@@ -144,3 +144,19 @@
 .p-strength i { width: 6px; height: 6px; border-radius: 50%; background: var(--line); }
 .p-strength i.on { background: var(--family); }
 .p-more { margin: 18px 2px 0; }
+
+/* The night as one continuous band */
+.p-join { stroke: var(--rule); stroke-width: 1; stroke-dasharray: 1.5 2; fill: none; }
+.p-trace { fill: none; stroke-width: 1.6; stroke-linejoin: round; stroke-linecap: round; }
+.p-trace.heart { stroke: var(--heart); }
+.p-trace.breath { stroke: var(--oxygen); }
+.p-cursor { stroke: var(--ink); stroke-width: 1; opacity: .7; }
+.p-detail-read { display: grid; grid-template-columns: 1.5fr 1fr 1fr; gap: 10px; margin-bottom: 14px; }
+.p-detail-read strong { display: block; font-size: 17px; margin-top: 3px; font-variant-numeric: tabular-nums; white-space: nowrap; }
+.p-detail-read [data-tone] strong { color: var(--family); }
+.p-detail-read small { font-size: 11px; font-weight: 500; color: var(--muted); }
+.p-scrub { width: 88.5%; margin: 8px 0 0 1%; accent-color: var(--family); }
+.p-nap { display: grid; grid-template-columns: 84px 1fr; align-items: center; gap: 14px; padding: 14px 0; border-top: 1px solid var(--line); }
+.p-nap strong { display: block; font-size: 24px; letter-spacing: -.6px; font-variant-numeric: tabular-nums; }
+.p-nap small { font-size: 11.5px; color: var(--muted); }
+.p-nap p { display: flex; justify-content: space-between; font-size: 10.5px; color: var(--subtle); margin-top: 5px; font-variant-numeric: tabular-nums; }
