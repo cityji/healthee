@@ -178,6 +178,18 @@ def healthee_refused(step: str, status: int, detail: str) -> ZeppImportError:
     )
 
 
+def healthee_unreadable(what: str, unread: int, total: int, looked_like: str) -> ZeppImportError:
+    """A list of what Healthee holds that this tool could not fully read."""
+    count = f"{unread} of its {total} rows" if total else "the reply"
+    return ZeppImportError(
+        "healthee_unreadable",
+        f"Healthee sent {what}, and {count} could not be read ({looked_like}).",
+        "Nothing was written. A stored session this tool cannot read would look absent "
+        "and be imported a second time, and nothing here can delete one. The server's "
+        "reply differs from the one this tool was written against.",
+    )
+
+
 def healthee_too_many_tokens() -> ZeppImportError:
     return ZeppImportError(
         "healthee_too_many_tokens",

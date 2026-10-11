@@ -10,6 +10,7 @@ from zepp_import.healthee_rows import (
     existing_workout,
     next_page_day,
     normalise_url,
+    read_all,
 )
 
 
@@ -115,6 +116,47 @@ class WorkoutRow(unittest.TestCase):
         row = existing_workout({**self.ROW, "duration_min": None})
         assert row is not None
         self.assertEqual(row.duration_s, 0)
+
+
+class ReadAll(unittest.TestCase):
+    GOOD = {"start_iso": "2026-09-26T04:27:00+00:00", "sport": 1, "duration_min": 30}
+
+    def failure(self, listed: object) -> ZeppImportError:
+        with self.assertRaises(ZeppImportError) as raised:
+            read_all("the workout list", listed, existing_workout, ("start_iso",))
+        return raised.exception
+
+    def test_every_row_that_reads_is_returned_in_order(self) -> None:
+        later = {**self.GOOD, "start_iso": "2026-09-27T04:27:00+00:00"}
+        rows = read_all("the workout list", [later, self.GOOD], existing_workout, ("start_iso",))
+        self.assertEqual([r.start_ms for r in rows], [1_790_483_220_000, 1_790_396_820_000])
+        self.assertEqual(read_all("the workout list", [], existing_workout, ("start_iso",)), [])
+
+    def test_one_unreadable_row_fails_the_read_and_shows_only_how_it_was_written(self) -> None:
+        failure = self.failure([self.GOOD, {**self.GOOD, "start_iso": "26/09/2026 04:27"}])
+        self.assertEqual(failure.code, "healthee_unreadable")
+        self.assertIn("the workout list, and 1 of its 2 rows could not be read", failure.headline)
+        self.assertIn("(start_iso:99?99?9999 99:99)", failure.headline)
+        self.assertNotIn("2026", failure.headline)
+        self.assertIn("Nothing was written", failure.remedy)
+
+    def test_a_reply_with_no_list_is_a_failure_not_an_empty_history(self) -> None:
+        for listed in (None, {"rows": []}, "none"):
+            with self.subTest(listed=listed):
+                failure = self.failure(listed)
+                self.assertEqual(failure.code, "healthee_unreadable")
+                self.assertIn("the reply could not be read", failure.headline)
+
+    def test_a_route_row_shows_its_times_as_layout_and_its_id_as_a_type(self) -> None:
+        row = {
+            "track_id": 5,
+            "start_ts": "2026-09-26T04:27:00+00:00",
+            "end_ts": "2026-09-26T04:58:00+00:00",
+        }
+        with self.assertRaises(ZeppImportError) as raised:
+            read_all("the route list", [row], existing_track, ("start_ts", "end_ts"), ("track_id",))
+        when = "9999-99-99a99:99:99+99:99"
+        self.assertIn(f"(start_ts:{when},end_ts:{when},track_id:int)", raised.exception.headline)
 
 
 class TrackRow(unittest.TestCase):

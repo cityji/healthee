@@ -78,6 +78,26 @@ class Reads(Base):
         asked = [r for r in self.net.requests if r.path == "/api/activity"]
         self.assertEqual(len(asked), 2)  # the page, then the same page again: stop there
 
+    def test_a_stored_workout_that_cannot_be_read_stops_the_run(self) -> None:
+        row = {"start_iso": "11.10.2026 06:00", "sport": 1, "duration_min": 30}
+        page = {"date": "2026-10-11", "workouts": [row]}
+        self.healthee.forced[("GET", "/api/activity")] = json_reply(200, page)
+        failure = self.failure(self.api.existing_workouts, NOW_S - 30 * DAY_S)
+        self.assertEqual(failure.code, "healthee_unreadable")
+        self.assertIn("the workout list", failure.headline)
+
+    def test_a_workout_reply_with_no_list_is_not_read_as_an_empty_history(self) -> None:
+        self.healthee.forced[("GET", "/api/activity")] = json_reply(200, {"date": "2026-10-11"})
+        failure = self.failure(self.api.existing_workouts, NOW_S - 30 * DAY_S)
+        self.assertEqual(failure.code, "healthee_unreadable")
+
+    def test_a_stored_route_that_cannot_be_read_stops_the_run(self) -> None:
+        listed = {"tracks": [{"track_id": "t", "start_ts": "x", "end_ts": "y"}]}
+        self.healthee.forced[("GET", "/api/workout/gps")] = json_reply(200, listed)
+        failure = self.failure(self.api.existing_tracks)
+        self.assertEqual(failure.code, "healthee_unreadable")
+        self.assertIn("the route list, and 1 of its 1 rows", failure.headline)
+
     def test_stored_routes_are_listed_with_their_window(self) -> None:
         track_id = self.healthee.store_track(START, START + 1860)
         tracks = self.api.existing_tracks()

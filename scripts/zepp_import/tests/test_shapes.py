@@ -5,7 +5,7 @@ from __future__ import annotations
 import json
 import unittest
 
-from zepp_import.shapes import MAX_CHARS, fields, shape
+from zepp_import.shapes import MAX_CHARS, fields, layout, shape
 from zepp_import.tests import fixtures
 
 START = 1_790_000_000
@@ -82,6 +82,28 @@ class Fields(unittest.TestCase):
 
     def test_something_that_is_not_an_object_is_described_whole(self) -> None:
         self.assertEqual(fields("oops", ("trackid",)), "str")
+
+
+class Layout(unittest.TestCase):
+    def test_a_timestamp_keeps_its_format_and_loses_every_digit(self) -> None:
+        row = {"start_iso": "2026-09-26T04:27:13.5Z", "end": "26/09/2026 04:27"}
+        self.assertEqual(
+            layout(row, ("start_iso", "end")),
+            "start_iso:9999-99-99a99:99:99.9a,end:99?99?9999 99:99",
+        )
+
+    def test_letters_of_any_script_are_masked_one_for_one(self) -> None:
+        self.assertEqual(layout({"t": "Сб 26 sept"}, ("t",)), "t:aa 99 aaaa")
+
+    def test_a_long_string_is_cut_so_free_text_cannot_ride_out(self) -> None:
+        self.assertEqual(layout({"t": "x" * 500}, ("t",)), "t:" + "a" * 40)
+
+    def test_what_is_not_a_string_is_named_by_type(self) -> None:
+        self.assertEqual(
+            layout({"a": None, "b": 5, "d": ""}, ("a", "b", "c", "d")),
+            "a:null,b:int,c:missing,d:str(empty)",
+        )
+        self.assertEqual(layout(["x"], ("a",)), "[strx1]")
 
 
 if __name__ == "__main__":

@@ -28,6 +28,7 @@ from zepp_import.healthee_rows import (
     existing_track,
     existing_workout,
     next_page_day,
+    read_all,
 )
 from zepp_import.healthee_session import HealtheeSession
 
@@ -87,7 +88,8 @@ class HealtheeApi:
         day: str | None = None
         for _ in range(_MAX_ACTIVITY_PAGES):
             body = self._get("the workout list", "/api/activity" + (f"?day={day}" if day else ""))
-            rows = [w for w in map(existing_workout, body.get("workouts") or []) if w]
+            listed = body.get("workouts")
+            rows = read_all("the workout list", listed, existing_workout, ("start_iso",))
             fresh = [w for w in rows if w.start_ms not in found]
             found.update({w.start_ms: w for w in fresh})
             if len(rows) < _ACTIVITY_PAGE_ROWS or min(w.start_s for w in rows) < since_s:
@@ -100,7 +102,8 @@ class HealtheeApi:
     def existing_tracks(self) -> list[ExistingTrack]:
         """The newest GPS tracks already stored (the server caps the list at 100)."""
         body = self._get("the route list", f"/api/workout/gps?limit={TRACK_LIST_LIMIT}")
-        return [t for t in map(existing_track, body.get("tracks") or []) if t]
+        times = ("start_ts", "end_ts")
+        return read_all("the route list", body.get("tracks"), existing_track, times, ("track_id",))
 
     # ── writes ───────────────────────────────────────────────────────────────
 
