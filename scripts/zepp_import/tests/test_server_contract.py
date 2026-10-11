@@ -93,6 +93,15 @@ class ServerContract(unittest.TestCase):
         assert isinstance(cap, int)
         self.assertGreaterEqual(cap, healthee_api._PUSH_CHUNK)
 
+    def test_stored_instants_are_still_written_the_way_python_3_10_reads_them(self) -> None:
+        # `datetime.fromisoformat` on 3.10 reads `isoformat()` output and little else, and
+        # a start this tool cannot read ends the run (`healthee_rows.read_all`).
+        listed = _source("read/fitness.py")
+        self.assertIn('"start_iso": start_ts.isoformat() if start_ts else None', listed)
+        tracks = _source("read/gps.py")
+        self.assertIn('"start_ts": r[1].isoformat()', tracks)
+        self.assertIn('"end_ts": r[2].isoformat()', tracks)
+
     def test_the_endpoints_this_tool_calls_still_exist(self) -> None:
         routers = "".join(
             _source(f"api/routers/{name}.py") for name in ("auth", "gps", "ingest", "activity")

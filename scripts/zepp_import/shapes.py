@@ -16,6 +16,10 @@ Three rules keep it that way, and `tests/test_shapes.py` holds each one:
 
 A workout summary has around ninety fields, so `fields` exists beside `shape`: it
 describes only the named ones, which is what a failure message has room for.
+
+`layout` is for an instant that would not parse. There the COUNT of digits is the
+diagnosis (a two-digit year, seconds left off), so each digit and each letter is masked
+one for one instead of run by run, and the string is cut at forty characters.
 """
 
 from __future__ import annotations
@@ -32,6 +36,11 @@ _DIGITS_RE = re.compile(r"[0-9]+")
 _LETTERS_RE = re.compile(r"[A-Za-z]+")
 _NOT_PATTERN_RE = re.compile(r"[^9a,.:+-]")
 _NUMBER_RE = re.compile(r"-?[0-9]+(\.[0-9]+)?")
+_LAYOUT_CHARS = 40
+_DIGIT_RE = re.compile(r"[0-9]")
+_LETTER_RE = re.compile(r"[^\W\d_]")  # any letter, in any script
+_NOT_LAYOUT_RE = re.compile(r"[^9a.:+ -]")
+_MISSING = object()
 
 
 def _pattern(cell: str) -> str:
@@ -78,6 +87,26 @@ def _describe(value: object, depth: int) -> str:
         by_key = {_key(key): item for key, item in value.items()}
         return "{" + ",".join(f"{key}:{_describe(by_key[key], depth + 1)}" for key in keys) + "}"
     return type(value).__name__
+
+
+def layout(value: object, names: tuple[str, ...]) -> str:
+    """The named fields with a string shown as its LAYOUT: `start_iso:9999-99-99a99:99a`.
+
+    For timestamps this tool could not read. Every digit becomes `9` and every letter
+    `a`, one for one, so the format is all that is left of the instant.
+    """
+    if not isinstance(value, dict):
+        return shape(value, 80)
+    return ",".join(f"{name}:{_layout(value.get(name, _MISSING))}" for name in names)
+
+
+def _layout(value: object) -> str:
+    if value is _MISSING:
+        return "missing"
+    if not isinstance(value, str):
+        return _describe(value, 1)
+    masked = _LETTER_RE.sub("a", _DIGIT_RE.sub("9", value[:_LAYOUT_CHARS]))
+    return _NOT_LAYOUT_RE.sub("?", masked) or "str(empty)"
 
 
 def shape(value: object, max_chars: int = MAX_CHARS) -> str:

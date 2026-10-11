@@ -16,11 +16,16 @@ from __future__ import annotations
 
 import ipaddress
 import urllib.parse
+from collections.abc import Callable
 from dataclasses import dataclass
 from datetime import date, datetime, timedelta
+from typing import TypeVar
 
 from zepp_import import failures
 from zepp_import.localtime import UTC
+from zepp_import.shapes import fields, layout, shape
+
+_Row = TypeVar("_Row")
 
 MEASUREMENT_COLUMNS = ("distance_m", "calories", "avg_hr", "max_hr", "min_hr")
 
@@ -132,6 +137,42 @@ def existing_track(row: object) -> ExistingTrack | None:
     if start_ms is None or end_ms is None or not isinstance(track_id, str):
         return None
     return ExistingTrack(track_id=track_id, start_s=start_ms / 1000.0, end_s=end_ms / 1000.0)
+
+
+def read_all(
+    what: str,
+    listed: object,
+    parse: Callable[[object], _Row | None],
+    times: tuple[str, ...],
+    others: tuple[str, ...] = (),
+) -> list[_Row]:
+    """Every row of a list Healthee returned. One that cannot be read is a failure.
+
+    Never a gap: a stored session this tool cannot read would look absent, absent
+    sessions are what it writes, and nothing here can delete the second copy. `times`
+    names the instants a row is read by, shown as their layout when one does not parse.
+    """
+    if not isinstance(listed, list):
+        raise failures.healthee_unreadable(what, 0, 0, shape(listed, 80))
+    rows: list[_Row] = []
+    unread: list[object] = []
+    for item in listed:
+        row = parse(item)
+        if row is None:
+            unread.append(item)
+        else:
+            rows.append(row)
+    if unread:
+        seen = _seen(unread[0], times, others)
+        raise failures.healthee_unreadable(what, len(unread), len(listed), seen)
+    return rows
+
+
+def _seen(row: object, times: tuple[str, ...], others: tuple[str, ...]) -> str:
+    """How an unreadable row was written: its instants as layout, the rest as types."""
+    if not others or not isinstance(row, dict):
+        return layout(row, times)
+    return f"{layout(row, times)},{fields(row, others)}"
 
 
 def next_page_day(oldest_s: float, server_today: object) -> str | None:
