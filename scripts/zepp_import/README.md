@@ -101,6 +101,23 @@ There is no endpoint that deletes a workout or a route, so this tool cannot undo
 import. If you are unsure about the fitness effect, import the workouts first with
 `--no-routes` and add the routes in a later run.
 
+## Body weight
+
+After the workouts, the tool compares the weigh-ins in Zepp's weight log with
+Healthee's, one per day (the last reading of each day), and makes Healthee match Zepp:
+
+| Line                       | Meaning                                                  |
+|----------------------------|----------------------------------------------------------|
+| `add`                      | Healthee has no reading that day, or an earlier one. Zepp's is written at its own time. |
+| `correct (Healthee has X)` | Healthee's newest reading is that day and differs. It is changed to Zepp's number. |
+| `already there`            | Same number. Nothing to do.                              |
+| `sent before`              | Written by an earlier run, but Healthee keeps a later reading that day. |
+
+A weight typed into the Healthee app on a day after Zepp's newest weigh-in is left
+alone, so it stays the current one. Weight feeds BMI, and through it the fitness estimate
+when no recent route measures it. It is written through `POST /api/log`, the app's own
+path for a weigh-in. Every Zepp weigh-in is checked on every run, whatever `--days` says.
+
 ## Options
 
 | Option                 | Effect                                                       |
@@ -109,6 +126,7 @@ import. If you are unsure about the fitness effect, import the workouts first wi
 | `--days N`             | Look back N days. The default is 30.                         |
 | `--since YYYY-MM-DD`   | Look back to this date, in your Healthee timezone.           |
 | `--no-routes`          | Import workouts without their routes.                        |
+| `--no-weight`          | Leave body weight out.                                       |
 | `--yes`                | Import without asking, routes included.                      |
 | `--healthee-url HOST`  | Your Healthee server.                                        |
 | `--zepp-host HOST`     | Ask only this Zepp region host.                              |

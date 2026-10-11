@@ -29,6 +29,7 @@ from zepp_import.localtime import UTC, label, utc_iso, zone_for
 from zepp_import.plan import StoredTracks
 from zepp_import.prompts import Settings, load_env_file
 from zepp_import.transport import host_of
+from zepp_import.weight_run import WeightRun
 from zepp_import.writer import Outcome, Writer
 from zepp_import.zepp_run import ZeppRun
 
@@ -86,9 +87,11 @@ class Run:
         gathered = zepp.gather(stored, window.since_s, window.now_s)
         ledger.save()
         self._show(gathered, zone, window)
-        if not self._confirmed_anything(gathered, settings):
-            return 0
-        return self._write(gathered, api, ledger, account, zone)
+        status = 0
+        if self._confirmed_anything(gathered, settings):
+            status = self._write(gathered, api, ledger, account, zone)
+        weights = WeightRun(args, api.session, ledger, account.user_id, self._out)
+        return max(status, weights.go(zepp.weights, zone, settings, deps.terminal.interactive))
 
     # ── settings and the Healthee side ───────────────────────────────────────
 

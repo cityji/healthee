@@ -41,6 +41,9 @@ def _parser() -> argparse.ArgumentParser:
     parser.add_argument(
         "--no-routes", action="store_true", help="import workouts without their routes"
     )
+    parser.add_argument(
+        "--no-weight", action="store_true", help="leave body weight out of the sync"
+    )
     parser.add_argument("--healthee-url", metavar="HOST", help="your Healthee server")
     parser.add_argument(
         "--zepp-host", metavar="HOST", help="ask only this Zepp region host for your workouts"

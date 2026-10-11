@@ -21,8 +21,11 @@ from zepp_import.gather import Gathered, Gatherer, Stored
 from zepp_import.ledger import Ledger
 from zepp_import.prompts import Settings
 from zepp_import.transport import host_of
+from zepp_import.weight_run import ZeppWeights
+from zepp_import.zepp_api import ZeppApi
 from zepp_import.zepp_auth import ZeppSession
 from zepp_import.zepp_history import ZeppHistory
+from zepp_import.zepp_weights import read_weights
 
 
 class ZeppRun:
@@ -35,6 +38,7 @@ class ZeppRun:
         self._deps = deps
         self._settings = settings
         self._ledger = ledger
+        self.weights: ZeppWeights = None
 
     def gather(self, stored: Stored, since_s: int, now_s: int) -> Gathered:
         """The plan for every Zepp workout that started in `[since_s, now_s]`."""
@@ -60,7 +64,13 @@ class ZeppRun:
                 notify=self._note,
                 pause=deps.pause,
             )
-            return gatherer.gather(feed)
+            gathered = gatherer.gather(feed)
+            if not self._args.no_weight and not session.user_id:
+                self._note("weight left out: the weight log needs ZEPP_USER_ID")
+            elif not self._args.no_weight:
+                api = ZeppApi(session, deps.send, pause=deps.pause, trace=self._trace)
+                self.weights = read_weights(api, feed.host, session.user_id)
+            return gathered
         finally:
             if opened_here:
                 ended = zepp_auth.sign_out(session, deps.endpoints, deps.send)

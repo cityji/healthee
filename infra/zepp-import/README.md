@@ -23,7 +23,8 @@ the timer on. The import runs as you, never as root.
   before choosing. There is no undo for an import.
 * `--new-logins`: type the logins again. Without it a second install keeps them.
 
-Each run looks back 3 days (`--days 3`), so a missed night is caught up. A run is stopped
+Each run looks back 3 days (`--days 3`) for workouts, so a missed night is caught up,
+and checks every Zepp weigh-in against Healthee. A run is stopped
 after 20 minutes, and a lock keeps two runs from overlapping. A server that was off at
 the time runs it once when it is back.
 
