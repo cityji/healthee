@@ -6,8 +6,11 @@ Reading them is behind one `Run` seam so the wording is tested without a systemd
 
 from __future__ import annotations
 
+import re
 from collections.abc import Callable, Sequence
 from dataclasses import dataclass
+from datetime import datetime, timezone
+from zoneinfo import ZoneInfo, ZoneInfoNotFoundError
 
 from zepp_import.nightly_units import SERVICE, TIMER, schedule_of
 
@@ -54,6 +57,28 @@ def summary(output: Sequence[str], worked: bool) -> list[str]:
     return found + [line for line in lines if line][-3:]
 
 
+# `systemctl show` prints a timestamp in the SERVER's zone, `Sun 2026-10-11 18:01:30 UTC`.
+_SYSTEMD_TIME = re.compile(r"\w{3} (\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}) UTC")
+
+
+def local_time(stamp: str, schedule: str) -> str:
+    """A UTC systemd timestamp in the zone the owner chose, `Sun 11 Oct, 23:31`.
+
+    A server on UTC printed the next run as 18:01 when the owner had asked for
+    23:30 India time, which reads as a wrong schedule. A stamp in any other form,
+    or a zone this machine does not know, is shown exactly as systemd gave it."""
+    found = _SYSTEMD_TIME.fullmatch(stamp.strip())
+    zone_name = schedule.partition(" ")[2]
+    if not found or not zone_name:
+        return stamp
+    try:
+        zone = ZoneInfo(zone_name)
+    except (ZoneInfoNotFoundError, ValueError):
+        return stamp
+    at = datetime.strptime(found.group(1), "%Y-%m-%d %H:%M:%S").replace(tzinfo=timezone.utc)
+    return at.astimezone(zone).strftime("%a %d %b, %H:%M")
+
+
 def report(facts: Facts) -> list[str]:
     if not facts.installed:
         return [
@@ -70,12 +95,12 @@ def report(facts: Facts) -> list[str]:
     else:
         worked = facts.result == "success"
         verdict = _RESULTS.get(facts.result, f"It FAILED ({facts.result}). What it said:")
-        out.append(f"Last run: {facts.started}. {verdict}")
+        out.append(f"Last run: {local_time(facts.started, facts.schedule)}. {verdict}")
         out.extend(f"  {line}" for line in summary(facts.output, worked))
         if not worked:
             out.append("  Full log: journalctl -u healthee-zepp-import -n 80")
     if facts.next_run:
-        out.append(f"Next run: {facts.next_run}.")
+        out.append(f"Next run: {local_time(facts.next_run, facts.schedule)}.")
     return out
 
 
