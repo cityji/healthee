@@ -66,10 +66,10 @@ void main() {
       expect(size.width, _panelInnerWidth);
 
       final painted = paintedBy(tester, find.byType(V02Hypnogram));
-      // The bands are the rounded marks. The night is drawn as ONE stepped
-      // ribbon now, so the painter also puts down its frame and a riser between
-      // each pair of spans — square, and neither of them a datum. Counting
-      // every rectangle would count the furniture.
+      // The blocks are the rounded marks, one per span, meeting edge to edge.
+      // The joins between levels are dotted hairlines (`drawLine`), never a
+      // datum, so only the rounded rects are counted. The block geometry itself
+      // is pinned in `test/shared/hypnogram_painter_test.dart`.
       final bands = rrectsOf(painted);
       expect(bands, hasLength(night.timeline.length));
       expect(bands, isNotEmpty, reason: 'a chart that painted nothing');
