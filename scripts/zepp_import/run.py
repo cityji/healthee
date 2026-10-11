@@ -16,7 +16,7 @@ from __future__ import annotations
 
 import argparse
 from dataclasses import dataclass
-from datetime import UTC, date, datetime, time, tzinfo
+from datetime import date, datetime, time, tzinfo
 
 from zepp_import import failures, report, zepp_wire
 from zepp_import.deps import Deps
@@ -25,7 +25,7 @@ from zepp_import.healthee_api import TOKEN_LEFT, TRACK_LIST_LIMIT, HealtheeApi
 from zepp_import.healthee_rows import normalise_url
 from zepp_import.healthee_session import Account, HealtheeSession
 from zepp_import.ledger import Ledger, default_path
-from zepp_import.localtime import label, utc_iso, zone_for
+from zepp_import.localtime import UTC, label, utc_iso, zone_for
 from zepp_import.plan import StoredTracks
 from zepp_import.prompts import Settings, load_env_file
 from zepp_import.transport import host_of
