@@ -22,6 +22,17 @@ the timer on. The import runs as you, never as root.
   biological age; read "What changes in Healthee" in `scripts/zepp_import/README.md`
   before choosing. There is no undo for an import.
 * `--new-logins`: type the logins again. Without it a second install keeps them.
+* `--env-file FILE`: use logins you already keep in a file of your own instead of being
+  asked: the five names below, one `NAME=value` per line, owned by you and `chmod 600`.
+  Nothing is asked and nothing is copied; the timer reads that file each night.
+
+  ```
+  HEALTHEE_URL=healthee.example.com
+  HEALTHEE_EMAIL=you@example.com
+  HEALTHEE_PASSWORD=...
+  ZEPP_EMAIL=you@example.com
+  ZEPP_PASSWORD=...
+  ```
 
 Each run looks back 3 days (`--days 3`) for workouts, so a missed night is caught up,
 and checks every Zepp weigh-in against Healthee. A run is stopped

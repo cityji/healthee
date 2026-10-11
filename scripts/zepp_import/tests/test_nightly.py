@@ -130,6 +130,7 @@ class FakeMachine:
         self.asked: list[str] = []
         self.fail: str | None = None
         self.chowned: list[Path] = []
+        self.owner = 1000
 
     def run(self, argv: Sequence[str]) -> tuple[int, str]:
         self.commands.append(list(argv))
@@ -157,6 +158,7 @@ class FakeMachine:
             link=self.root / "zepp-nightly",
             zoneinfo=self.root / "zoneinfo",
             chown=lambda path, *_: self.chowned.append(path),
+            owner_of=lambda _path: self.owner,
         )
 
 
@@ -231,6 +233,58 @@ class InstallTest(unittest.TestCase):
         self.assertEqual(nightly.main(["uninstall"], self.fake.machine()), 0)
         self.assertEqual(list((self.root / "units").iterdir()), [])
         self.assertTrue((self.fake.home / nightly.ENV_NAME).exists())
+
+
+class OwnEnvFileTest(unittest.TestCase):
+    """`--env-file`: a self-hoster's own file, used as it is and never asked for."""
+
+    def setUp(self) -> None:
+        self._dir = tempfile.TemporaryDirectory()
+        self.root = Path(self._dir.name)
+        self.fake = FakeMachine(self.root, answers=[], secrets=[])
+        self.env = self.root / "healthee.env"
+        self.env.write_text(
+            "HEALTHEE_URL=healthee.example.com\nHEALTHEE_EMAIL=a@example.com\n"
+            f"HEALTHEE_PASSWORD={sentinel('h')}\nZEPP_EMAIL=b@example.com\n"
+            f"ZEPP_PASSWORD={sentinel('z')}\n"
+        )
+        self.env.chmod(0o600)
+
+    def tearDown(self) -> None:
+        self._dir.cleanup()
+
+    def _install(self) -> int:
+        argv = ["install", "--time", "23:30", "--no-routes", "--env-file", str(self.env)]
+        return nightly.main(argv, self.fake.machine())
+
+    def test_it_is_used_as_it_is_and_nothing_is_asked(self) -> None:
+        self.assertEqual(self._install(), 0)
+        self.assertEqual(self.fake.asked, [])
+        service = (self.root / "units" / SERVICE).read_text()
+        self.assertIn(f"--env-file {self.env.resolve()} --yes", service)
+        self.assertFalse((self.fake.home / nightly.ENV_NAME).exists())
+
+    def test_a_file_others_can_read_is_refused(self) -> None:
+        self.env.chmod(0o644)
+        self.assertEqual(self._install(), 1)
+        self.assertIn("chmod 600", self.fake.said[-1])
+        self.assertEqual(self.fake.commands, [])
+
+    def test_a_file_missing_a_login_is_refused(self) -> None:
+        self.env.write_text("HEALTHEE_URL=x\nHEALTHEE_EMAIL=a@example.com\n")
+        self.env.chmod(0o600)
+        self.assertEqual(self._install(), 1)
+        self.assertIn("HEALTHEE_PASSWORD, ZEPP_EMAIL, ZEPP_PASSWORD", self.fake.said[-1])
+
+    def test_someone_elses_file_is_refused(self) -> None:
+        self.fake.owner = 0
+        self.assertEqual(self._install(), 1)
+        self.assertIn("must belong to nikhil", self.fake.said[-1])
+
+    def test_it_cannot_be_combined_with_new_logins(self) -> None:
+        argv = ["install", "--time", "23:30", "--routes", "--new-logins", "--env-file", "x"]
+        with self.assertRaises(SystemExit):
+            nightly.main(argv, self.fake.machine())
 
 
 _RUN = [

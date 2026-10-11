@@ -20,7 +20,7 @@ from dataclasses import dataclass, field
 from getpass import getpass
 from pathlib import Path
 
-from zepp_import import nightly_status
+from zepp_import import failures, nightly_status
 from zepp_import.nightly_units import (
     LOGINS,
     SERVICE,
@@ -32,6 +32,7 @@ from zepp_import.nightly_units import (
     env_text,
     units,
 )
+from zepp_import.prompts import load_env_file
 
 REPO = Path(__file__).resolve().parents[2]
 LINK = Path("/usr/local/bin/zepp-nightly")
@@ -54,6 +55,7 @@ class Machine:
     link: Path = LINK
     zoneinfo: Path = Path("/usr/share/zoneinfo")
     chown: Callable[[Path, int, int], None] = field(default=os.chown)
+    owner_of: Callable[[Path], int] = field(default=lambda path: path.stat().st_uid)
 
     @staticmethod
     def real() -> Machine:
@@ -94,8 +96,14 @@ def _parser() -> argparse.ArgumentParser:
     routes = install.add_mutually_exclusive_group(required=True)
     routes.add_argument("--routes", action="store_true", help="import GPS routes too")
     routes.add_argument("--no-routes", action="store_true", help="import workouts only")
-    install.add_argument(
+    logins = install.add_mutually_exclusive_group()
+    logins.add_argument(
         "--new-logins", action="store_true", help="ask for the logins again, replacing the file"
+    )
+    logins.add_argument(
+        "--env-file",
+        type=Path,
+        help="use logins you already keep in this file (chmod 600, yours) instead of asking",
     )
     jobs.add_parser("status", help="did the last run work")
     jobs.add_parser("uninstall", help="turn it off and remove the units (keeps the logins)")
@@ -145,7 +153,7 @@ def _install(args: argparse.Namespace, machine: Machine, user: str) -> int:
         choice = Choice(
             user=user,
             repo=REPO,
-            env_file=machine.home_of(user) / ENV_NAME,
+            env_file=_env_path(args, machine, user),
             python=sys.executable or "/usr/bin/python3",
             time=checked_time(args.time),
             zone=checked_zone(args.zone, machine.zoneinfo),
@@ -154,7 +162,10 @@ def _install(args: argparse.Namespace, machine: Machine, user: str) -> int:
         texts = units(choice)
     except ValueError as error:
         raise RefusedError(f"Not installed: {error}.") from None
-    _logins(machine, choice, user, fresh=args.new_logins)
+    if args.env_file is None:
+        _logins(machine, choice, user, fresh=args.new_logins)
+    else:
+        _checked_env_file(machine, choice.env_file, user)
     for name, text in texts.items():
         (machine.unit_dir / name).write_text(text, encoding="utf-8")
     for argv in (["systemctl", "daemon-reload"], ["systemctl", "enable", "--now", TIMER]):
@@ -168,6 +179,30 @@ def _install(args: argparse.Namespace, machine: Machine, user: str) -> int:
     machine.out("  Check it any time:  zepp-nightly status")
     machine.out("  Run it once now:    sudo systemctl start healthee-zepp-import")
     return 0
+
+
+def _env_path(args: argparse.Namespace, machine: Machine, user: str) -> Path:
+    given: Path | None = args.env_file
+    return machine.home_of(user) / ENV_NAME if given is None else given.resolve()
+
+
+def _checked_env_file(machine: Machine, path: Path, user: str) -> None:
+    """An owner's own file: theirs, private, and holding every login a run needs."""
+    try:
+        values = load_env_file(path)
+    except failures.ZeppImportError as problem:
+        raise RefusedError(f"Not installed: {problem.headline}") from None
+    if machine.owner_of(path) != machine.ids_of(user)[0]:
+        raise RefusedError(f"Not installed: {path} must belong to {user}, who runs the import.")
+    zepp = ("ZEPP_EMAIL", "ZEPP_PASSWORD") if "ZEPP_APP_TOKEN" not in values else ()
+    missing = [
+        k
+        for k in ("HEALTHEE_URL", "HEALTHEE_EMAIL", "HEALTHEE_PASSWORD", *zepp)
+        if not values.get(k)
+    ]
+    if missing:
+        raise RefusedError(f"Not installed: {path} has no {', '.join(missing)}.")
+    machine.out(f"Using the logins in {path}.")
 
 
 def _logins(machine: Machine, choice: Choice, user: str, *, fresh: bool) -> None:
