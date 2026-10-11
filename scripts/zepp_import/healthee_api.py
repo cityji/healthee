@@ -69,6 +69,7 @@ class HealtheeApi:
 
     def __init__(self, session: HealtheeSession) -> None:
         self._session = session
+        self.session = session
         self.base_url = session.base_url
 
     def _get(self, step: str, path: str) -> dict:

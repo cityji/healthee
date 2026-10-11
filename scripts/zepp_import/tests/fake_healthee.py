@@ -48,6 +48,7 @@ class FakeHealthee:
     workouts: dict[int, dict] = field(default_factory=dict)
     tracks: dict[str, dict] = field(default_factory=dict)
     tokens: dict[str, dict] = field(default_factory=dict)
+    weights: dict[int, float] = field(default_factory=dict)  # epoch s -> kg
     pushes: list[dict] = field(default_factory=list)
     scoring: object = None
     forced: dict[tuple[str, str], Response] = field(default_factory=dict)
@@ -99,9 +100,42 @@ class FakeHealthee:
             return self._track_list(int(request.query.get("limit", "30")))
         if key == ("POST", "/api/workout/gps"):
             return self._track_upload(json.loads(request.body or b"{}"))
+        if key == ("GET", "/api/history") and request.query.get("metric") == "weight_kg":
+            return self._weight_history()
+        if key == ("GET", "/api/log/recent"):
+            return self._weight_recent()
+        if key == ("POST", "/api/log"):
+            return self._log(json.loads(request.body or b"{}"))
         if request.path.startswith("/api/device"):
             return self._device(request)
         return json_reply(404, {"detail": "Not Found"})
+
+    # `read/history.py::_weight_points`: the last weigh-in of each local day.
+    def _weight_history(self) -> Response:
+        days: dict[str, float] = {}
+        for stamp in sorted(self.weights):
+            days[self._local_day(stamp).isoformat()] = self.weights[stamp]
+        series = [{"day": day, "value": kg} for day, kg in sorted(days.items())]
+        return json_reply(200, {"metric": "weight_kg", "series": series})
+
+    # `read/logs.py::recent_logs`: the newest weigh-in, its instant in ms.
+    def _weight_recent(self) -> Response:
+        entries = []
+        if self.weights:
+            stamp = max(self.weights)
+            weight = {"type": "weight", "ts": stamp * 1000, "amount": self.weights[stamp]}
+            entries.append({**weight, "unit": "kg"})
+        return json_reply(200, {"entries": entries, "fast": None})
+
+    # `read/logs.py::record_log`: upsert on the instant; `core/bounds.py` bounds the mass.
+    def _log(self, body: dict) -> Response:
+        amount, at = body.get("amount"), body.get("at")
+        if body.get("type") != "weight" or not isinstance(at, int):
+            return json_reply(422, {"detail": "unsupported in this fake"})
+        if not isinstance(amount, (int, float)) or not 20 <= amount <= 300:
+            return json_reply(422, {"detail": "implausible weight"})
+        self.weights[at // 1000] = float(amount)
+        return json_reply(200, {"ok": True})
 
     def _password_grant(self, request: Request) -> Response:
         body = json.loads(request.body or b"{}")

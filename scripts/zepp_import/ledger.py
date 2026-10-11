@@ -115,3 +115,18 @@ class Ledger:
     def imported(self, server: str, healthee_user_id: str) -> Mapping[str, Mapping]:
         account = self._data["imports"].get(f"{server}|{healthee_user_id}")
         return account if isinstance(account, dict) else {}
+
+    def record_weight(self, server: str, healthee_user_id: str, ts_s: int, kg: float) -> None:
+        """Note a weight this tool wrote, by its instant."""
+        weights = self._data.setdefault("weights", {})
+        weights.setdefault(f"{server}|{healthee_user_id}", {})[str(ts_s)] = kg
+
+    def weights_sent(self, server: str, healthee_user_id: str) -> dict[int, float]:
+        account = self._data.get("weights", {}).get(f"{server}|{healthee_user_id}")
+        if not isinstance(account, dict):
+            return {}
+        sent: dict[int, float] = {}
+        for stamp, kg in account.items():
+            if stamp.isdigit() and isinstance(kg, (int, float)) and not isinstance(kg, bool):
+                sent[int(stamp)] = float(kg)
+        return sent

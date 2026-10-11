@@ -82,6 +82,21 @@ class ZeppApi:
         self, host: str, path: str, params: dict[str, object], timeout_s: float = TIMEOUT_S
     ) -> dict | str:
         """The `data` object of a successful reply, or a note on why there is none."""
+        body = self.get_body(host, path, params, timeout_s)
+        if isinstance(body, str):
+            return body
+        if body.get("code") != _SUCCESS_CODE:
+            return f"code {_code(body.get('code'))}"
+        data = body.get("data")
+        if isinstance(data, dict):
+            return data
+        return f"no data object in {shape(body, _NOTE_SHAPE_CHARS)}"
+
+    def get_body(
+        self, host: str, path: str, params: dict[str, object], timeout_s: float = TIMEOUT_S
+    ) -> dict | str:
+        """The whole JSON object of a 200 reply, or a note. For the few endpoints that
+        answer without the `{code, data}` envelope (the weight log is one)."""
         query = urllib.parse.urlencode(params)
         reply = self._fetch(f"{host}{path}{'?' + query if query else ''}", timeout_s)
         if isinstance(reply, str):
@@ -93,12 +108,7 @@ class ZeppApi:
         self._trace(f"{host_of(host)}{path}: {shape(body)}")
         if not isinstance(body, dict):
             return "a reply that is not an object"
-        if body.get("code") != _SUCCESS_CODE:
-            return f"code {_code(body.get('code'))}"
-        data = body.get("data")
-        if isinstance(data, dict):
-            return data
-        return f"no data object in {shape(body, _NOTE_SHAPE_CHARS)}"
+        return body
 
     def _fetch(self, url: str, timeout_s: float) -> Response | str:
         """A 200 reply, or a note. Retries what is worth retrying; follows what is safe."""

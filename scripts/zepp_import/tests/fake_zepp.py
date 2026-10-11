@@ -48,6 +48,9 @@ class FakeZepp:
     login_extra: dict = field(default_factory=dict)
     forced: dict[str, Response | list[Response]] = field(default_factory=dict)
     redirect_strangers: bool = False
+    # `weightRecords` items, any order; served newest first, `toTime` inclusive.
+    weights: list[dict] = field(default_factory=list)
+    weight_page: int = 200
     signed_out: int = 0
     sign_ins: int = 0
 
@@ -78,6 +81,8 @@ class FakeZepp:
             return self._history(request)
         if request.path == zepp_wire.DETAIL_PATH:
             return self._detail(request)
+        if request.path == f"/users/{USER_ID}/members/-1/weightRecords":
+            return self._weights(request)
         return json_reply(404, {"code": 0, "message": "not found"})
 
     def _tokens(self, request: Request) -> Response:
@@ -136,3 +141,17 @@ class FakeZepp:
         if found is None:
             return json_reply(404, {"code": 0, "message": "not found"})
         return json_reply(200, {"code": 1, "message": "success", "data": found})
+
+    def _weights(self, request: Request) -> Response:
+        if request.origin != self.home:
+            return json_reply(200, {"items": []})
+        limit = min(int(request.query.get("limit", "20")), self.weight_page)
+        to_time = request.query.get("toTime")
+        newest_first = sorted(self.weights, key=lambda item: -item["generatedTime"])
+        if to_time is not None:
+            newest_first = [i for i in newest_first if i["generatedTime"] <= int(to_time)]
+        page = newest_first[:limit]
+        body: dict = {"items": page}
+        if len(newest_first) > len(page):
+            body["next"] = page[-1]["generatedTime"]
+        return json_reply(200, body)
