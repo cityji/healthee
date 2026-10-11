@@ -1,0 +1,94 @@
+# A test APK of this branch that installs BESIDE the real Healthee app, not over it.
+#
+# FORK-ONLY. This file is for trying a branch on a phone before it is proposed
+# upstream; it is not part of any pull request to afkcodes/healthee and is dropped
+# when one is prepared.
+#
+# ## Why it cannot install over the real app
+#
+# Android refuses an update signed by a different key, and the real app is signed
+# with the developer's release key. So this build gets its own application id
+# (`codes.afk.healthee.preview`) and its own name ("Healthee Preview"), changed in
+# the runner's checkout only: the repository's own Gradle and manifest are
+# untouched. The installed app and its data are never touched; the preview signs
+# in and pairs the strap on its own.
+#
+# ## Why a cached debug key
+#
+# It is signed with the runner's debug key, and a fresh runner makes a fresh one,
+# which would make every new preview refuse to update the last. The key is kept in
+# the Actions cache so one preview updates the next. A cache unused for 7 days is
+# evicted; the next preview then needs the old one uninstalled first.
+#
+# ## Where it lands
+#
+# One pre-release tagged `preview`, replaced on every push, so the link never
+# changes: releases/download/preview/healthee-preview.apk. The tag does not match
+# release.yml's `v*`, and a pre-release is never `releases/latest`.
+name: Preview APK
+
+on:
+  push:
+    branches:
+      - claude/confident-newton-fxbnhy
+    paths:
+      - apps/mobile/**
+      - .github/workflows/preview-apk.yml
+
+concurrency:
+  group: preview-apk
+  cancel-in-progress: true
+
+permissions:
+  contents: write # replacing the `preview` pre-release
+
+jobs:
+  build:
+    name: Build · publish preview
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+
+      - uses: subosito/flutter-action@v2
+        with:
+          flutter-version: 3.44.7 # PINNED to CI's toolchain
+          channel: stable
+          cache: true
+
+      - name: Keep one debug key across previews
+        uses: actions/cache@v4
+        with:
+          path: ~/.android/debug.keystore
+          key: healthee-preview-debug-keystore-v1
+
+      - name: Give the preview its own id and name (this checkout only)
+        working-directory: apps/mobile/android/app
+        run: |
+          set -euo pipefail
+          sed -i 's/applicationId = "codes.afk.healthee"/applicationId = "codes.afk.healthee.preview"/' build.gradle.kts
+          sed -i 's/android:label="healthee"/android:label="Healthee Preview"/' src/main/AndroidManifest.xml
+          grep -q 'applicationId = "codes.afk.healthee.preview"' build.gradle.kts
+          grep -q 'android:label="Healthee Preview"' src/main/AndroidManifest.xml
+
+      - name: Build
+        working-directory: apps/mobile
+        run: |
+          set -euo pipefail
+          flutter pub get
+          # No dart-defines, like the real release: the app asks the server the
+          # owner types which sign-in provider to use (`GET /api/auth-config`).
+          flutter build apk --release
+          mv build/app/outputs/flutter-apk/app-release.apk healthee-preview.apk
+
+      - name: Replace the preview release
+        working-directory: apps/mobile
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          gh release delete preview --yes --cleanup-tag || true
+          gh release create preview healthee-preview.apk \
+            --prerelease \
+            --target "$GITHUB_SHA" \
+            --title "Healthee Preview (test build)" \
+            --notes "Test build of \`${GITHUB_REF_NAME}\` at ${GITHUB_SHA::7}. Installs beside the real Healthee app as \"Healthee Preview\"; your installed app and its data are not touched. Not for general use."
