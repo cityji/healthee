@@ -52,6 +52,13 @@ class Wording(unittest.TestCase):
         self.assertTrue(lines[0].startswith("  word"))
         self.assertTrue(all(line.startswith("    word") for line in lines[1:]))
 
+    def test_a_flag_or_a_long_token_is_never_split_across_lines(self) -> None:
+        text = "Set HEALTHEE_URL in the environment or in the abcdef --env-file, then go on."
+        for line in report.wrapped(text, indent="  ").split("\n"):
+            self.assertFalse(line.rstrip().endswith("-"), line)
+        long_word = "x" * 90
+        self.assertIn(long_word, report.wrapped(f"shape: {long_word} end", indent=""))
+
     def test_the_route_note_says_the_three_things_that_matter(self) -> None:
         for phrase in ("VO2max", "14 days", "up or down", "cannot remove a route"):
             self.assertIn(phrase, report.ROUTE_NOTE)

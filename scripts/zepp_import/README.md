@@ -134,10 +134,13 @@ out.
 * **Zepp's API is unofficial.** It can change without notice. When it does, the tool
   stops with a message that names the step, and `--verbose` prints what the reply looked
   like so it can be fixed.
-* **Not tested against a live Zepp account.** The sign-in is the one the Healthee app
-  already uses for pairing. The workout calls are written from what open-source clients
-  do against real accounts and checked against real payloads from one of them. The
-  Healthee half is checked against the real server.
+* **Not tested with a real Zepp account.** Two things were checked against live Zepp
+  on 2026-10-11: it accepts this sign-in request (it answers an account that does not
+  exist with its usual error), and every host in the list answers the workout path,
+  refusing a bad token in the expected shape. A successful sign-in and real workout
+  replies were not, because that needs somebody's password. The workout calls follow
+  what open-source clients do against real accounts, and the parser was run over real
+  payloads from one of them. The Healthee half is checked against the real server.
 * **Sign-in needs a Zepp email and password.** An account created with Google, Apple or a
   phone number needs a password set first.
 * **Zepp may refuse a cloud server's address.** If sign-in is refused from a server, run

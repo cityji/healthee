@@ -28,6 +28,18 @@ MAX_BODY_BYTES = 32 * 1024 * 1024
 _TOO_LARGE = "response larger than expected"
 
 
+# The failures a person can act on, in words. Anything else keeps its class name, which is
+# ours to print: no part of a URL, header or body is ever in a `TransportError`.
+_PLAIN_KINDS = {
+    "gaierror": "the name does not resolve",
+    "ConnectionRefusedError": "connection refused",
+    "ConnectionResetError": "connection reset",
+    "TimeoutError": "no answer in time",
+    "timeout": "no answer in time",
+    "SSLCertVerificationError": "its certificate could not be verified",
+}
+
+
 class TransportError(Exception):
     """The request never produced an HTTP status. Carries only the host and error class."""
 
@@ -106,7 +118,8 @@ def send(
             return _read(reply, url)
     except OSError as error:  # URLError, a timeout, a TLS failure, a reset: all are OSError
         reason = getattr(error, "reason", error)
-        raise TransportError(host_of(url), type(reason).__name__) from None
+        kind = type(reason).__name__
+        raise TransportError(host_of(url), _PLAIN_KINDS.get(kind, kind)) from None
     except http.client.HTTPException as error:
         raise TransportError(host_of(url), type(error).__name__) from None
 

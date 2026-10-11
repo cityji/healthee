@@ -52,15 +52,31 @@ class SignIn(unittest.TestCase):
         self.assertNotIn(APP_TOKEN, printed)
         self.assertNotIn(LOGIN_TOKEN, printed)
 
-    def test_a_wrong_password_is_named_as_one(self) -> None:
-        self.assertEqual(self.failure("not-it").code, "zepp_wrong_credentials")
+    def test_a_wrong_password_is_named_as_one_with_zepps_own_error_number(self) -> None:
+        failure = self.failure("not-it")
+        self.assertEqual(failure.code, "zepp_wrong_credentials")
+        self.assertIn("(Zepp error 401)", failure.headline)
         self.assertEqual(self.zepp.sign_ins, 0)
+
+    def test_an_error_number_is_cut_down_to_a_number(self) -> None:
+        page = "https://s3-us-west-2.amazonaws.com/x.html"
+        hostile = Response(303, {"location": f"{page}?error=0117%3Cscript%3E%20{PASSWORD}"}, b"")
+        self.zepp.forced[_TOKENS_PATH] = hostile
+        failure = self.failure()
+        self.assertIn("(Zepp error 0117scriptSE)", failure.headline)
+        self.assertNotIn(PASSWORD, failure.headline)
+        self.zepp.forced[_TOKENS_PATH] = Response(303, {"location": f"{page}?error="}, b"")
+        self.assertIn("(Zepp error unnumbered)", self.failure().headline)
+        self.zepp.forced[_TOKENS_PATH] = Response(303, {"location": f"{page}?error=%C3%A9401"}, b"")
+        self.assertIn("(Zepp error 401)", self.failure().headline)
 
     def test_an_http_refusal_of_the_credentials(self) -> None:
         for status in (400, 401):
             self.zepp.forced[_TOKENS_PATH] = json_reply(status, {})
+            failure = self.failure()
             with self.subTest(status=status):
-                self.assertEqual(self.failure().code, "zepp_wrong_credentials")
+                self.assertEqual(failure.code, "zepp_wrong_credentials")
+                self.assertIn(f"(HTTP {status})", failure.headline)
 
     def test_a_rate_limit_or_block_points_at_the_network_not_the_password(self) -> None:
         for status in (403, 429):

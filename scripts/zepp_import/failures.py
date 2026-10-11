@@ -68,10 +68,11 @@ def zepp_sign_in_refused(status: int) -> ZeppImportError:
     )
 
 
-def zepp_wrong_credentials() -> ZeppImportError:
+def zepp_wrong_credentials(said: str) -> ZeppImportError:
+    """`said` is Zepp's own short answer: an HTTP status, or the error number it redirects with."""
     return ZeppImportError(
         "zepp_wrong_credentials",
-        "Zepp did not accept that email and password.",
+        f"Zepp did not accept that email and password ({said}).",
         "Check them in the Zepp app itself, then type them again. If you sign in to Zepp "
         "with Google, Apple or a phone number, set a Zepp password first.",
     )

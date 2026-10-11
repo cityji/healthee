@@ -26,6 +26,7 @@ from zepp_import.zepp_wire import ZeppEndpoints
 _TIMEOUT_S = 30.0
 _REFUSED_STATUSES = (403, 429)
 _WRONG_CREDENTIAL_STATUSES = (400, 401)
+_ERROR_CHARS = 12
 
 
 @dataclass(frozen=True)
@@ -92,7 +93,7 @@ def _request_access_token(email: str, password: str, endpoints: ZeppEndpoints, s
     )
     reply = _send("the sign-in", send, endpoints.tokens_url, zepp_wire.tokens_headers(), payload)
     if reply.status in _WRONG_CREDENTIAL_STATUSES:
-        raise failures.zepp_wrong_credentials()
+        raise failures.zepp_wrong_credentials(f"HTTP {reply.status}")
     if reply.status in _REFUSED_STATUSES:
         raise failures.zepp_sign_in_refused(reply.status)
     if not 300 <= reply.status < 400:
@@ -100,13 +101,17 @@ def _request_access_token(email: str, password: str, endpoints: ZeppEndpoints, s
     location = reply.headers.get("location", "")
     if not location:
         raise failures.zepp_api_changed("the sign-in", "a redirect with no Location header")
-    query = urllib.parse.parse_qs(urllib.parse.urlsplit(location).query)
+    query = urllib.parse.parse_qs(urllib.parse.urlsplit(location).query, keep_blank_values=True)
     access = query.get("access", [""])[0]
     if access:
         return access
-    # A redirect that carries an error code instead of tokens is Zepp saying no.
-    if "error" in query or "error_code" in query:
-        raise failures.zepp_wrong_credentials()
+    # A redirect that carries an error number instead of tokens is Zepp saying no. Live
+    # Zepp answers a wrong email or password with `error=401` (checked 2026-10-11).
+    said = (query.get("error") or query.get("error_code") or [""])[0]
+    if said or "error" in query or "error_code" in query:
+        kept = "".join(ch for ch in said if ch.isascii() and ch.isalnum())
+        number = kept[:_ERROR_CHARS] or "unnumbered"
+        raise failures.zepp_wrong_credentials(f"Zepp error {number}")
     raise failures.zepp_api_changed("the sign-in", "no access token in the redirect")
 
 

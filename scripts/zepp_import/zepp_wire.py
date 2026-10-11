@@ -35,7 +35,8 @@ PRIMARY_API_HOSTS = ("https://api-mifit.zepp.com", "https://api-mifit.huami.com"
 
 # Zepp keeps an account's data in one region and a host for another region answers with
 # a well-formed EMPTY list rather than an error. These are tried, in this order, only when
-# the primary hosts hold nothing for the account.
+# the primary hosts hold nothing for the account. Every host here, and both above, was
+# answering the workout path on 2026-10-11 (a 401 for a made-up token).
 REGION_API_HOSTS = (
     "https://api-mifit-us2.zepp.com",
     "https://api-mifit-in.huami.com",

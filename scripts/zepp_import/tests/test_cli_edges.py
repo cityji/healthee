@@ -98,7 +98,7 @@ class WhenThingsGoWrong(unittest.TestCase):
     def test_a_wrong_zepp_password_writes_nothing(self) -> None:
         result = self.world.run(answers={"Zepp password": "wrong", **YES})
         self.assertEqual((result.status, self.world.writes()), (1, []))
-        self.assertIn("Zepp did not accept that email and password.", result.lines)
+        self.assertIn("Zepp did not accept that email and password (Zepp", result.text)
 
     def test_a_zepp_failure_after_sign_in_still_ends_the_session(self) -> None:
         self.world.zepp.workouts.clear()
