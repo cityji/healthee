@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import json
 import unittest
 
 from zepp_import import plan
@@ -31,6 +32,16 @@ def stored(
 ) -> ExistingWorkout:
     """A row Healthee holds. `lacks` are the measurements the server reported as null."""
     return ExistingWorkout(start_s * 1000, minutes * 60, sport, frozenset(lacks))
+
+
+class VerdictWords(unittest.TestCase):
+    def test_a_verdict_reads_as_its_words_on_every_python(self) -> None:
+        # A `str`-mixin enum formats as its value before Python 3.11 and as its name
+        # after; the plan a person reads must not depend on which one is installed.
+        self.assertEqual(str(Verdict.PRESENT), "already there")
+        self.assertEqual(f"{Verdict.SKIP}", "skip")
+        self.assertEqual(json.dumps([Verdict.IMPORT]), '["import"]')
+        self.assertEqual(Verdict("complete"), Verdict.COMPLETE)
 
 
 class NewSession(unittest.TestCase):

@@ -10,8 +10,12 @@ and LABELLED as UTC (`label`), rather than shown in the server's zone under no l
 
 from __future__ import annotations
 
-from datetime import UTC, datetime, tzinfo
+from datetime import datetime, timezone, tzinfo
 from zoneinfo import ZoneInfo, ZoneInfoNotFoundError
+
+# `datetime.UTC` arrived in Python 3.11 and this tool runs on 3.10, the Python that
+# Ubuntu 22.04 ships. Every module takes UTC from here, so the reason is written once.
+UTC = timezone.utc
 
 
 def zone_for(name: str) -> tzinfo:

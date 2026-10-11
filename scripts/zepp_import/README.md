@@ -8,7 +8,7 @@ Zepp with its distance and route, and Healthee has neither. This tool reads your
 workout history and writes it to Healthee through the same two endpoints the mobile app
 uses. Nothing on the server changes and no new app build is needed.
 
-It is a standalone script. Python 3.11 or newer, standard library only, nothing to
+It is a standalone script. Python 3.10 or newer, standard library only, nothing to
 install. It runs on the server, on a laptop, or in Termux on a phone.
 
 ## Run it

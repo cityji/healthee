@@ -20,9 +20,9 @@ from __future__ import annotations
 import json
 import uuid
 from dataclasses import dataclass, field
-from datetime import UTC, date, datetime, time, timedelta
+from datetime import date, datetime, time, timedelta
 
-from zepp_import.localtime import zone_for
+from zepp_import.localtime import UTC, zone_for
 from zepp_import.tests.support import NOW_S, Request, json_reply, sentinel
 from zepp_import.transport import Response
 

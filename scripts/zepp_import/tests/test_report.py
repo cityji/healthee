@@ -3,11 +3,10 @@
 from __future__ import annotations
 
 import unittest
-from datetime import UTC
 from zoneinfo import ZoneInfo
 
 from zepp_import import report
-from zepp_import.localtime import label, local_day, utc_iso, zone_for
+from zepp_import.localtime import UTC, label, local_day, utc_iso, zone_for
 
 START = 1_790_396_820  # 2026-09-26T04:27:00Z
 

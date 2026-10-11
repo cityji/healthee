@@ -17,9 +17,10 @@ from __future__ import annotations
 import ipaddress
 import urllib.parse
 from dataclasses import dataclass
-from datetime import UTC, date, datetime, timedelta
+from datetime import date, datetime, timedelta
 
 from zepp_import import failures
+from zepp_import.localtime import UTC
 
 MEASUREMENT_COLUMNS = ("distance_m", "calories", "avg_hr", "max_hr", "min_hr")
 
@@ -97,8 +98,12 @@ def _epoch_ms(iso: object) -> int | None:
     """An ISO instant WITH an offset, as epoch milliseconds. Anything else is None."""
     if not isinstance(iso, str):
         return None
+    # Python 3.10 reads only what `datetime.isoformat()` writes, which is what the server
+    # sends. "Z" is the one other spelling of UTC a JSON encoder commonly produces, so it
+    # is read on every Python rather than only on 3.11 and later.
+    text = f"{iso[:-1]}+00:00" if iso.endswith(("Z", "z")) else iso
     try:
-        moment = datetime.fromisoformat(iso)
+        moment = datetime.fromisoformat(text)
     except ValueError:
         return None
     return round(moment.timestamp() * 1000) if moment.tzinfo else None

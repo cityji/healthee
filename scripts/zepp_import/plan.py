@@ -62,7 +62,7 @@ from __future__ import annotations
 import uuid
 from collections.abc import Sequence
 from dataclasses import dataclass
-from enum import StrEnum
+from enum import Enum
 
 from zepp_import import sports
 from zepp_import.healthee_rows import ExistingTrack, ExistingWorkout
@@ -78,13 +78,21 @@ _GENERIC_SPORT_CODES = (0, 44)
 _ROUTE_NAMESPACE = uuid.UUID("29ac2e53-a283-4e8c-97b6-55ffe8b7e3fe")
 
 
-class Verdict(StrEnum):
-    """What happens to one summary or one route."""
+class Verdict(str, Enum):
+    """What happens to one summary or one route.
+
+    `enum.StrEnum` is Python 3.11 and this tool runs on 3.10. `__str__` is written out
+    because the two disagree about what a `str`-mixin member formats as: its value
+    before 3.11, its name from 3.11 on.
+    """
 
     IMPORT = "import"
     COMPLETE = "complete"
     PRESENT = "already there"
     SKIP = "skip"
+
+    def __str__(self) -> str:
+        return self.value
 
 
 @dataclass(frozen=True)

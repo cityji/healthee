@@ -91,6 +91,20 @@ class WorkoutRow(unittest.TestCase):
         assert row is not None
         self.assertEqual(row.start_ms, 1_790_396_820_000)
 
+    def test_utc_written_as_z_is_read_on_every_python(self) -> None:
+        # Python 3.10 reads `isoformat()` output and little else. A "Z" it could not read
+        # would make a stored session look absent, and absent sessions get imported.
+        for spelling in ("2026-09-26T04:27:00Z", "2026-09-26T04:27:00z"):
+            with self.subTest(spelling=spelling):
+                row = existing_workout({**self.ROW, "start_iso": spelling})
+                assert row is not None
+                self.assertEqual(row.start_ms, 1_790_396_820_000)
+
+    def test_the_servers_own_spelling_with_microseconds_is_read(self) -> None:
+        row = existing_workout({**self.ROW, "start_iso": "2026-09-26T04:27:00.250000+00:00"})
+        assert row is not None
+        self.assertEqual(row.start_ms, 1_790_396_820_250)
+
     def test_a_row_without_a_usable_start_is_not_a_row(self) -> None:
         for start in (None, "yesterday", "2026-09-26T04:27:00", 5):
             with self.subTest(start=start):

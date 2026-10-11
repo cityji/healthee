@@ -10,8 +10,12 @@ Standard library only: nothing to install. See scripts/zepp_import/README.md.
 import sys
 from pathlib import Path
 
-if sys.version_info < (3, 11):  # noqa: UP036 - the one guard that must run on an old Python
-    sys.exit("zepp-import needs Python 3.11 or newer; this is Python " + sys.version.split()[0])
+if sys.version_info < (3, 10):  # noqa: UP036 - the one guard that must run on an old Python
+    sys.exit(
+        "zepp-import needs Python 3.10 or newer and this is Python "
+        + sys.version.split()[0]
+        + ".\n  Termux on an Android phone has a newer one: pkg install python git"
+    )
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 
