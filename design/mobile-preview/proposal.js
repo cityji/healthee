@@ -66,18 +66,30 @@
     ${H.footer()}</div>`;
 
   /* ── Sleep: one night ───────────────────────────────────────────────────── */
-  const lanes = ['awake', 'rem', 'light', 'deep'], laneName = { awake: 'Awake', rem: 'REM', light: 'Light', deep: 'Deep' };
-  const hypnogram = night => {
-    const left = 44, width = 290, top = 8, lane = 30, total = night.wake - night.bed, x = minute => left + minute / total * width;
-    let content = lanes.map((stage, index) => `<text class="p-axis" x="0" y="${top + index * lane + 17}">${laneName[stage]}</text><path class="p-lane" d="M${left} ${top + index * lane + lane - 3}H${left + width}"/>`).join('');
-    for (let hour = Math.ceil(night.bed / 60); hour * 60 < night.wake; hour += 1) content += `<path class="p-hour" d="M${x(hour * 60 - night.bed).toFixed(1)} ${top}V${top + lanes.length * lane}"/><text class="p-axis" text-anchor="middle" x="${x(hour * 60 - night.bed).toFixed(1)}" y="${top + lanes.length * lane + 16}">${hour % 24}</text>`;
-    let at = 0;
-    night.timeline.forEach(([stage, minutes]) => {
-      const blockX = x(at), blockWidth = Math.max(2.5, x(at + minutes) - blockX - 1);
-      content += `<rect class="stage-${stage}" x="${blockX.toFixed(1)}" y="${top + lanes.indexOf(stage) * lane + 5}" width="${blockWidth.toFixed(1)}" height="${lane - 10}" rx="${Math.min(5, blockWidth / 2).toFixed(1)}"><title>${laneName[stage]}, ${minutes} min from ${clock(night.bed + at)}</title></rect>`;
-      at += minutes;
+  const laneName = { awake: 'Awake', rem: 'REM', light: 'Light', deep: 'Deep' };
+  /* One continuous band, the way a night actually runs: every minute belongs to a block,
+     each stage has its own level, and a thin dotted join carries the eye from one block
+     to the next. Awake is a short cap above the band. */
+  const levels = ['awake', 'rem', 'light', 'deep'];
+  const band = (timeline, { left, width, top, row, awake = row * .55, gap = 3 }) => {
+    const total = timeline.reduce((sum, item) => sum + item[1], 0), x = minute => left + minute / total * width;
+    const yTop = stage => stage === 'awake' ? top : top + awake + gap + (levels.indexOf(stage) - 1) * (row + gap), height = stage => stage === 'awake' ? awake : row;
+    let blocks = '', joins = '', at = 0, before = null;
+    timeline.forEach(([stage, minutes]) => {
+      const from = x(at), to = x(at + minutes), wide = Math.max(1.6, to - from);
+      if (before && before !== stage) {
+        const upper = levels.indexOf(before) < levels.indexOf(stage) ? before : stage, lower = upper === before ? stage : before;
+        joins += `<path class="p-join" d="M${from.toFixed(1)} ${(yTop(upper) + height(upper)).toFixed(1)}V${yTop(lower).toFixed(1)}"/>`;
+      }
+      blocks += `<rect class="stage-${stage}" x="${from.toFixed(1)}" y="${yTop(stage).toFixed(1)}" width="${wide.toFixed(1)}" height="${height(stage).toFixed(1)}" rx="${Math.min(3, wide / 2).toFixed(1)}"><title>${laneName[stage]}, ${minutes} min</title></rect>`;
+      at += minutes; before = stage;
     });
-    return `<svg class="p-chart" viewBox="0 0 340 ${top + lanes.length * lane + 22}" role="img" aria-label="Sleep stages from ${clock(night.bed)} to ${clock(night.wake)}">${content}</svg>`;
+    return { content: joins + blocks, bottom: top + awake + gap + 3 * row + 2 * gap, yTop, height, total, x };
+  };
+  const hypnogram = night => {
+    const drawn = band(night.timeline, { left: 34, width: 302, top: 4, row: 20 });
+    const labels = levels.map(stage => `<text class="p-axis" x="0" y="${(drawn.yTop(stage) + drawn.height(stage) / 2 + 3.5).toFixed(1)}">${laneName[stage]}</text>`).join('');
+    return `<svg class="p-chart" viewBox="0 0 340 ${drawn.bottom + 22}" role="img" aria-label="Sleep stages from ${clock(night.bed)} to ${clock(night.wake)}">${labels}${drawn.content}<text class="p-axis" x="34" y="${drawn.bottom + 17}">${clock(night.bed)}</text><text class="p-axis" text-anchor="end" x="336" y="${drawn.bottom + 17}">${clock(night.wake)}</text></svg>`;
   };
   const stageRows = stages => {
     const total = stages.reduce((sum, stage) => sum + stage[2], 0), longest = Math.max(...stages.flatMap(stage => [stage[2], stage[3]]));
@@ -171,6 +183,6 @@
     ${trendCard(P.trends.hrv)}${trendCard(P.trends.rhr)}${durationCard(P.week)}${timingCard(P.week)}${trendCard(P.trends.deep)}
     ${H.footer()}</div>`;
 
-  H.p = { P, esc, hm, clock, chip, verdictOf, rangeBar, hypnogram, stageRows, checks, trendCard, durationCard, timingCard, scale, frame, dayAxis, average, days };
+  H.p = { P, esc, hm, clock, chip, verdictOf, rangeBar, hypnogram, band, levels, laneName, stageRows, checks, trendCard, durationCard, timingCard, scale, frame, dayAxis, average, days };
   H.directory?.push(['p-today', 'Proposal · Today', 'spark'], ['p-sleep', 'Proposal · Sleep', 'spark'], ['p-trends', 'Proposal · Trends', 'spark']);
 })();
