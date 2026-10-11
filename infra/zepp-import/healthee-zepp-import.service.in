@@ -1,0 +1,23 @@
+# Healthee nightly Zepp import. Oneshot unit, started by healthee-zepp-import.timer.
+#
+# Do not copy this file by hand: `sudo python3 scripts/zepp-nightly install` fills in
+# the values in double braces and installs it. See infra/zepp-import/README.md.
+#
+# Check the last run:  zepp-nightly status
+# Full log:            journalctl -u healthee-zepp-import.service
+
+[Unit]
+Description=Healthee: import last few days of Zepp workouts
+Wants=network-online.target
+After=network-online.target
+
+[Service]
+Type=oneshot
+User={{USER}}
+WorkingDirectory={{REPO}}
+# flock: a run by hand under the same lock cannot overlap the nightly one.
+# --days 3: a night that was missed is caught up by the next one.
+ExecStart=/usr/bin/flock --nonblock {{LOCK}} {{PYTHON}} {{REPO}}/scripts/zepp-import --env-file {{ENV_FILE}} --yes --days 3{{ROUTES_FLAG}}
+# A run that hangs is stopped long before the next night, so runs never pile up.
+TimeoutStartSec=20min
+Nice=10
