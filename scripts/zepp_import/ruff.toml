@@ -1,0 +1,9 @@
+# The server's lint rules (docs/ENGINEERING_STANDARDS.md), applied to a tool that also has
+# to run on the Python a bare Ubuntu LTS or a phone terminal ships: 3.11 and up. Without
+# this file ruff would find no config for scripts/ and fall back to its defaults.
+extend = "../../apps/server/pyproject.toml"
+target-version = "py311"
+src = [".."]
+
+[lint.per-file-ignores]
+"tests/**" = ["ARG"]
