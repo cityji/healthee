@@ -49,7 +49,8 @@ import 'package:solar_icons/solar_icons.dart';
 const String kNoTimelineNote = 'No stage timeline recorded for this night.';
 
 /// `H.note('Stage durations were not recorded for this night.')`.
-const String kNoStagesNote = 'Stage durations were not recorded for this night.';
+const String kNoStagesNote =
+    'Stage durations were not recorded for this night.';
 
 /// The prototype's own caveat under the stage table.
 const String kStageTotalsNote =
@@ -75,10 +76,11 @@ class NightTimelinePanel extends StatelessWidget {
 
   /// The plot's height, before the legend.
   ///
-  /// Four levels and a clock strip. At the old 165 the lanes were 34 apart and
-  /// the ribbon 14 thick, which read as a squashed sparkline rather than a
-  /// night with room in it.
-  static const double chartHeight = 196;
+  /// An awake cap, three sleep levels and a clock strip. The blocks fill their
+  /// levels now, so the height is spent on the night itself: at 196 the three
+  /// levels were 45 tall each and the card was mostly one chart. 156 gives a
+  /// level about 33, which is a block you can compare widths on.
+  static const double chartHeight = 156;
 
   /// The gap above the legend.
   static const double legendGap = 10;
