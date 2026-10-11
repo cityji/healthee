@@ -80,20 +80,19 @@ void main() {
         // Every gap is a literal restated from the CSS by hand — the method
         // `v02_layout_test.dart` records. Reading `BioHero.contextGap` here
         // would move the expectation with the constant under test.
+        // Today's hero is frameless (`.p-hero .bio-hero { border: 0 }`, and no
+        // rule above the terms): the gaps stay, the three hairlines go.
         final expected =
-            hairline + // border-top
             22 + // padding-top
             32 + // .bio-eyebrow, whose 32px control sets its height
-            bioDisplaySide(hero.width - hairline * 2) + // .bio-display, square
+            bioDisplaySide(hero.width) + // .bio-display, square
             heightOf(caption) + // .age-context, margin-top reset by motion.css
             18 + // .age-context { margin-bottom: 18px }
             heightOf(find.byType(AgeScale)) +
             16 + // .bio-divider { margin-top: 16px }
-            hairline + // the rule itself
             14 + // .bio-divider { padding-top: 14px }
             heightOf(find.byType(BioStatsRow)) +
-            22 + // padding-bottom
-            hairline; // border-bottom
+            22; // padding-bottom
 
         expect(
           hero.height,
@@ -108,8 +107,8 @@ void main() {
         tester,
       ) async {
         // `.bio-display { width:100%; max-width:304px; aspect-ratio:1 }`, inside
-        // `.bio-hero { padding: 22px }` and its 1px border. This is the card's
-        // tallest term, so it is the one that has to be right.
+        // `.bio-hero { padding: 22px }`, with no border on Today's hero. This is
+        // the card's tallest term, so it is the one that has to be right.
         await pumpHeroAt(tester, store, width);
         final hero = tester.getRect(find.byType(BioHero));
         final square = tester.getRect(
@@ -120,11 +119,11 @@ void main() {
               )
               .first,
         );
-        final content = hero.width - hairline * 2 - 22 * 2;
+        final content = hero.width - 22 * 2;
         expect(square.width, content < 304 ? content : 304);
         expect(square.height, square.width);
         // And it starts directly under the eyebrow: `.age-value { margin: 0 }`.
-        expect(square.top - hero.top, hairline + 22 + 32);
+        expect(square.top - hero.top, 22 + 32);
       });
 
       testWidgets('$width — the contributions and the ⓘ are INSIDE', (

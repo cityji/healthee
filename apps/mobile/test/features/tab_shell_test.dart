@@ -172,11 +172,17 @@ void main() {
       );
     }
 
-    expect(find.byIcon(SolarIconsBold.sun), findsOneWidget);
-    expect(find.byIcon(SolarIconsOutline.sun), findsNothing);
+    // Asked of the bar alone: the screen above it may use the same glyphs
+    // (the age card badges fitness with the Activity tab's runner).
+    Finder inBar(IconData icon) => find.descendant(
+      of: find.byType(AppTabBar),
+      matching: find.byIcon(icon),
+    );
+    expect(inBar(SolarIconsBold.sun), findsOneWidget);
+    expect(inBar(SolarIconsOutline.sun), findsNothing);
     for (final AppTab tab in kAppTabs.skip(1)) {
-      expect(find.byIcon(tab.icon), findsOneWidget, reason: tab.label);
-      expect(find.byIcon(tab.activeIcon), findsNothing, reason: tab.label);
+      expect(inBar(tab.icon), findsOneWidget, reason: tab.label);
+      expect(inBar(tab.activeIcon), findsNothing, reason: tab.label);
     }
   });
 }

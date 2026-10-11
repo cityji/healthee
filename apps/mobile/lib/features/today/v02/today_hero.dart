@@ -27,6 +27,7 @@
 library;
 
 import 'package:flutter/material.dart';
+import 'package:healthee/core/theme/instrument_hues.dart';
 import 'package:healthee/core/theme/tone.dart';
 import 'package:healthee/data/models/biological_age.dart';
 import 'package:healthee/data/models/recovery_score.dart';
@@ -110,18 +111,36 @@ class TodayBioHero extends StatelessWidget {
           progress: t,
         ),
       ),
+      frameless: true,
       stats: <BioStat>[
         for (final term in age.contributions)
           if (term.deltaYears case final double delta)
-            BioStat(
-              '${_termName(term.term)} contribution',
-              _years(delta),
-              onOpen: onOpenTerm == null
-                  ? null
-                  : () => onOpenTerm!(term.term),
-            ),
+            _stat(context.hues, term.term, delta),
       ],
       modelLabel: age.disclaimer ?? kPopulationModelLabel,
+    );
+  }
+
+  /// One term, with its family's badge when the term names a family this app
+  /// colours: fitness green with a runner, sleep violet with a moon. A term the
+  /// model adds later draws as plain text rather than borrowing a family.
+  BioStat _stat(InstrumentHues hues, String term, double delta) {
+    final family = switch (term) {
+      'fitness' => (SolarIconsOutline.running, hues.fitness, hues.fitnessSoft),
+      _ when term.startsWith('sleep') => (
+        SolarIconsOutline.moon,
+        hues.sleep,
+        hues.sleepSoft,
+      ),
+      _ => null,
+    };
+    return BioStat(
+      '${_termName(term)} contribution',
+      _years(delta),
+      onOpen: onOpenTerm == null ? null : () => onOpenTerm!(term),
+      icon: family?.$1,
+      hue: family?.$2,
+      hueSoft: family?.$3,
     );
   }
 
