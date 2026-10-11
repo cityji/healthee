@@ -100,41 +100,29 @@
     nights.forEach((minutes, index) => { content += `<rect class="p-bar ${index === nights.length - 1 ? 'current' : ''}" x="${(left + index * step + step * .18).toFixed(1)}" y="${(104 - minutes / max * 92).toFixed(1)}" width="${(step * .64).toFixed(1)}" height="${(minutes / max * 92).toFixed(1)}" rx="3"><title>${hm(minutes)} short</title></rect>`; });
     return `<svg class="p-chart" viewBox="0 0 340 122" role="img" aria-label="Sleep shortfall on each of the last 14 nights">${content}<text class="p-axis" x="${left}" y="120">14 nights ago</text><text class="p-axis" text-anchor="end" x="306" y="120">last night</text></svg>`;
   };
-  H.screens['p-sleep'] = () => {
-    const night = P.night, total = P.debt.fortnight.reduce((sum, minutes) => sum + minutes, 0);
-    return `<div class="p-screen" data-tone="sleep">
-      <header class="page-header p-header"><div class="grow"><h1>Sleep</h1><p class="date">Night of Tue, 15 Sep</p></div><a href="#settings" class="icon-button avatar" aria-label="Profile and settings">A</a></header>
-      <section class="p-sleep-hero"><p class="p-eyebrow">Time asleep</p><div class="p-big">6<small>h</small> 24<small>m</small></div>
-        ${rangeBar({ value: 384, min: 240, max: 540, band: [350, 430], label: 'Asleep 6 hours 24 minutes. Your usual range is 5 hours 50 to 7 hours 10.', ends: ['4h', '9h', 'usual 5h 50m to 7h 10m'] })}
-        <p class="p-key-line">${chip(verdictOf(384, [350, 430]))} <strong>1h 36m short</strong> of your 8h need.</p>
-        <dl class="p-facts"><div><dt>In bed</dt><dd>${clock(night.bed)}</dd></div><div><dt>Up</dt><dd>${clock(night.wake)}</dd></div><div><dt>Time in bed</dt><dd>${hm(night.wake - night.bed)}</dd></div></dl></section>
-      <section class="panel p-panel" data-tone="sleep"><h3 class="panel-title">${H.icon('moon')}Your night, hour by hour</h3>${hypnogram(night)}<p class="p-legend">Each block is one stretch in one stage. Higher on the chart is lighter sleep.</p></section>
-      <section class="panel p-panel" data-tone="sleep"><h3 class="panel-title">${H.icon('moon')}Where the time went</h3>${stageRows(night.stages)}</section>
-      <section class="panel p-panel" data-tone="sleep"><h3 class="panel-title">${H.icon('check')}Four checks on this night</h3><p class="p-legend first">The shaded part of each bar is the reference range. The mark is last night.</p>${checks()}</section>
-      <section class="panel p-panel" data-tone="sleep"><h3 class="panel-title">${H.icon('clock')}Sleep you still owe</h3><div class="p-two"><div><p class="p-eyebrow">Last night</p><div class="p-mid">${hm(P.debt.lastNight)}</div><small>short of your need</small></div><div><p class="p-eyebrow">Last 14 nights</p><div class="p-mid">${(total / 60).toFixed(1)}<small> h</small></div><small>about ${hm(total / 14)} a night</small></div></div>${debtBars(P.debt.fortnight)}<p class="p-legend">Each bar is how far one night fell short of 8h. Shorter bars are better.</p></section>
-      ${H.footer()}</div>`;
-  };
-
   /* ── Trends: one card grammar for every metric ──────────────────────────── */
   const average = values => { const present = values.filter(value => value !== null); return present.reduce((sum, value) => sum + value, 0) / present.length; };
   const scale = (low, high, top = 14, bottom = 118) => value => bottom - (value - low) / (high - low) * (bottom - top);
   const frame = (y, ticks, format) => ticks.map(value => `<path class="p-grid" d="M4 ${y(value).toFixed(1)}H306"/><text class="p-axis" text-anchor="end" x="338" y="${(y(value) + 4).toFixed(1)}">${format(value)}</text>`).join('');
   const dayAxis = () => days.map((day, index) => `<text class="p-axis" text-anchor="middle" x="${26 + index * 43}" y="138">${day}</text>`).join('');
   const dots = metric => {
-    const present = metric.values.filter(value => value !== null), low = Math.min(...present, metric.normal[0]) - 6, high = Math.max(...present, metric.normal[1]) + 6, y = scale(low, high, 24), mean = average(metric.values);
+    const present = metric.values.filter(value => value !== null), low = Math.min(...present, metric.normal[0]) - 6, high = Math.min(metric.ceiling ?? Infinity, Math.max(...present, metric.normal[1]) + 6), y = scale(low, high, 24), mean = average(metric.values);
     const format = value => metric.time ? `${Math.floor(value / 60)}:${String(Math.round(value % 60)).padStart(2, '0')}` : Math.round(value);
-    let content = frame(y, [low + 2, (low + high) / 2, high - 2], format) + `<rect class="p-normal" x="4" y="${y(metric.normal[1]).toFixed(1)}" width="302" height="${(y(metric.normal[0]) - y(metric.normal[1])).toFixed(1)}" rx="4"/><path class="p-mean" d="M4 ${y(mean).toFixed(1)}H306"/>`;
+    let content = frame(y, [low + 2, (low + high) / 2, metric.ceiling === high ? high : high - 2], format) + `<rect class="p-normal" x="4" y="${y(metric.normal[1]).toFixed(1)}" width="302" height="${(y(metric.normal[0]) - y(metric.normal[1])).toFixed(1)}" rx="4"/><path class="p-mean" d="M4 ${y(mean).toFixed(1)}H306"/>`;
     let run = [];
     const flush = () => { if (run.length > 1) content += `<path class="p-line" d="${run.map((point, index) => `${index ? 'L' : 'M'}${point[0]},${point[1].toFixed(1)}`).join(' ')}"/>`; run = []; };
-    metric.values.forEach((value, index) => { if (value === null) flush(); else run.push([26 + index * 43, y(value)]); });
+    const count = metric.values.length, many = count > 8, at = index => many ? 12 + index * (286 / (count - 1)) : 26 + index * 43;
+    const lowest = Math.min(...present), highest = Math.max(...present);
+    metric.values.forEach((value, index) => { if (value === null) flush(); else run.push([at(index).toFixed(1), y(value)]); });
     flush();
     metric.values.forEach((value, index) => {
-      const x = 26 + index * 43;
-      if (value === null) { content += `<text class="p-missing" text-anchor="middle" x="${x}" y="114">no data</text>`; return; }
+      const x = at(index).toFixed(1), last = index === count - 1;
+      if (value === null) { if (!many) content += `<text class="p-missing" text-anchor="middle" x="${x}" y="114">no data</text>`; return; }
       const outside = value < metric.normal[0] || value > metric.normal[1];
-      content += `<circle class="p-dot ${outside ? 'outside' : ''} ${index === metric.values.length - 1 ? 'current' : ''}" cx="${x}" cy="${y(value).toFixed(1)}" r="4.5"/><text class="p-value" text-anchor="middle" x="${x}" y="${(y(value) - 9).toFixed(1)}">${format(value)}</text>`;
+      const named = !many || last || (value === lowest && metric.values.indexOf(lowest) === index) || (value === highest && metric.values.indexOf(highest) === index);
+      content += `<circle class="p-dot ${outside ? 'outside' : ''} ${index === metric.values.length - 1 ? 'current' : ''}" cx="${x}" cy="${y(value).toFixed(1)}" r="${many ? 3.5 : 4.5}"/>${named ? `<text class="p-value" text-anchor="${many && last ? 'end' : 'middle'}" x="${many && last ? 306 : x}" y="${(y(value) - 9).toFixed(1)}">${format(value)}</text>` : ''}`;
     });
-    return `<svg class="p-chart" viewBox="0 0 340 142" role="img" aria-label="${esc(metric.title)} on each of the last seven days">${content}${dayAxis()}</svg>`;
+    return `<svg class="p-chart" viewBox="0 0 340 142" role="img" aria-label="${esc(metric.title)} across ${count} nights">${content}${many ? `<text class="p-axis" x="4" y="138">${metric.span[0]}</text><text class="p-axis" text-anchor="end" x="306" y="138">${metric.span[1]}</text>` : dayAxis()}</svg>`;
   };
   const trendCard = metric => {
     const mean = average(metric.values), change = mean - metric.previous, inside = metric.values.filter(value => value !== null && value >= metric.normal[0] && value <= metric.normal[1]).length, measured = metric.values.filter(value => value !== null).length;
@@ -142,7 +130,7 @@
     const better = (change > 0 && metric.better === 'up') || (change < 0 && metric.better === 'down'), flat = Math.abs(change) < 1;
     const plain = value => metric.time ? hm(value) : `${Math.round(value)} ${metric.unit}`;
     return `<section class="panel p-panel p-trend" data-tone="${metric.tone}"><div class="p-trend-head"><h3 class="panel-title">${H.icon(metric.icon)}${metric.title}</h3><span class="p-direction">${metric.better === 'up' ? 'Higher is better' : 'Lower is better'}</span></div>
-      <div class="p-trend-read"><div class="p-mid">${show(mean)}</div><span class="p-eyebrow">average this week</span><span class="p-delta ${flat ? 'steady' : better ? 'good' : 'watch'}">${flat ? 'No change' : `${change > 0 ? '↑' : '↓'} ${metric.time ? `${Math.round(Math.abs(change))} min` : Math.round(Math.abs(change))}`} vs last week</span></div>
+      <div class="p-trend-read"><div class="p-mid">${show(mean)}</div><span class="p-eyebrow">average ${metric.period || 'this week'}</span><span class="p-delta ${flat ? 'steady' : better ? 'good' : 'watch'}">${flat ? 'No change' : `${change > 0 ? '↑' : '↓'} ${metric.time ? `${Math.round(Math.abs(change))} min` : Math.round(Math.abs(change))}`} vs ${metric.before || 'last week'}</span></div>
       ${dots(metric)}
       <p class="p-sentence"><strong>${inside} of ${measured} nights</strong> were inside your normal range of ${plain(metric.normal[0])} to ${plain(metric.normal[1])}.</p></section>`;
   };
@@ -183,5 +171,6 @@
     ${trendCard(P.trends.hrv)}${trendCard(P.trends.rhr)}${durationCard(P.week)}${timingCard(P.week)}${trendCard(P.trends.deep)}
     ${H.footer()}</div>`;
 
+  H.p = { P, esc, hm, clock, chip, verdictOf, rangeBar, hypnogram, stageRows, checks, trendCard, durationCard, timingCard, scale, frame, dayAxis, average, days };
   H.directory?.push(['p-today', 'Proposal · Today', 'spark'], ['p-sleep', 'Proposal · Sleep', 'spark'], ['p-trends', 'Proposal · Trends', 'spark']);
 })();
