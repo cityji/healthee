@@ -80,6 +80,10 @@ class Settings:
     def from_env(self, name: str) -> str:
         return (self._env.get(ENV_NAMES[name]) or "").strip()
 
+    def known(self, name: str) -> bool:
+        """True when the environment or an earlier run already holds this setting."""
+        return bool(self.from_env(name) or self._remembered(name))
+
     def text(self, name: str, label: str, override: str | None = None) -> str:
         """A non-secret setting. The remembered value is offered as the default."""
         given = (override or "").strip() or self.from_env(name)

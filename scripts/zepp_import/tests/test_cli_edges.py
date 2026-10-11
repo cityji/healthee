@@ -13,7 +13,7 @@ import unittest
 from zepp_import.tests.fake_healthee import USER_ID
 from zepp_import.tests.fake_zepp import APP_TOKEN, HOME
 from zepp_import.tests.support import json_reply
-from zepp_import.tests.world import JOG, RUN, STRENGTH, World
+from zepp_import.tests.world import HEALTHEE_EMAIL, JOG, RUN, STRENGTH, World
 from zepp_import.zepp_wire import LOGIN_URL, LOGOUT_URL, TOKENS_URL
 
 YES = {"Import": "y"}
@@ -89,9 +89,9 @@ class WhenThingsGoWrong(unittest.TestCase):
     def test_a_wrong_healthee_password_stops_it_before_zepp_is_contacted(self) -> None:
         result = self.world.run(answers={"Healthee password": "wrong"})
         self.assertEqual(result.status, 1)
-        self.assertIn(
-            "Healthee's sign-in refused that email and password", result.text.replace("\n", " ")
-        )
+        said = " ".join(result.text.split())
+        self.assertIn("Healthee's sign-in refused that email and password", said)
+        self.assertIn("This is your Healthee login, not your Zepp one", said)
         self.assertEqual(self.world.paths_to("zepp.com"), [])
         self.assertFalse(any("Zepp" in prompt for prompt in result.script.asked))
 
@@ -113,7 +113,7 @@ class WhenThingsGoWrong(unittest.TestCase):
         result = self.world.run(answers=YES)
         self.assertEqual(result.status, 1)
         self.assertIn("route refused: HTTP 422: nope", result.text)
-        self.assertIn("Done: 3 summaries, 0 routes stored.", result.lines)
+        self.assertIn("Done: 3 workouts, 0 routes stored.", result.lines)
         self.assertIn("2 routes refused by Healthee; see above.", result.lines)
         self.assertEqual(len(self.world.healthee.workouts), 3)
 
@@ -122,8 +122,8 @@ class WhenThingsGoWrong(unittest.TestCase):
         result = self.world.run(answers=YES)
         self.assertEqual(result.status, 1)
         flat = result.text.replace("\n", " ")
-        self.assertIn("Stored before the failure below: 0 summaries, 2 routes.", flat)
-        self.assertIn("Healthee refused the workout summaries (HTTP 500: boom).", flat)
+        self.assertIn("Stored before the failure below: 0 workouts, 2 routes.", flat)
+        self.assertIn("Healthee refused the workouts (HTTP 500: boom).", flat)
         self.assertEqual(self.world.healthee.live_tokens(), [])
         ledger = json.loads(self.world.state.read_text())
         self.assertIn("route_id", ledger["imports"][f"https://healthee.test|{USER_ID}"][str(RUN)])
@@ -131,7 +131,7 @@ class WhenThingsGoWrong(unittest.TestCase):
         self.world.healthee.forced.clear()
         again = self.world.run(answers=YES)
         self.assertEqual(again.status, 0)
-        self.assertIn("Done: 3 summaries, 0 routes stored.", again.lines)
+        self.assertIn("Done: 3 workouts, 0 routes stored.", again.lines)
         self.assertEqual(len(self.world.healthee.tracks), 2)
 
     def test_a_token_left_behind_is_swept_by_the_next_run(self) -> None:
@@ -202,13 +202,24 @@ class AppToken(unittest.TestCase):
         world = World()
         result = world.run("--dry-run", env={"ZEPP_APP_TOKEN": APP_TOKEN})
         self.assertEqual(result.status, 0)
-        self.assertIn("To write: 3 summaries, 2 routes.", result.lines)
+        self.assertIn("To write: 3 workouts, 2 routes.", result.lines)
         self.assertFalse(any("Zepp" in prompt for prompt in result.script.asked))
         urls = {r.url for r in world.net.requests}
         self.assertTrue(urls.isdisjoint({TOKENS_URL, LOGIN_URL, LOGOUT_URL}))
 
 
 class Hints(unittest.TestCase):
+    def test_the_login_note_is_for_a_person_who_has_to_type_the_email(self) -> None:
+        said = "It is not your Zepp login"
+        asked = World().run("--dry-run")
+        given = World().run("--dry-run", env={"HEALTHEE_EMAIL": HEALTHEE_EMAIL})
+        nobody = World().run_unattended("--dry-run")
+        self.assertIn(said, " ".join(asked.text.split()))
+        self.assertLess(asked.lines.index("  its sign-in goes to auth.healthee.test"), 3)
+        for result in (given, nobody):
+            self.assertEqual(result.status, 0)
+            self.assertNotIn("Zepp login", result.text)
+
     def test_no_track_for_any_session_is_called_out_as_a_possible_api_change(self) -> None:
         world = World()
         for track_id in (RUN, JOG):
@@ -216,7 +227,7 @@ class Hints(unittest.TestCase):
         result = world.run("--dry-run")
         self.assertIn("Zepp returned no usable GPS track", result.text)
         self.assertIn("--verbose", result.text)
-        self.assertIn("To write: 3 summaries, 0 routes.", result.lines)
+        self.assertIn("To write: 3 workouts, 0 routes.", result.lines)
 
     def test_records_that_could_not_be_read_are_counted_out_loud(self) -> None:
         world = World()

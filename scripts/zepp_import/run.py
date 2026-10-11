@@ -111,6 +111,9 @@ class Run:
         session = HealtheeSession(normalise_url(address), self._deps.send)
         self._out(f"Healthee: {host_of(session.base_url)}")
         self._out(f"  its sign-in goes to {session.sign_in_host()}")
+        if self._deps.terminal.interactive and not settings.known("healthee_email"):
+            # Asked from nothing: the owner may not know Healthee has a login at all.
+            self._out(report.wrapped(report.HEALTHEE_LOGIN_NOTE, indent="  "))
         email = settings.text("healthee_email", "Healthee email")
         account = session.sign_in(email, settings.secret("healthee_password", "Healthee password"))
         ledger.remember({"healthee_url": session.base_url, "healthee_email": email})
@@ -180,7 +183,7 @@ class Run:
             raise failures.unconfirmed()
         self._out("")
         if summaries:
-            wanted = report.counted(summaries, "summary", "summaries")
+            wanted = report.counted(summaries, "workout")
             self._take_summaries = settings.confirm(f"Import {wanted}?")
             if not self._take_summaries:
                 return  # a route follows its session; with no summaries there is no import

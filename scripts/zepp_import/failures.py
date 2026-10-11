@@ -15,6 +15,11 @@ reaches the output.
 
 from __future__ import annotations
 
+# The Healthee app's own heading for the screen an owner signed in on
+# (`apps/mobile/lib/features/signin/widgets/server_signin_form.dart`). It is quoted to
+# them, so `tests/test_server_contract.py` fails when the app renames it.
+SIGN_IN_SCREEN = "Sign in to your server"
+
 
 class ZeppImportError(Exception):
     """A named failure. `code` is a stable, secret-free id for logs and tests."""
@@ -165,7 +170,9 @@ def healthee_wrong_credentials(detail: str) -> ZeppImportError:
     return ZeppImportError(
         "healthee_wrong_credentials",
         f"Healthee's sign-in refused that email and password ({detail}).",
-        "Use the email and password you sign in to the Healthee app with.",
+        "This is your Healthee login, not your Zepp one: the email and password you "
+        f'typed into the Healthee app on "{SIGN_IN_SCREEN}". The README says how to '
+        "look the email up on your own server.",
     )
 
 

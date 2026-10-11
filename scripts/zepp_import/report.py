@@ -13,6 +13,7 @@ from collections.abc import Callable, Sequence
 from datetime import tzinfo
 
 from zepp_import import sports
+from zepp_import.failures import SIGN_IN_SCREEN
 from zepp_import.localtime import local
 from zepp_import.plan import Decision, Step
 
@@ -25,6 +26,13 @@ ROUTE_NOTE = (
     "Routes: Healthee tries to measure your fitness (VO2max) from each route. A measured "
     "value replaces the estimate for 14 days and can move biological age up or down. "
     "This tool cannot remove a route once it is stored."
+)
+
+
+HEALTHEE_LOGIN_NOTE = (
+    "This is the email and password you typed into the Healthee app on "
+    f'"{SIGN_IN_SCREEN}". The app stays signed in, so it is easy to forget you have '
+    "one. It is not your Zepp login; that is asked for next."
 )
 
 
@@ -61,9 +69,9 @@ def wrapped(text: str, indent: str = _DETAIL, hang: str = "") -> str:
     )
 
 
-def counted(count: int, noun: str, plural: str = "") -> str:
-    """`1 route`, `2 routes`, `1 summary`, `3 summaries`."""
-    return f"{count} {noun if count == 1 else (plural or noun + 's')}"
+def counted(count: int, noun: str) -> str:
+    """`1 route`, `2 routes`."""
+    return f"{count} {noun}{'' if count == 1 else 's'}"
 
 
 def _facts(decision: Decision) -> str:
@@ -98,7 +106,7 @@ def describe(decision: Decision, zone: tzinfo) -> list[str]:
     lines = [
         f"{_ITEM}{when(decision.workout.start_s, zone)}  {sport_name(decision)}",
         wrapped(_facts(decision)),
-        wrapped(_step_line("summary", decision.summary), hang="  "),
+        wrapped(_step_line("workout", decision.summary), hang="  "),
     ]
     if decision.route.shown:
         points = f", {decision.route_points:,} points" if decision.route.writes else ""
@@ -115,7 +123,7 @@ def writes(decisions: Sequence[Decision]) -> tuple[int, int]:
 
 
 def to_write(summaries: int, routes: int) -> str:
-    return f"{counted(summaries, 'summary', 'summaries')}, {counted(routes, 'route')}"
+    return f"{counted(summaries, 'workout')}, {counted(routes, 'route')}"
 
 
 def plan(decisions: Sequence[Decision], zone: tzinfo, out: Out) -> None:

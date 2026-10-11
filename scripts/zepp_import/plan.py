@@ -17,7 +17,7 @@ Summaries:
  * *Under ten minutes is not imported.* `read/fitness.py::_MIN_WORKOUT_S` hides those
    from every list, so the row would change the day's calories and be visible nowhere.
  * *The same session is never written twice.* A row starting within two minutes is the
-   same session; it is only COMPLETED. What it lacks is filled in — distance, heart
+   same session; it is only UPDATED. What it lacks is filled in — distance, heart
    rate, calories — and nothing it already measured is replaced.
  * *A sport label is corrected only on evidence.* A stored "Activity" becomes the sport
    Zepp recorded. And a stored code that is exactly Zepp's CLOUD type for that same
@@ -45,9 +45,9 @@ Routes:
  * *A route id is derived from the workout, not generated.* Re-running the import sends
    the same id, and `read/gps.py::ingest_gps_track` answers with the stored track.
 
-## Why completing a stored row is safe
+## Why updating a stored row is safe
 
-A completion sends `start_ts` and only the fields being added. The server's upsert
+An update sends `start_ts` and only the fields being added. The server's upsert
 COALESCEs every other column (`ingest/upsert.py::upsert_workouts`), so what the strap
 measured is untouched. `healthee_session.py` says why a server too old for that is never
 reached.
@@ -87,7 +87,7 @@ class Verdict(str, Enum):
     """
 
     IMPORT = "import"
-    COMPLETE = "complete"
+    UPDATE = "update"
     PRESENT = "already there"
     SKIP = "skip"
 
@@ -203,7 +203,7 @@ def _completion(
         said.insert(0, "adds " + ", ".join(added))
     if not said:
         return Step(Verdict.PRESENT)
-    return Step(Verdict.COMPLETE, "; ".join(said), payload)
+    return Step(Verdict.UPDATE, "; ".join(said), payload)
 
 
 def plan_summary(workout: ZeppWorkout, existing: Sequence[ExistingWorkout]) -> Step:

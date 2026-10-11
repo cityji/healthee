@@ -32,6 +32,15 @@ class Text(unittest.TestCase):
         self.assertEqual(chosen.text("healthee_url", "Healthee address"), "from-env")
         self.assertEqual(script.asked, [])
 
+    def test_a_setting_is_known_when_the_environment_or_an_earlier_run_holds_it(self) -> None:
+        terminal = Script().terminal()
+        in_env = Settings({"ZEPP_EMAIL": "me@zepp.test"}, _remembered({}), terminal)
+        remembered = Settings({}, _remembered({"zepp_email": "me@zepp.test"}), terminal)
+        blank = Settings({"ZEPP_EMAIL": "  "}, _remembered({}), terminal)
+        self.assertEqual(
+            [s.known("zepp_email") for s in (in_env, remembered, blank)], [True, True, False]
+        )
+
     def test_the_remembered_value_is_offered_and_enter_accepts_it(self) -> None:
         script = Script()
         chosen = Settings({}, _remembered({"zepp_email": "me@zepp.test"}), script.terminal())

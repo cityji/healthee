@@ -25,37 +25,37 @@ EXPECTED_PLAN = (
     (
         "  26 Sep 11:56  Outdoor run",
         "    31:00, 2.70 km, 296 kcal, avg HR 133",
-        "    summary: import",
+        "    workout: import",
         "    route: import, 120 points",
     ),
     (
         "  02 Oct 11:56  Outdoor run",
         "    24:00, 4.01 km, 296 kcal, avg HR 133",
-        "    summary: complete (adds distance, heart rate, sport)",
+        "    workout: update (adds distance, heart rate, sport)",
         "    route: import, 300 points",
     ),
     (
         "  03 Oct 11:56  Auto-detected activity",
         "    14:00, 0.90 km, 296 kcal, avg HR 133",
-        "    summary: skip (auto-detected; the strap reports it)",
+        "    workout: skip (auto-detected; the strap reports it)",
         "  02 Oct",
     ),
     (
         "  04 Oct 11:56  Outdoor run",
         "    6:00, 2.70 km, 296 kcal, avg HR 133",
-        "    summary: skip (under 10 min; Healthee lists none)",
+        "    workout: skip (under 10 min; Healthee lists none)",
         "  03 Oct",
     ),
     (
         "  06 Oct 11:56  Strength",
         "    45:00, 296 kcal, avg HR 133",
-        "    summary: import",
+        "    workout: import",
         "  04 Oct",
     ),
     (
         "  08 Oct 11:56  Zepp type 999",
         "    20:00, 2.70 km, 296 kcal, avg HR 133",
-        "    summary: skip (Zepp type 999 has no Healthee sport)",
+        "    workout: skip (Zepp type 999 has no Healthee sport)",
         "  06 Oct",
     ),
 )
@@ -68,7 +68,7 @@ class DryRun(unittest.TestCase):
 
     def test_it_shows_the_plan_and_writes_nothing(self) -> None:
         self.assertEqual(self.result.status, 0)
-        self.assertIn("To write: 3 summaries, 2 routes.", self.result.lines)
+        self.assertIn("To write: 3 workouts, 2 routes.", self.result.lines)
         self.assertIn("Dry run: nothing was written.", self.result.lines)
         self.assertEqual(self.world.writes(), [])
         self.assertEqual(self.world.healthee.tokens, {})
@@ -113,9 +113,9 @@ class Import(unittest.TestCase):
         self.assertEqual(
             self.world.writes(), ["POST /api/workout/gps"] * 2 + ["POST /ingest/helio"]
         )
-        self.assertIn("Done: 3 summaries, 2 routes stored.", result.lines)
+        self.assertIn("Done: 3 workouts, 2 routes stored.", result.lines)
         self.assertIn("    fitness measured: VO2max 41.2 (gps_graded)", result.lines)
-        self.assertIn("  3 summaries stored, 3 days re-derived", result.lines)
+        self.assertIn("  3 workouts stored, 3 days recalculated", result.lines)
 
     def test_what_lands_in_healthee(self) -> None:
         self.world.run(answers=YES)
@@ -152,13 +152,13 @@ class Import(unittest.TestCase):
     def test_the_two_questions_are_asked_separately(self) -> None:
         result = self.world.run(answers=YES)
         questions = [prompt for prompt in result.script.asked if "Import" in prompt]
-        self.assertEqual(questions, ["Import 3 summaries? [y/N]: ", "Import 2 routes too? [y/N]: "])
+        self.assertEqual(questions, ["Import 3 workouts? [y/N]: ", "Import 2 routes too? [y/N]: "])
 
     def test_summaries_without_routes(self) -> None:
-        result = self.world.run(answers={"summaries?": "y", "routes": "n"})
+        result = self.world.run(answers={"workouts?": "y", "routes": "n"})
         self.assertEqual(self.world.writes(), ["POST /ingest/helio"])
         self.assertEqual(self.world.healthee.tracks, {})
-        self.assertIn("Done: 3 summaries, 0 routes stored.", result.lines)
+        self.assertIn("Done: 3 workouts, 0 routes stored.", result.lines)
 
     def test_declining_the_summaries_ends_it_without_a_second_question(self) -> None:
         result = self.world.run(answers={"Import": "n"})
@@ -220,6 +220,11 @@ class RunningItAgain(unittest.TestCase):
             ],
         )
 
+    def test_what_the_healthee_login_is_gets_said_only_when_it_is_asked_from_nothing(self) -> None:
+        said = 'the Healthee app on "Sign in to your server"'
+        self.assertIn(said, " ".join(self.first.text.split()))
+        self.assertNotIn("Sign in to your server", self.second.text)
+
     def test_it_goes_straight_to_the_host_that_had_the_workouts(self) -> None:
         asked = [line for line in self.second.lines if "asking" in line]
         self.assertEqual(asked, ["  Zepp: asking api-mifit-in.huami.com"])
@@ -231,7 +236,7 @@ class RunningItAgain(unittest.TestCase):
         self.assertEqual(sorted(imports), sorted(str(t) for t in (RUN, JOG, STRENGTH)))
         self.assertEqual(imports[str(RUN)]["start_ts"], RUN * 1000)
         self.assertEqual(imports[str(RUN)]["route_id"], plan.route_id(USER_ID, RUN))
-        self.assertEqual(imports[str(JOG)]["summary"], "complete")
+        self.assertEqual(imports[str(JOG)]["summary"], "update")
         self.assertEqual(imports[str(JOG)]["start_ts"], JOG_STORED * 1000)
         self.assertNotIn("route_id", imports[str(STRENGTH)])
         self.assertEqual(ledger["hosts"], {"7700112233": HOME})
