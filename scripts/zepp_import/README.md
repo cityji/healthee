@@ -14,19 +14,22 @@ install. It runs on the server, on a laptop, or in Termux on a phone.
 ## Run it
 
 ```sh
-python3 scripts/zepp-import --dry-run     # show the plan, write nothing
-python3 scripts/zepp-import               # show the plan, ask, then import
+python3 scripts/zepp-import
 ```
+
+It signs in, lists every Zepp workout it found with what it would do to each, and asks
+before it writes anything. Answer `n` and nothing is written. `--dry-run` shows the same
+list and never asks.
 
 The first run asks for five things:
 
-| Asked for          | What to type                                        |
-|--------------------|-----------------------------------------------------|
-| Healthee address   | the server name you typed into the Healthee app     |
-| Healthee email     | the email you sign in to Healthee with              |
-| Healthee password  | hidden while you type                               |
-| Zepp email         | the email on your Zepp account                      |
-| Zepp password      | hidden while you type                               |
+| Asked for          | What to type                                                |
+|--------------------|-------------------------------------------------------------|
+| Healthee address   | the server name you typed into the Healthee app             |
+| Healthee email     | the email you typed into the Healthee app (see below)       |
+| Healthee password  | the password you typed there; hidden while you type         |
+| Zepp email         | the email on your Zepp account                              |
+| Zepp password      | hidden while you type                                       |
 
 The address and the two emails are remembered. Later runs ask for the two passwords and
 let you press Enter for the rest. Passwords are never stored.
@@ -34,18 +37,39 @@ let you press Enter for the rest. Passwords are never stored.
 Run it as often as you like. A session already in Healthee is recognised and nothing is
 imported twice.
 
+## Your Healthee login
+
+The app's first screen says "Healthee has no account of its own". That is true: nobody
+runs a central Healthee account. Your own server still has a login, and this tool needs
+it. It is the email and password you typed into the app on its "Sign in to your server"
+screen. The app stays signed in afterwards, so it is easy to forget you have one. It is
+not your Zepp login.
+
+If you host the server yourself and do not remember which email you used, the server
+has it. On the machine that runs it:
+
+```sh
+docker exec healthee-db sh -c 'psql -U "$POSTGRES_USER" -d "$POSTGRES_DB" -tAc "select email from app_user where email is not null"'
+```
+
+The password is not on your server, so nothing there can show it. It is held by the
+sign-in provider the server names (the Supabase project from `docs/SELF_HOSTING.md`,
+Part 4), and a forgotten one can only be replaced there. Signing out of the app does not
+help: signing back in needs the same password.
+
 ## What the plan means
 
-Every Zepp session in the window is listed with a verdict for its summary and, where it
-has one, its route.
+Every Zepp session in the window is listed with two lines. `workout:` is the session
+itself: its time, distance, heart rate and calories. `route:` is its GPS track, shown
+where there is one.
 
-| Verdict                  | Meaning                                                      |
-|--------------------------|--------------------------------------------------------------|
-| `import`                 | Healthee does not have it. It will be written.               |
-| `complete (adds ...)`    | Healthee has this session. Only what it lacks is added.      |
-| `complete (sport was filed as X)` | The stored sport label was wrong and is corrected.  |
-| `already there`          | Nothing to do.                                               |
-| `skip (...)`             | Not imported. The reason is in the brackets.                 |
+| Verdict                         | Meaning                                                |
+|---------------------------------|--------------------------------------------------------|
+| `import`                        | Healthee does not have it. It will be written.         |
+| `update (adds ...)`             | Healthee has this session. Only what it lacks is added. |
+| `update (sport was filed as X)` | The stored sport label was wrong and is corrected.     |
+| `already there`                 | Nothing to do.                                         |
+| `skip (...)`                    | Not imported. The reason is in the brackets.           |
 
 What is skipped, and why:
 
@@ -59,14 +83,14 @@ What is skipped, and why:
 
 Two rules protect what Healthee already holds:
 
-* A stored value is never replaced. `complete` fills only fields the server reports as
+* A stored value is never replaced. `update` fills only fields the server reports as
   empty.
 * A session that overlaps one already stored is imported without its calories, because
   Healthee adds workout calories together.
 
 ## What changes in Healthee
 
-**Summaries** change the workout list, the weekly training and strength minutes, and the
+**Workouts** change the workout list, the weekly training and strength minutes, and the
 calories of the days they fall on.
 
 **Routes** add the map, and they also feed fitness. Healthee tries to measure VO2max from
@@ -74,7 +98,7 @@ each route using your strap's heart rate. A measured value replaces the estimate
 14 days, and biological age moves with it. It can go up or down. Walking is not scored.
 
 There is no endpoint that deletes a workout or a route, so this tool cannot undo an
-import. If you are unsure about the fitness effect, import summaries first with
+import. If you are unsure about the fitness effect, import the workouts first with
 `--no-routes` and add the routes in a later run.
 
 ## Options
@@ -84,7 +108,7 @@ import. If you are unsure about the fitness effect, import summaries first with
 | `--dry-run`            | Show the plan and write nothing.                             |
 | `--days N`             | Look back N days. The default is 30.                         |
 | `--since YYYY-MM-DD`   | Look back to this date, in your Healthee timezone.           |
-| `--no-routes`          | Import summaries only.                                       |
+| `--no-routes`          | Import workouts without their routes.                        |
 | `--yes`                | Import without asking, routes included.                      |
 | `--healthee-url HOST`  | Your Healthee server.                                        |
 | `--zepp-host HOST`     | Ask only this Zepp region host.                              |
@@ -121,7 +145,7 @@ out.
 * The Healthee password goes to the sign-in service your Healthee server names. The tool
   prints that host before asking for the password.
 * The Zepp session is signed out before anything is written to Healthee.
-* Writing summaries needs a device token. One is created for the run and revoked when
+* Writing workouts needs a device token. One is created for the run and revoked when
   the run ends. If a run is killed in between, the next run revokes it first.
 * Nothing is printed or stored that identifies where you ran. `--verbose` prints field
   names and types only, never a value.

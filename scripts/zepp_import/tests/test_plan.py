@@ -41,7 +41,7 @@ class VerdictWords(unittest.TestCase):
         self.assertEqual(str(Verdict.PRESENT), "already there")
         self.assertEqual(f"{Verdict.SKIP}", "skip")
         self.assertEqual(json.dumps([Verdict.IMPORT]), '["import"]')
-        self.assertEqual(Verdict("complete"), Verdict.COMPLETE)
+        self.assertEqual(Verdict("update"), Verdict.UPDATE)
 
 
 class NewSession(unittest.TestCase):
@@ -103,7 +103,7 @@ class SameSession(unittest.TestCase):
     def test_only_what_is_missing_is_added_and_under_the_stored_key(self) -> None:
         row = stored(START - 90, sport=44, lacks=("distance_m",))
         step = plan.plan_summary(workout(), [row])
-        self.assertEqual(step.verdict, Verdict.COMPLETE)
+        self.assertEqual(step.verdict, Verdict.UPDATE)
         self.assertEqual(
             step.payload, {"start_ts": (START - 90) * 1000, "distance_m": 2701.0, "sport": 1}
         )
@@ -147,8 +147,8 @@ class SameSession(unittest.TestCase):
         near = plan.plan_summary(workout(), [stored(START + 120, sport=44)])
         far = plan.plan_summary(workout(), [stored(START + 121, sport=44)])
         before = plan.plan_summary(workout(), [stored(START - 120, sport=44)])
-        self.assertEqual(near.verdict, Verdict.COMPLETE)
-        self.assertEqual(before.verdict, Verdict.COMPLETE)
+        self.assertEqual(near.verdict, Verdict.UPDATE)
+        self.assertEqual(before.verdict, Verdict.UPDATE)
         self.assertEqual(far.verdict, Verdict.IMPORT)
 
     def test_the_nearest_of_two_candidates_is_the_one_completed(self) -> None:
@@ -178,7 +178,7 @@ class SportLabel(unittest.TestCase):
         # Zepp says this session is cloud type 8, a treadmill run. The stored row says 8
         # too, which in Healthee's enum is "Pool swim": it was written in the wrong enum.
         step = plan.plan_summary(workout(cloud_type=8), [stored(START, sport=8)])
-        self.assertEqual(step.verdict, Verdict.COMPLETE)
+        self.assertEqual(step.verdict, Verdict.UPDATE)
         self.assertEqual(step.payload, {"start_ts": START * 1000, "sport": 4})
         self.assertEqual(step.reason, "sport was filed as Pool swim")
 

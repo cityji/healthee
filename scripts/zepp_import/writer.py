@@ -119,6 +119,6 @@ class Writer:
         result = self._api.push_workouts(payloads, stored=stored)
         self.outcome.days_derived = result.days_derived
         self.outcome.token_revoked = result.token_revoked
-        count = report.counted(self.outcome.summaries_stored, "summary", "summaries")
+        count = report.counted(self.outcome.summaries_stored, "workout")
         days = report.counted(result.days_derived, "day")
-        self._out(f"  {count} stored, {days} re-derived")
+        self._out(f"  {count} stored, {days} recalculated")

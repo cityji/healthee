@@ -144,7 +144,7 @@ class HealtheeApi:
         return PushResult(count, derived, token_revoked=self._revoke(token_id))
 
     def _push_chunk(self, chunk: list[Mapping[str, object]], device_token: str) -> dict:
-        step = "the workout summaries"
+        step = "the workouts"
         reply = self._session.call(
             step,
             "POST",

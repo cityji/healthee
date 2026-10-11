@@ -39,8 +39,8 @@ class Times(unittest.TestCase):
 
 class Wording(unittest.TestCase):
     def test_counts_agree_with_their_nouns(self) -> None:
-        self.assertEqual(report.to_write(1, 1), "1 summary, 1 route")
-        self.assertEqual(report.to_write(3, 0), "3 summaries, 0 routes")
+        self.assertEqual(report.to_write(1, 1), "1 workout, 1 route")
+        self.assertEqual(report.to_write(3, 0), "3 workouts, 0 routes")
         self.assertEqual(report.counted(1, "Zepp workout"), "1 Zepp workout")
         self.assertEqual(report.counted(2, "Zepp workout"), "2 Zepp workouts")
 

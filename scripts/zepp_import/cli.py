@@ -38,7 +38,9 @@ def _parser() -> argparse.ArgumentParser:
     window.add_argument("--since", metavar="YYYY-MM-DD", help="look back to this date instead")
     parser.add_argument("--dry-run", action="store_true", help="show the plan and write nothing")
     parser.add_argument("--yes", action="store_true", help="import without asking, routes included")
-    parser.add_argument("--no-routes", action="store_true", help="import summaries only")
+    parser.add_argument(
+        "--no-routes", action="store_true", help="import workouts without their routes"
+    )
     parser.add_argument("--healthee-url", metavar="HOST", help="your Healthee server")
     parser.add_argument(
         "--zepp-host", metavar="HOST", help="ask only this Zepp region host for your workouts"

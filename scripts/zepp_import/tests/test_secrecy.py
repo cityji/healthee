@@ -129,9 +129,8 @@ class NothingLeaks(unittest.TestCase):
 
     def test_an_echoed_credential_is_cut_out_of_the_servers_reason(self) -> None:
         _world, result = self.run_scenario("a server that echoes credentials")
-        self.assertIn(
-            "rejected Bearer [redacted] for [redacted]", result.text.replace("\n     ", " ")
-        )
+        said = " ".join(result.text.split())  # the reason is wrapped to the phone's width
+        self.assertIn("rejected Bearer [redacted] for [redacted]", said)
 
 
 class EachSecretGoesToOnePlace(unittest.TestCase):

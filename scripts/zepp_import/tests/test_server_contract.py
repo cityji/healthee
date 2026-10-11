@@ -17,7 +17,7 @@ import re
 import unittest
 from pathlib import Path
 
-from zepp_import import healthee_api, plan, sports, zepp_parse
+from zepp_import import failures, healthee_api, plan, sports, zepp_parse
 
 _SERVER = Path(__file__).resolve().parents[3] / "apps" / "server" / "src" / "healthee"
 
@@ -60,6 +60,25 @@ class ServerContract(unittest.TestCase):
         recorder = _SERVER.parents[3] / "apps/mobile/lib/data/gps/gps_run.dart"
         expected = f"static const maxAccuracyM = {float(zepp_parse.MAX_ACCURACY_M)};"
         self.assertIn(expected, recorder.read_text(encoding="utf-8"))
+
+    def test_the_sign_in_screen_this_tool_names_is_still_called_that(self) -> None:
+        widgets = _SERVER.parents[3] / "apps/mobile/lib/features/signin/widgets"
+        form = (widgets / "server_signin_form.dart").read_text(encoding="utf-8")
+        self.assertIn(f"'{failures.SIGN_IN_SCREEN}'", form)
+
+    def test_what_the_readme_says_about_the_healthee_login_is_still_true(self) -> None:
+        repo = _SERVER.parents[3]
+        readme = (Path(__file__).resolve().parents[1] / "README.md").read_text(encoding="utf-8")
+        welcome = repo / "apps/mobile/lib/features/welcome/welcome_screen.dart"
+        quoted = "Healthee has no account of its own"
+        self.assertIn(quoted, readme)
+        self.assertIn(quoted, welcome.read_text(encoding="utf-8"))
+        # The email lookup it gives: that container, that table, that column.
+        self.assertIn("docker exec healthee-db ", readme)
+        compose = repo / "infra/docker/docker-compose.prod.yml"
+        self.assertIn("container_name: healthee-db", compose.read_text(encoding="utf-8"))
+        table = _source("db/schema.sql").split("CREATE TABLE IF NOT EXISTS app_user (")[1]
+        self.assertIn("email ", table.split(");")[0])
 
     def test_strength_sessions_map_to_codes_the_weekly_target_counts(self) -> None:
         strength = _assigned(_source("read/fitness.py"), "_STRENGTH_SPORTS")

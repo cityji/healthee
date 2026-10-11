@@ -5,7 +5,7 @@ Six Zepp sessions over the last fifteen days, one of each kind the plan treats d
 | name     | what it is                         | what should happen                        |
 |----------|------------------------------------|-------------------------------------------|
 | RUN      | a 31-minute run with a route       | summary imported, route imported          |
-| JOG      | a 24-minute run with a route, that | summary COMPLETED (distance, sport), route |
+| JOG      | a 24-minute run with a route, that | summary UPDATED (distance, sport), route   |
 |          | Healthee holds as an "Activity"    | imported                                  |
 | AUTO     | an auto-detected bout              | skipped                                   |
 | SHORT    | a 6-minute run with a route        | skipped, and its route with it            |
