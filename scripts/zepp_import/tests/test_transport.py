@@ -96,6 +96,7 @@ class Transport(unittest.TestCase):
         with self.assertRaises(TransportError) as raised:
             transport.send("GET", "http://127.0.0.1:1/secret-path?token=abc", timeout_s=2.0)
         self.assertEqual(raised.exception.host, "127.0.0.1")
+        self.assertEqual(raised.exception.kind, "connection refused")
         self.assertNotIn("secret-path", str(raised.exception))
         self.assertNotIn("abc", str(raised.exception))
 

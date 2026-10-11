@@ -51,7 +51,14 @@ def duration(seconds: int) -> str:
 
 def wrapped(text: str, indent: str = _DETAIL, hang: str = "") -> str:
     """`text` folded to the phone's width. `hang` further indents continuation lines."""
-    return textwrap.fill(text, width=WIDTH, initial_indent=indent, subsequent_indent=indent + hang)
+    return textwrap.fill(
+        text,
+        width=WIDTH,
+        initial_indent=indent,
+        subsequent_indent=indent + hang,
+        break_on_hyphens=False,  # `--env-file` and a host name stay in one piece
+        break_long_words=False,  # and so does a shape somebody will copy
+    )
 
 
 def counted(count: int, noun: str, plural: str = "") -> str:
