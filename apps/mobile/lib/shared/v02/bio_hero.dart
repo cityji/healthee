@@ -22,7 +22,7 @@
 /// .model-label           { font-size:9px; margin-top:14px; opacity:.8; gap:5px; }
 /// ```
 ///
-/// **This card has its own dark surface in both themes**, which is why
+/// **This card has its own surface in both themes**, which is why
 /// `bioBackground` / `bioInk` are tokens rather than `surface` / `ink`. Nothing
 /// inside it may reach for the page's ink.
 ///
@@ -99,6 +99,7 @@ class BioHero extends StatelessWidget {
     this.art,
     this.artFillsCard = false,
     this.centred = false,
+    this.frameless = false,
     super.key,
   });
 
@@ -260,6 +261,9 @@ class BioHero extends StatelessWidget {
   /// every caller written against `richer.css` alone is unchanged.
   final bool centred;
 
+  /// Today's hero (`proposal.css` `.p-hero`): no edge, no rule, badged terms.
+  final bool frameless;
+
   @override
   Widget build(BuildContext context) {
     final colors = context.colors;
@@ -282,7 +286,12 @@ class BioHero extends StatelessWidget {
   ) {
     return Container(
       clipBehavior: Clip.antiAlias,
-      decoration: bioHeroSkin(colors, radius: radius, lineMix: lineMix),
+      decoration: bioHeroSkin(
+        colors,
+        radius: radius,
+        lineMix: lineMix,
+        framed: !frameless,
+      ),
       child: Stack(
         children: <Widget>[
           // FIRST, so it paints behind the content, and POSITIONED, so the
@@ -346,12 +355,20 @@ class BioHero extends StatelessWidget {
       SizedBox(
         height: caption != null && instrument == null ? ruleGap : dividerGap,
       ),
-      SizedBox(
-        height: hairline,
-        child: ColoredBox(color: rule),
-      ),
+      if (!frameless)
+        SizedBox(
+          height: hairline,
+          child: ColoredBox(color: rule),
+        ),
       const SizedBox(height: statsGap),
-      _inset(BioStatsRow(stats: stats, ink: ink, centred: centred)),
+      _inset(
+        BioStatsRow(
+          stats: stats,
+          ink: ink,
+          centred: centred,
+          divider: frameless ? rule : null,
+        ),
+      ),
     ],
     if (infoKey == null)
       if (modelLabel case final String label) ...<Widget>[

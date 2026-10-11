@@ -28,108 +28,9 @@ import 'package:healthee/core/theme/shapes.dart';
 import 'package:healthee/core/theme/tokens.dart';
 import 'package:healthee/core/theme/type_scale_bio.dart';
 import 'package:healthee/data/honesty/last_known.dart';
-import 'package:healthee/shared/instrument/h_tap.dart';
 import 'package:healthee/shared/v02/bio_display.dart';
 
-/// One of the statistics under the hero's rule.
-@immutable
-class BioStat {
-  /// Builds a statistic: a small [label] over a larger [value].
-  const BioStat(this.label, this.value, {this.onOpen});
-
-  /// `.bio-bottom span`.
-  final String label;
-
-  /// `.bio-bottom strong`.
-  final String value;
-
-  /// Where this term goes. `.bio-bottom > a` — both terms are anchors in the
-  /// prototype, one to `#fitness` and one to `#sleep`. Null draws the term with
-  /// no tap rather than a control that leads nowhere.
-  final VoidCallback? onOpen;
-}
-
-/// `.bio-bottom` — the model's terms, side by side.
-class BioStatsRow extends StatelessWidget {
-  /// [ink] is the hero's own ink; see the library docstring.
-  const BioStatsRow({
-    required this.stats,
-    required this.ink,
-    this.centred = false,
-    super.key,
-  });
-
-  /// `.bio-bottom { gap: 16px }`.
-  static const double spacing = 16;
-
-  /// `.bio-bottom span { opacity: .85 }`.
-  static const double labelOpacity = 0.85;
-
-  /// The terms, in the payload's order.
-  final List<BioStat> stats;
-
-  /// The hero's ink.
-  final Color ink;
-
-  /// Whether the columns are centred, under a centred card.
-  ///
-  /// **The value is drawn ABOVE the label, which the prototype's `.bio-bottom`
-  /// does the other way round.** Two labels of different lengths — `Fitness
-  /// contribution` fits one line, `Sleep duration contribution` does not at
-  /// 320 — put the two figures on different baselines, which is the misalignment
-  /// this fixes. Above the label, the figures line up whatever the words do,
-  /// and the row reads as two small numbers under the big one.
-  final bool centred;
-
-  @override
-  Widget build(BuildContext context) => Row(
-    crossAxisAlignment: CrossAxisAlignment.start,
-    children: <Widget>[
-      for (var i = 0; i < stats.length; i++) ...<Widget>[
-        if (i > 0) const SizedBox(width: spacing),
-        Expanded(
-          child: HTap(
-            onTap: stats[i].onOpen,
-            semanticLabel: '${stats[i].label} ${stats[i].value}',
-            child: Column(
-              crossAxisAlignment: centred
-                  ? CrossAxisAlignment.center
-                  : CrossAxisAlignment.start,
-              mainAxisSize: MainAxisSize.min,
-              children: <Widget>[
-                if (centred) ...<Widget>[
-                  Text(
-                    stats[i].value,
-                    textAlign: TextAlign.center,
-                    style: BioType.bioStat.copyWith(color: ink),
-                  ),
-                  Text(
-                    stats[i].label,
-                    textAlign: TextAlign.center,
-                    style: BioType.bioStatLabel.copyWith(
-                      color: ink.withValues(alpha: ink.a * labelOpacity),
-                    ),
-                  ),
-                ] else ...<Widget>[
-                  Text(
-                    stats[i].label,
-                    style: BioType.bioStatLabel.copyWith(
-                      color: ink.withValues(alpha: ink.a * labelOpacity),
-                    ),
-                  ),
-                  Text(
-                    stats[i].value,
-                    style: BioType.bioStat.copyWith(color: ink),
-                  ),
-                ],
-              ],
-            ),
-          ),
-        ),
-      ],
-    ],
-  );
-}
+export 'package:healthee/shared/v02/bio_stats.dart';
 
 /// What stands in the figure's place when the server refused the number.
 ///
@@ -325,23 +226,31 @@ class BioModelLabel extends StatelessWidget {
   }
 }
 
-/// The hero's own surface: its dark ground inside the app's continuous corner.
+/// The hero's own surface: its ground inside the app's continuous corner.
 ///
 /// [lineMix] fades the edge toward the page rather than fading the edge itself,
 /// so a hero on a light page keeps a visible boundary and one on a dark page
 /// does not draw a second frame around the card behind it.
+///
+/// [framed] false draws the ground with no edge at all: the redesigned Today
+/// hero (`design/mobile-preview/proposal.css`, `.p-hero .bio-hero { border: 0 }`),
+/// where the tinted ground is the boundary and a hairline around it read as a
+/// frame the owner called odd.
 ShapeDecoration bioHeroSkin(
   HealtheeColors colors, {
   required double radius,
   required double lineMix,
+  bool framed = true,
 }) => ShapeDecoration(
   color: colors.bioBackground,
   shape: hSquircle(
     radius,
-    side: BorderSide(
-      color: Color.lerp(colors.bioLine, colors.surface, 1 - lineMix)!,
-      width: hairline,
-    ),
+    side: framed
+        ? BorderSide(
+            color: Color.lerp(colors.bioLine, colors.surface, 1 - lineMix)!,
+            width: hairline,
+          )
+        : BorderSide.none,
   ),
 );
 

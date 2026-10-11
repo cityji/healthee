@@ -120,6 +120,8 @@ class TodayBioHeroWithheld extends ConsumerWidget {
         asOf: held?.day,
       ),
       caption: caption(withheld, exclusions),
+      // Same ground as the live hero, which has no edge (`today_hero.dart`).
+      frameless: true,
     );
   }
 

@@ -20,7 +20,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:healthee/core/theme/app_theme.dart';
-import 'package:healthee/core/theme/dimensions.dart';
 import 'package:healthee/data/store/local_store.dart';
 import 'package:healthee/shared/v02/bio_hero.dart';
 import 'package:healthee/shared/v02/instruments/age_scale.dart';
@@ -48,9 +47,10 @@ void main() {
     ) async {
       await pumpHeroAt(tester, store, 390);
       final hero = tester.getRect(find.byType(BioHero));
-      // `inset: 0` inside the border: the field's box IS the card's, so it
-      // cannot be the thing that decided how tall the card is.
-      expect(tester.getRect(find.byType(BioHalo)), hero.deflate(hairline));
+      // `inset: 0`: the field's box IS the card's, so it cannot be the thing
+      // that decided how tall the card is. Today's hero has no border
+      // (`.p-hero .bio-hero { border: 0 }`), so there is nothing to inset by.
+      expect(tester.getRect(find.byType(BioHalo)), hero);
     });
 
     testWidgets('IT PAINTS BEHIND THE CONTENT — the stack order says so', (
