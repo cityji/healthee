@@ -22,12 +22,12 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:healthee/data/store/local_store.dart';
 import 'package:healthee/features/today/steps_plateau.dart';
 import 'package:healthee/features/today/today_labels.dart';
-import 'package:healthee/features/today/v02/today_hero.dart';
+import 'package:healthee/features/today/v02/today_key_numbers.dart';
 import 'package:healthee/shared/metric_info/metric_info_sheet.dart';
 import 'package:healthee/shared/v02/bio_hero.dart';
 import 'package:healthee/shared/v02/bio_hero_parts.dart';
 import 'package:healthee/shared/v02/instruments/bio_halo.dart';
-import 'package:healthee/shared/v02/summary_tile.dart';
+import 'package:healthee/shared/v02/key_number_card.dart';
 
 import '../_today_stubs.dart';
 import '_today_host.dart';
@@ -198,12 +198,12 @@ void main() {
     });
   });
 
-  group('the three summary tiles', () {
-    testWidgets('A TILE WITH NO READING IS NAMED, HELD AND VISIBLY EMPTY', (
+  group('the three key numbers', () {
+    testWidgets('A CARD WITH NO READING IS NAMED, HELD AND VISIBLY EMPTY', (
       tester,
     ) async {
-      // Never a blank and never a zero: `—` with `Not measured` under it, in a
-      // tile that keeps its slot so the row does not change shape.
+      // Never a blank and never a zero: `—` with `Not measured.` under it, in a
+      // card that keeps its slot so the stack does not change shape.
       tall(tester);
       await tester.pumpWidget(
         todayHost(
@@ -219,13 +219,17 @@ void main() {
       );
       await tester.pumpAndSettle();
 
-      final tiles = find.byType(SummaryTile);
-      expect(tiles, findsNWidgets(3));
-      expect(
-        find.descendant(of: tiles, matching: find.text('Not measured')),
-        findsWidgets,
+      final cards = find.byType(KeyNumberCard);
+      expect(cards, findsNWidgets(3));
+      final empty = find.byWidgetPredicate(
+        (widget) =>
+            widget is KeyNumberCard &&
+            widget.value == '—' &&
+            widget.lead == 'Not measured.',
       );
-      expect(find.byType(TodaySummaryTiles), findsOneWidget);
+      // Recovery and movement have no reading in this payload.
+      expect(empty, findsNWidgets(2));
+      expect(find.byType(TodayKeyNumbers), findsOneWidget);
     });
 
     testWidgets('THE STEP TARGET IS THE NOTE’S BAND, NEVER A GUESS', (
@@ -240,29 +244,20 @@ void main() {
       //
       // `steps_plateau.dart` supplies one now, and it is DERIVED: the age-banded
       // plateau `steps_mortality` publishes, whose top is 10,000 under 60 and
-      // 8,000 at or over it. The card may draw a bar because the band is the
+      // 8,000 at or over it. The card may name it because the band is the
       // note's, and `steps_plateau_test.dart` asserts the transcription against
       // the note file itself.
       tall(tester);
       await tester.pumpWidget(todayHost(store));
       await tester.pumpAndSettle();
 
-      final movement = find.byWidgetPredicate(
-        (widget) => widget is SummaryTile && widget.title == 'Movement',
-      );
-      expect(movement, findsOneWidget);
-      expect(
-        find.descendant(of: movement, matching: find.byType(TileMeter)),
-        findsOneWidget,
+      final movement = tester.widget<KeyNumberCard>(
+        find.byWidgetPredicate(
+          (widget) => widget is KeyNumberCard && widget.name == 'Movement',
+        ),
       );
       // The fixture's owner is 32, so the band's top is the under-60 one.
-      expect(
-        find.descendant(
-          of: movement,
-          matching: find.textContaining('of ${commaGrouped(10000)}'),
-        ),
-        findsOneWidget,
-      );
+      expect(movement.line, contains('the ${commaGrouped(10000)} plateau'));
     });
 
     testWidgets('AN UNKNOWN AGE MEANS NO BAND, AND SO NO METER', (
@@ -278,12 +273,12 @@ void main() {
       expect(stepsPlateauTop(59.9), kStepsPlateauTopUnder60);
     });
 
-    testWidgets('AND THE TILE ITSELF DRAWS NO BAR FOR AN OWNER WITH NO AGE', (
+    testWidgets('AND THE CARD ITSELF NAMES NO PLATEAU FOR AN OWNER WITH NO AGE', (
       tester,
     ) async {
       // **The function's rule, asserted where it is spent.** The unit test
-      // above proves `stepsPlateauTop` refuses; this proves the tile asks it.
-      // A tile that hard-coded 10,000 would agree with the derived answer for
+      // above proves `stepsPlateauTop` refuses; this proves the card asks it.
+      // A card that hard-coded 10,000 would agree with the derived answer for
       // every owner under 60 — including this suite's own fixture, who is 36 —
       // so the only owner who can tell the two apart is one with no age at all.
       tall(tester);
@@ -303,19 +298,20 @@ void main() {
       );
       await tester.pumpAndSettle();
 
-      final movement = find.byWidgetPredicate(
-        (widget) => widget is SummaryTile && widget.title == 'Movement',
-      );
-      expect(movement, findsOneWidget);
-      expect(
-        find.descendant(of: movement, matching: find.byType(TileMeter)),
-        findsNothing,
-        reason: 'no band was published, so there is nothing to draw against',
+      final movement = tester.widget<KeyNumberCard>(
+        find.byWidgetPredicate(
+          (widget) => widget is KeyNumberCard && widget.name == 'Movement',
+        ),
       );
       expect(
-        find.descendant(of: movement, matching: find.textContaining('% of')),
-        findsNothing,
-        reason: 'and no percentage of a denominator nobody supplied',
+        movement.line,
+        isNull,
+        reason: 'no band was published, so there is no plateau to name',
+      );
+      expect(
+        movement.lead,
+        isNull,
+        reason: 'and no "to go" against a denominator nobody supplied',
       );
     });
   });

@@ -37,7 +37,7 @@ import 'package:healthee/features/today/today_sections.dart';
 import 'package:healthee/features/today/v02/date_calendar_sheet.dart';
 import 'package:healthee/features/today/v02/date_control.dart';
 import 'package:healthee/features/today/v02/today_header.dart';
-import 'package:healthee/features/today/v02/today_hero.dart';
+import 'package:healthee/features/today/v02/today_key_numbers.dart';
 import 'package:healthee/features/today/widgets/data_health_section.dart';
 import 'package:healthee/shared/page_section.dart';
 import 'package:healthee/shared/states/reading_view.dart';
@@ -171,7 +171,7 @@ void main() {
         isTrue,
         reason: 'the biological age, as of that day',
       );
-      expect(_has<TodaySummaryTiles>(past), isTrue, reason: 'the tiles');
+      expect(_has<TodayKeyNumbers>(past), isTrue, reason: 'the tiles');
     });
 
     test('AND IT IS THAT DAY’S CHAPTERS, NOT THE DATED-HISTORY ONES', () {
@@ -233,7 +233,7 @@ void main() {
       final today = _sectionsFor(todayDate);
       expect(_has<ReadingView<BiologicalAge>>(today), isTrue);
       expect(_has<ChapterHeading>(today), isTrue);
-      expect(_has<TodaySummaryTiles>(today), isTrue);
+      expect(_has<TodayKeyNumbers>(today), isTrue);
     });
 
     testWidgets('the header reads the day being shown', (tester) async {

@@ -102,7 +102,7 @@ class RangeBar extends StatelessWidget {
                 height: markHeight,
                 child: CustomPaint(
                   painter: _RangePainter(
-                    track: colors.line,
+                    track: colors.surface2,
                     band: family.withValues(alpha: bandAlpha),
                     mark: colors.ink,
                     ring: colors.surface,
