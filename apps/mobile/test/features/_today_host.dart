@@ -106,18 +106,14 @@ Widget todayHost(
     signedIn: signedIn,
     sleep: sleep,
     consistency: consistency,
-    lastKnownBioAge: lastKnownBioAge, suggestedPrograms: suggestedPrograms,
+    lastKnownBioAge: lastKnownBioAge,
+    suggestedPrograms: suggestedPrograms,
     history: history,
     child: MaterialApp(
       theme: themeOverride ?? AppTheme.light,
-      // **Reduced motion, always.** Today's hero carries `BioHalo`, an ambient
-      // particle field on a 30 fps ticker — a screen containing a running one
-      // never becomes idle, so every `pumpAndSettle` in every suite that pumps
-      // this screen would time out. `bio_halo.dart` reads
-      // `MediaQuery.disableAnimations` and stops dead under it, which is the
-      // same path a phone with the accessibility setting on takes. The halo's
-      // own motion has its own suite (`test/shared/instruments/`), against a
-      // pumped clock rather than a settled tree.
+      // **Reduced motion, always.** Today's hero carries `AgeOrb`, a particle
+      // field on a ticker, and a running one times out every `pumpAndSettle`.
+      // `age_orb.dart` holds still under `disableAnimations`, as a phone would.
       builder: (context, child) => MediaQuery(
         data: MediaQuery.of(context).copyWith(disableAnimations: reducedMotion),
         child: child!,
@@ -200,7 +196,11 @@ Widget _scoped(
       programFeedProvider.overrideWith(
         (ref) => Stream.value(
           ServerSnapshot(
-            ProgramFeed(active: null, suggested: suggestedPrograms, recent: const []),
+            ProgramFeed(
+              active: null,
+              suggested: suggestedPrograms,
+              recent: const [],
+            ),
             fetchedAt: now,
           ),
         ),

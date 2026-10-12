@@ -1,19 +1,15 @@
 /// Today's age hero on the page itself, WHOOP style: no card, no edge, and the
-/// model's terms as two coloured figures; the framed hero elsewhere keeps its
-/// edge and its rule.
+/// model's terms as two coloured figures.
 library;
 
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:healthee/core/theme/app_theme.dart';
-import 'package:healthee/core/theme/dimensions.dart';
 import 'package:healthee/core/theme/tokens.dart';
 import 'package:healthee/data/models/biological_age.dart';
 import 'package:healthee/features/today/v02/today_hero.dart';
 import 'package:healthee/shared/reveal_once.dart';
 import 'package:healthee/shared/v02/age_orb_hero.dart';
-import 'package:healthee/shared/v02/bio_hero.dart';
-import 'package:healthee/shared/v02/bio_hero_parts.dart';
 
 /// Invented numbers, in the payload's own shape.
 BiologicalAge _age({
@@ -35,13 +31,6 @@ Widget _host(Widget child, ThemeData theme) => MaterialApp(
     body: SingleChildScrollView(child: SizedBox(width: 390, child: child)),
   ),
 );
-
-ShapeBorder _shapeOf(WidgetTester tester, Finder hero) {
-  final container = tester.widget<Container>(
-    find.descendant(of: hero, matching: find.byType(Container)).first,
-  );
-  return (container.decoration! as ShapeDecoration).shape;
-}
 
 void main() {
   for (final MapEntry<String, ThemeData> theme in <String, ThemeData>{
@@ -70,35 +59,10 @@ void main() {
           .widgetList<DecoratedBox>(
             find.descendant(of: hero, matching: find.byType(DecoratedBox)),
           )
-          .where(
-            (box) => <Color?>[
-              colors.surface,
-              colors.bioBackground,
-            ].contains(fill(box.decoration)),
-          );
+          .where((box) => fill(box.decoration) == colors.surface);
       expect(grounds, isEmpty, reason: 'the page is the ground');
     });
   }
-
-  testWidgets('a framed hero keeps its edge and its rule', (tester) async {
-    await tester.pumpWidget(
-      _host(
-        const BioHero(
-          eyebrow: 'VO₂max',
-          value: '41',
-          stats: <BioStat>[BioStat('Trend', '+1.0')],
-        ),
-        AppTheme.light,
-      ),
-    );
-    final shape = _shapeOf(tester, find.byType(BioHero)) as OutlinedBorder;
-    expect(shape.side.width, hairline);
-    final rule = tester
-        .widgetList<SizedBox>(find.byType(SizedBox))
-        .where((box) => box.child is ColoredBox);
-    expect(rule.single.height, hairline);
-    expect(rule.single.width, isNull, reason: 'the rule spans the card');
-  });
 
   testWidgets('each term is named, and older is the amber side', (
     tester,

@@ -11,6 +11,7 @@ library;
 
 import 'package:flutter/material.dart';
 import 'package:healthee/core/theme/tokens.dart';
+import 'package:healthee/core/theme/type_ladder.dart';
 import 'package:healthee/core/theme/type_scale_keys.dart';
 import 'package:healthee/data/honesty/disclosure.dart';
 import 'package:healthee/shared/instrument/h_tap.dart';
@@ -289,7 +290,7 @@ class AgeOrbHero extends StatelessWidget {
             Text(
               stat.label.toUpperCase(),
               textAlign: TextAlign.center,
-              style: _caps.copyWith(color: colors.ink2, fontSize: 10.5),
+              style: TypeLadder.label.copyWith(color: colors.ink2),
             ),
           ],
         ),

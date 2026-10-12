@@ -211,14 +211,9 @@ void paintScrubBubble(
   if (box.bubble.height <= 0) {
     return;
   }
-  final painter = chartLabel(
-    text,
-    ink.labelStyle.copyWith(
-      color: ink.surface,
-      fontWeight: FontWeight.w700,
-      height: 1.2,
-    ),
-  );
+  // Plain micro, like every chart label: the ladder sets it at 400 on its own
+  // 14 px line, and the legacy bubbles (`h_area`, `h_debt_bars`) match.
+  final painter = chartLabel(text, ink.labelStyle.copyWith(color: ink.surface));
   final width = painter.width + 14;
   final height = painter.height + 6;
   final left = (anchorX - width / 2).clamp(0.0, box.bubble.right - width);

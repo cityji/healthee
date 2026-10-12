@@ -122,7 +122,7 @@ class _AgeOrbState extends State<AgeOrb> with SingleTickerProviderStateMixin {
         painter: OrbPainter(
           rim: context.hues.fitness,
           ground: colors.bg,
-          spark: colors.bioInk,
+          spark: colors.ink,
           dark: dark,
         ),
       ),

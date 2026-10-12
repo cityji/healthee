@@ -117,7 +117,7 @@ void main() {
     });
   });
 
-  group('PanelHead — 17px icon, 8px gaps, 13px/700 title', () {
+  group('PanelHead — 17px icon, 8px gaps, the calloutStrong title', () {
     testWidgets('the icon is 17 and the title starts 8 after it', (
       tester,
     ) async {
@@ -132,21 +132,25 @@ void main() {
       expect(title.left - icon.right, 8);
     });
 
-    testWidgets('the title is 13px at weight 700', (tester) async {
+    testWidgets('the title is 13px at weight 600', (tester) async {
       await pumpV02(tester, const PanelHead(title: 'Resting heart rate'));
       final style = tester.widget<Text>(find.text('Resting heart rate')).style!;
       expect(style.fontSize, 13);
-      expect(style.fontWeight, FontWeight.w700);
+      expect(style.fontWeight, FontWeight.w600);
       expect(style.color, kColors.ink);
     });
 
-    testWidgets('the action is 11px and no shorter than 28', (tester) async {
+    testWidgets('the action is a 12px caption and no shorter than 28', (
+      tester,
+    ) async {
       await pumpV02(
         tester,
         const PanelHead(title: 'Steps', actionLabel: 'History'),
       );
       final button = tester.widget<TextButton>(find.byType(TextButton));
-      expect(button.style!.textStyle!.resolve(<WidgetState>{})!.fontSize, 11);
+      final label = button.style!.textStyle!.resolve(<WidgetState>{})!;
+      expect(label.fontSize, 12);
+      expect(label.fontWeight, FontWeight.w400);
       expect(
         tester.getRect(find.byType(TextButton)).height,
         greaterThanOrEqualTo(28),
@@ -190,7 +194,7 @@ void main() {
       );
     });
 
-    testWidgets('the value is 24px and the meta 8.5px, 10 and 4 apart', (
+    testWidgets('the value is 28px and the meta 12px, 10 and 24 apart', (
       tester,
     ) async {
       await pumpV02(
@@ -210,11 +214,8 @@ void main() {
       // meta sits on the same baseline as a tile that has one. Three tiles of
       // different internal rhythm in one row read as three kinds of thing.
       expect(meta.top - value.bottom, closeTo(24, 0.5));
-      expect(tester.widget<Text>(find.text('8,214')).style!.fontSize, 24);
-      expect(
-        tester.widget<Text>(find.text('goal 10,000')).style!.fontSize,
-        8.5,
-      );
+      expect(tester.widget<Text>(find.text('8,214')).style!.fontSize, 28);
+      expect(tester.widget<Text>(find.text('goal 10,000')).style!.fontSize, 12);
     });
 
     testWidgets('the micro-track is 5 high, 14 down, gapped 3, first 4 solid', (

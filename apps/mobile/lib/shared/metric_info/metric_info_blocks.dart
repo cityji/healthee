@@ -51,11 +51,11 @@ class InfoBlock extends StatelessWidget {
           children: <Widget>[
             Icon(icon, size: 15, color: accent),
             const SizedBox(width: Insets.sm),
-            Text(label, style: HType.label(accent, tracking: 0.1)),
+            Flexible(child: Text(label, style: HType.label(accent))),
           ],
         ),
         const SizedBox(height: 7),
-        Text(body, style: HType.sans(colors.ink, size: 14.5, height: 1.55)),
+        Text(body, style: HType.sans(colors.ink, size: 14.5)),
       ],
     );
   }
@@ -102,16 +102,13 @@ class InfoLines extends StatelessWidget {
           children: <Widget>[
             Icon(icon, size: 15, color: accent),
             const SizedBox(width: Insets.sm),
-            Text(label, style: HType.label(accent, tracking: 0.1)),
+            Flexible(child: Text(label, style: HType.label(accent))),
           ],
         ),
         const SizedBox(height: 7),
         for (var i = 0; i < lines.length; i++) ...<Widget>[
           if (i > 0) const SizedBox(height: lineGap),
-          Text(
-            lines[i],
-            style: HType.sans(colors.ink, size: 14.5, height: 1.55),
-          ),
+          Text(lines[i], style: HType.sans(colors.ink, size: 14.5)),
         ],
       ],
     );
@@ -156,32 +153,26 @@ class DisclosureBlock extends StatelessWidget {
           children: <Widget>[
             Icon(SolarIconsOutline.infoCircle, size: 15, color: accent),
             const SizedBox(width: Insets.sm),
-            Text(label, style: HType.label(accent, tracking: 0.1)),
+            Flexible(child: Text(label, style: HType.label(accent))),
           ],
         ),
         for (final disclosure in disclosures) ...<Widget>[
           const SizedBox(height: 9),
           if (disclosure.term case final String term) ...<Widget>[
-            Text(term.toUpperCase(), style: HType.label(colors.ink3, tracking: 0.12)),
+            Text(term.toUpperCase(), style: HType.label(colors.ink3)),
             const SizedBox(height: 5),
           ],
-          Text(
-            disclosure.message,
-            style: HType.sans(colors.ink, size: 14.5, height: 1.55),
-          ),
+          Text(disclosure.message, style: HType.sans(colors.ink, size: 14.5)),
           // The absent terms a composite names inside its own withheld block.
           // They are the "what would bring it back" half and must not be
           // flattened into the sentence above them.
           for (final term in disclosure.terms) ...<Widget>[
             const SizedBox(height: 9),
             if (term.term case final String name) ...<Widget>[
-              Text(name.toUpperCase(), style: HType.label(colors.ink3, tracking: 0.12)),
+              Text(name.toUpperCase(), style: HType.label(colors.ink3)),
               const SizedBox(height: 5),
             ],
-            Text(
-              term.message,
-              style: HType.sans(colors.ink, size: 14.5, height: 1.55),
-            ),
+            Text(term.message, style: HType.sans(colors.ink, size: 14.5)),
           ],
         ],
       ],
@@ -225,7 +216,7 @@ class NotCoveredNote extends StatelessWidget {
         Expanded(
           child: Text(
             'Not covered by those sources: $text',
-            style: HType.sans(colors.ink3, size: 11.5, height: 1.45),
+            style: HType.sans(colors.ink3, size: 11.5),
           ),
         ),
       ],

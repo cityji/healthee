@@ -30,7 +30,11 @@ import 'package:solar_icons/solar_icons.dart';
 /// A connective sentence, hung off a vertical rule.
 class ContextBridge extends StatelessWidget {
   /// Builds a bridge around [child], usually a `Text`.
-  const ContextBridge({required this.child, this.leadIn = PageSpacing.block, super.key});
+  const ContextBridge({
+    required this.child,
+    this.leadIn = PageSpacing.block,
+    super.key,
+  });
 
   /// Builds a bridge carrying one sentence, styled as `.context-bridge p`.
   ContextBridge.text(String text, {this.leadIn = PageSpacing.block, super.key})
@@ -169,10 +173,14 @@ class _BridgeLink extends StatelessWidget {
                 child: Row(
                   mainAxisSize: MainAxisSize.min,
                   children: <Widget>[
-                    Text(
-                      label,
-                      style: TypeScale.textButton.copyWith(
-                        color: context.family,
+                    // Flexible: at 320 a long label wraps inside its span
+                    // rather than running past the paragraph's edge.
+                    Flexible(
+                      child: Text(
+                        label,
+                        style: TypeScale.textButton.copyWith(
+                          color: context.family,
+                        ),
                       ),
                     ),
                     Icon(
@@ -197,8 +205,6 @@ class _BridgeText extends StatelessWidget {
   final String text;
 
   @override
-  Widget build(BuildContext context) => Text(
-    text,
-    style: TypeScale.bridge.copyWith(color: context.colors.ink2),
-  );
+  Widget build(BuildContext context) =>
+      Text(text, style: TypeScale.bridge.copyWith(color: context.colors.ink2));
 }

@@ -349,10 +349,7 @@ class _Expanded extends StatelessWidget {
       children: [
         if (rec.rationale case final String why) ...[
           const SizedBox(height: 10),
-          GroundedProse(
-            text: why,
-            style: HType.sans(colors.ink2, size: 13, height: 1.5),
-          ),
+          GroundedProse(text: why, style: HType.sans(colors.ink2, size: 13)),
         ],
         if (rec.expectedEffect case final String effect) ...[
           const SizedBox(height: 10),
@@ -370,7 +367,7 @@ class _Expanded extends StatelessWidget {
                 Expanded(
                   child: GroundedProse(
                     text: effect,
-                    style: HType.sans(colors.ink3, size: 11.5, height: 1.4),
+                    style: HType.sans(colors.ink3, size: 11.5),
                   ),
                 ),
               ],

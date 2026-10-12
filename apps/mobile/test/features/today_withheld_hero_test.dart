@@ -29,7 +29,6 @@ import 'package:healthee/shared/v02/age_orb_hero.dart';
 import 'package:healthee/shared/v02/bio_hero_parts.dart';
 import 'package:healthee/shared/v02/instruments/age_orb.dart';
 import 'package:healthee/shared/v02/instruments/age_slider.dart';
-import 'package:healthee/shared/v02/instruments/bio_halo.dart';
 import 'package:healthee/shared/v02/withheld_panel.dart';
 
 import '../_today_stubs.dart';
@@ -215,9 +214,13 @@ void main() {
       await tester.pump();
       await tester.pump(const Duration(milliseconds: 200));
 
-      expect(find.byType(BioHalo), findsNothing);
+      expect(
+        tester.widget<AgeOrb>(find.byType(AgeOrb)).turning,
+        isFalse,
+        reason: 'the refused hero holds its orb still',
+      );
       // The observable behind the decision: with motion allowed, a screen
-      // carrying a live halo never goes idle. This one does — so there is no
+      // carrying a turning orb never goes idle. This one does — so there is no
       // ambient field turning around a number that is not there.
       var settled = true;
       try {

@@ -1,44 +1,26 @@
-/// The hero's skin, and the two pieces under its rule.
+/// What the biological-age figure becomes when the server refused the number.
 ///
-/// Split out of `bio_hero.dart` at the 400-line gate (Standards §1). They are
-/// the things the hero draws that are **not** the figure: its own surface, the
-/// contributions grid, and the line naming the model. Both are public because the hero is not
-/// the only card that will carry a footer of terms — the age-waterfall screen
-/// shows the same pair — and a second copy of either is a second opinion about
-/// how a model names itself.
+/// What is left of the old bio hero's parts file: the hero itself, its halo,
+/// skin and model label are gone, and only the withheld figure is still drawn
+/// (`today_hero_withheld.dart` hands it to the orb hero).
 ///
-/// ```css
-/// .bio-bottom       { display:grid; grid-template-columns:1fr 1fr; gap:16px; }
-/// .bio-bottom span  { font-size:10px; opacity:.85; }
-/// .bio-bottom strong{ font-size:17px; font-weight:600; }
-/// .model-label      { font-size:9px; margin-top:14px; opacity:.8; gap:5px; }
-/// .model-label .icon{ width:11px; height:11px; }
-/// ```
-///
-/// **Both take the hero's ink as a parameter, which is not a hole in the
-/// no-`Color` rule.** The hero card has its own dark surface in both themes
-/// (`bioBackground` / `bioInk` are tokens for exactly that reason), so nothing
-/// inside it may reach for the page's ink — and these two are inside it. The
-/// colour is the hero's, handed to its own parts, not a hue a call site chose.
+/// **It takes the ink as a parameter, which is not a hole in the no-`Color`
+/// rule.** The colour is the hero's, handed to its own part, not a hue a call
+/// site chose.
 library;
 
 import 'package:flutter/material.dart';
 import 'package:healthee/core/theme/dimensions.dart';
-import 'package:healthee/core/theme/shapes.dart';
-import 'package:healthee/core/theme/tokens.dart';
 import 'package:healthee/core/theme/type_scale_bio.dart';
 import 'package:healthee/data/honesty/last_known.dart';
-import 'package:healthee/shared/v02/bio_display.dart';
-
-export 'package:healthee/shared/v02/bio_stats.dart';
 
 /// What stands in the figure's place when the server refused the number.
 ///
 /// Two states, and the difference between them is the whole design:
 ///
 ///   * **nothing held** — a dash at the figure's own size. The hero keeps its
-///     ground, radius, padding, eyebrow and model label; only the number is
-///     gone. A refused hero is still a hero.
+///     place on the page; only the number is gone. A refused hero is still a
+///     hero.
 ///   * **a value held from an earlier day** — the owner asked for this: *"it
 ///     should show the old one instead of completely not showing"*. It is drawn
 ///     [staleOpacity] faded, under a **dashed rule**, over a date line in full
@@ -178,172 +160,4 @@ class _DashedRule extends CustomPainter {
 
   @override
   bool shouldRepaint(_DashedRule oldDelegate) => oldDelegate.colour != colour;
-}
-
-/// `.model-label` — which model produced the figure, said quietly and always.
-class BioModelLabel extends StatelessWidget {
-  /// Builds the line.
-  const BioModelLabel({
-    required this.label,
-    required this.ink,
-    this.icon,
-    super.key,
-  });
-
-  /// `.model-label .icon { width: 11px }`.
-  static const double iconSize = 11;
-
-  /// `.model-label { gap: 5px }`.
-  static const double gap = 5;
-
-  /// `.model-label { opacity: .8 }`.
-  static const double opacity = 0.8;
-
-  /// What produced the figure.
-  final String label;
-
-  /// Drawn before it.
-  final IconData? icon;
-
-  /// The hero's ink.
-  final Color ink;
-
-  @override
-  Widget build(BuildContext context) {
-    final faded = ink.withValues(alpha: ink.a * opacity);
-    return Row(
-      mainAxisSize: MainAxisSize.min,
-      children: <Widget>[
-        if (icon != null) ...<Widget>[
-          Icon(icon, size: iconSize, color: faded),
-          const SizedBox(width: gap),
-        ],
-        Flexible(
-          child: Text(label, style: BioType.modelLabel.copyWith(color: faded)),
-        ),
-      ],
-    );
-  }
-}
-
-/// The hero's own surface: its ground inside the app's continuous corner.
-///
-/// [lineMix] fades the edge toward the page rather than fading the edge itself,
-/// so a hero on a light page keeps a visible boundary and one on a dark page
-/// does not draw a second frame around the card behind it.
-ShapeDecoration bioHeroSkin(
-  HealtheeColors colors, {
-  required double radius,
-  required double lineMix,
-}) => ShapeDecoration(
-  color: colors.bioBackground,
-  shape: hSquircle(
-    radius,
-    side: BorderSide(
-      color: Color.lerp(colors.bioLine, colors.surface, 1 - lineMix)!,
-      width: hairline,
-    ),
-  ),
-);
-
-/// `.p-hero .bio-hero` from `proposal.css`: Today's hero merged into the page.
-///
-/// It is drawn edge to edge (`PageSection.bleed`) with no border. On a light
-/// page its ground ends in [kBioMergedRadius] corners at the bottom only, so it
-/// reads as the top of the screen tinted; on a dark one it has no corners at
-/// all, and [bioHeroFades] dissolve its top and bottom into the page.
-ShapeDecoration bioHeroMergedSkin(HealtheeColors colors) => ShapeDecoration(
-  color: colors.bioBackground,
-  shape: RoundedRectangleBorder(
-    borderRadius: _isDark(colors)
-        ? BorderRadius.zero
-        : const BorderRadius.vertical(
-            bottom: Radius.circular(kBioMergedRadius),
-          ),
-  ),
-);
-
-/// `:root:not([data-theme='dark']) .p-hero .bio-hero { border-radius: 0 0 32px 32px }`.
-const double kBioMergedRadius = 32;
-
-/// `.p-hero .bio-hero::before / ::after { height: 72px }`.
-const double kBioFadeHeight = 72;
-
-/// The dark hero's two fades, page colour to clear, at its top and bottom.
-/// None on a light page, where the ground's own edge is the boundary.
-List<Widget> bioHeroFades(HealtheeColors colors) {
-  if (!_isDark(colors)) {
-    return const <Widget>[];
-  }
-  Widget fade(Alignment from) => Positioned(
-    left: 0,
-    right: 0,
-    top: from == Alignment.topCenter ? 0 : null,
-    bottom: from == Alignment.bottomCenter ? 0 : null,
-    height: kBioFadeHeight,
-    child: IgnorePointer(
-      child: DecoratedBox(
-        decoration: BoxDecoration(
-          gradient: LinearGradient(
-            begin: from,
-            end: -from,
-            colors: <Color>[colors.bg, colors.bg.withValues(alpha: 0)],
-          ),
-        ),
-      ),
-    ),
-  );
-  return <Widget>[fade(Alignment.topCenter), fade(Alignment.bottomCenter)];
-}
-
-/// Dark when the page is darker than the hero's ink: true of the dark theme
-/// whatever its exact values, and of no light one.
-bool _isDark(HealtheeColors colors) =>
-    colors.bg.computeLuminance() < colors.bioInk.computeLuminance();
-
-/// `.bio-art` geometry, measured from the padding box.
-const Rect kBioArtRect = Rect.fromLTWH(0, 18, 300, 230);
-
-/// `.bio-art { right: -60px }`.
-const double kBioArtRight = -60;
-
-/// `.bio-art { opacity: .6 }`.
-const double kBioArtOpacity = 0.6;
-
-/// `.bio-art { opacity: 1 }` with `.bio-atmosphere`'s own `.9` on top of it.
-const double kBioFieldOpacity = 0.9;
-
-/// `.bio-art` — the halo, in whichever of its two boxes.
-///
-/// **Positioned either way, which is the whole point**: both `.bio-art` rules
-/// are `position: absolute`, so the field is sized BY the card and contributes
-/// nothing to it. `bio_hero.dart`'s docstring argues that at length; this is
-/// where it is drawn.
-Widget bioHeroArt({
-  required Widget art,
-  required bool fillsCard,
-  required bool centred,
-}) {
-  if (!fillsCard) {
-    return Positioned(
-      right: kBioArtRight,
-      top: kBioArtRect.top,
-      width: kBioArtRect.width,
-      height: kBioArtRect.height,
-      child: Opacity(opacity: kBioArtOpacity, child: art),
-    );
-  }
-  return Positioned.fill(
-    // The constraints here are the card's finished size — a positioned child is
-    // laid out against the stack, which is laid out against the content — so
-    // this is where the still centre can be worked out at all.
-    child: LayoutBuilder(
-      builder: (context, constraints) => BioDisplayScope(
-        stillCentre: centred
-            ? bioStillCentre(constraints.biggest)
-            : Alignment.center,
-        child: Opacity(opacity: kBioFieldOpacity, child: art),
-      ),
-    ),
-  );
 }

@@ -1092,12 +1092,8 @@ mutate 'the linked lanes stop leaving air between them' "$V02_COLUMNS" "$V02_LIN
   'const double _laneGap = 0;'
 
 # ── the v02 hero instruments ────────────────────────────────────────────────
-HALO=lib/shared/v02/instruments/bio_halo.dart
-FIELD=lib/shared/v02/instruments/halo_field.dart
 WATERFALL=lib/shared/v02/instruments/age_waterfall.dart
-RULER=lib/shared/v02/instruments/age_scale.dart
 RAIL=lib/shared/v02/instruments/vo2max_rail.dart
-HALO_TEST=test/shared/instruments/halo_motion_test.dart
 AGE_TEST=test/shared/instruments/age_instruments_test.dart
 FITNESS_TEST=test/shared/instruments/fitness_instruments_test.dart
 
@@ -1117,37 +1113,6 @@ mutate 'the waterfall snaps its ladder onto the estimate' "$AGE_TEST" "$WATERFAL
   '    final anchor = column.from == null ? bottom : y(column.from!);' \
   '    final anchor = column.from == null ? bottom : y(column.to ?? running);'
 
-# A value off the 28-44 ruler clamped to the end instead of drawing nothing.
-mutate 'the age ruler clamps an off-scale estimate' "$AGE_TEST" "$RULER" \
-  '    if (onScale(estimate, low: kAgeScaleLow, high: kAgeScaleHigh)) {' \
-  '    if (estimate.isFinite) {'
-
-# The three ways the halo must stop, broken one at a time: a halo that pauses
-# two ways out of three still burns the battery the third way.
-mutate 'the halo keeps animating in the background' "$HALO_TEST" "$HALO" \
-  '    _foreground = state == AppLifecycleState.resumed;' \
-  '    _foreground = true;'
-
-mutate 'the halo ignores the system reduced-motion setting' "$HALO_TEST" "$HALO" \
-  '    _reducedMotion = MediaQuery.maybeDisableAnimationsOf(context) ?? false;' \
-  '    _reducedMotion = false;'
-
-mutate 'the halo keeps animating offscreen' "$HALO_TEST" "$HALO" \
-  '    if (!_onScreen()) {
-      _ticker.stop();
-      return;
-    }
-' \
-  ''
-
-# The still centre stops being enforced, so particles drift across the figure.
-mutate 'particles are allowed into the still centre' "$HALO_TEST" "$FIELD" \
-  '    if ((at - centre).distance < stillRadius) {
-      return null;
-    }
-' \
-  ''
-
 # The extent renamed. A wording mutation on purpose: the sentence is the honesty
 # half of the instrument, and it is as breakable as the geometry.
 mutate 'the error magnitude is called a confidence interval' "$FITNESS_TEST" "$RAIL" \
@@ -1156,8 +1121,7 @@ mutate 'the error magnitude is called a confidence interval' "$FITNESS_TEST" "$R
 
 # ── the v02 Today: what a panel may not stop saying ─────────────────────────
 PANEL=lib/shared/v02/panel.dart
-HERO=lib/shared/v02/bio_hero.dart
-HERO_PARTS=lib/shared/v02/bio_hero_parts.dart
+HERO=lib/shared/v02/age_orb_hero.dart
 MINI=lib/features/today/v02/mini_trend_panel.dart
 FITNESS=lib/features/today/v02/longer_panels.dart
 HERO_TEST=test/features/today_hero_test.dart
@@ -1174,10 +1138,12 @@ mutate 'the v02 panel drops the caveats it was handed' "$V02_CAVEAT_TEST" "$PANE
 
 # The same, in the hero. It is not a `Panel`, so it needs its own block and its
 # own mutation: the biological-age block carries FOUR disclosures on the
-# committed payload and is the card the owner reported.
-mutate 'the hero drops the caveats it was handed' "$V02_CAVEAT_TEST" "$HERO" \
-  '        caveats: disclosed,' \
-  '        caveats: const <Disclosure>[],'
+# committed payload and is the card the owner reported. The orb hero merges the
+# scope's caveats into its ⓘ; drop them there and the four go with them.
+mutate 'the hero drops the caveats it was handed' \
+  test/features/today_caveat_surface_test.dart "$HERO" \
+  '    final disclosed = <Disclosure>[...?scope?.caveats, ...extraDisclosures];' \
+  '    final disclosed = <Disclosure>[...extraDisclosures];'
 
 # A half-width panel blanking on a refusal. It keeps its title, its slot and its
 # chart void, and stops saying why the number is missing — which reads as a
@@ -1216,13 +1182,6 @@ mutate 'the movement tile invents a step target' "$HERO_TEST" \
   '      fraction: plateau == null ? null : steps / plateau,' \
   '      fraction: steps / 10000,'
 
-# The halo placed outside the scroll it watches. It still animates, it still
-# looks right on the first screen, and it never pauses again.
-mutate 'the hero art is dropped from the card' "$HERO_TEST" \
-  lib/features/today/v02/today_hero.dart \
-  '      art: const BioHalo(),' \
-  '      art: null,'
-
 # ── the v02 Today fixes (withheld hero · provenance off the cards) ───────────
 ENVELOPE=lib/data/honesty/envelope.dart
 WITHHELD_HERO=lib/features/today/v02/today_hero_withheld.dart
@@ -1260,19 +1219,6 @@ mutate 'the withheld hero prints the server prose inline' \
       for (final exclusion in exclusions) exclusion.message,
       kWithheldPointer,
       if (left.isNotEmpty)'
-
-# A marker placed for a value that does not exist — the held figure fed to the
-# ruler, which is exactly the stale-as-current step this design forbids.
-mutate 'a held value is drawn on the age ruler' \
-  "$WITHHELD_HERO_TEST" "$WITHHELD_HERO" \
-  "import 'package:healthee/shared/v02/bio_hero.dart';" \
-  "import 'package:healthee/shared/v02/bio_hero.dart';
-import 'package:healthee/shared/v02/instruments/age_scale.dart';" \
-  '      figure: BioWithheldFigure(' \
-  '      instrument: held == null
-          ? null
-          : AgeScale(estimate: held.value, chronologicalAge: 36),
-      figure: BioWithheldFigure('
 
 # The date blanked. A held figure with no date IS the stale-as-current bug.
 mutate 'the last-known date is blanked' \
@@ -1343,8 +1289,6 @@ BODY_SRC=lib/features/today/today_body.dart
 REVEAL=lib/shared/reveal_once.dart
 PINNED_TEST=test/features/chapter_nav_pinned_test.dart
 REVEAL_TEST=test/shared/reveal_once_test.dart
-HALO=lib/shared/v02/instruments/halo_painter.dart
-HALO_TEST=test/shared/instruments/halo_ink_test.dart
 PARTS=lib/shared/v02/panel_parts.dart
 PARTS_TEST=test/shared/panel_value_width_test.dart
 VIEW_DATE=lib/data/store/view_date.dart
@@ -1376,16 +1320,6 @@ mutate 'a chart replays its reveal on scroll-back' \
     _seen.add(id);
     return true;
   }'
-
-# The glint back to a brightness event: `--halo-warm` resolved and then not used.
-mutate 'the halo glint stops being warm' "$HALO_TEST" "$HALO" \
-  '      glint: colors.haloWarm,' \
-  '      glint: colors.bioInk,'
-
-# `--halo-warm` transcribed one digit wrong. Renders; is not the prototype.
-mutate 'the halo warm is transcribed wrong' "$HALO_TEST" "$PALETTE" \
-  '  static const Color haloWarm = Color(0xFFFED16B);' \
-  '  static const Color haloWarm = Color(0xFFFED16C);'
 
 # `.panel-summary` back to two equal halves, which clips every long figure on
 # every phone width and looks fine on the 800 px test surface.
@@ -1426,75 +1360,6 @@ mutate 'the measured half stops following the selection' \
   "$DATE_TEST" "$DEVICE_REPO" \
   '  return store.strapReader.day(ref.watch(viewDateProvider));' \
   '  return store.strapReader.day(ref.watch(todayProvider));'
-
-HERO=lib/shared/v02/bio_hero.dart
-HERO_PARTS=lib/shared/v02/bio_hero_parts.dart
-GEOMETRY_TEST=test/features/today_hero_geometry_test.dart
-FIELD_TEST=test/features/today_hero_field_test.dart
-
-# ── the hero's geometry ─────────────────────────────────────────────────────
-# THE DEFECT ITSELF: the field stops being a background layer and becomes a
-# sized child of the stack, so the card is as tall as the FIELD and the
-# contributions and the model label go off the bottom of the screen.
-mutate 'the field drives the card height' "$GEOMETRY_TEST" "$HERO_PARTS" \
-  '  return Positioned.fill(
-    // The constraints here are the card'"'"'s finished size' \
-  '  return SizedBox.fromSize(
-    size: const Size(300, 900),
-    // The constraints here are the card'"'"'s finished size'
-
-# The clip goes soft: `overflow: clip` over a 28px radius becomes a square
-# corner, and the field paints into the four corners the card does not have.
-mutate 'the card stops clipping to its rounded corner' "$FIELD_TEST" "$HERO" \
-  '      clipBehavior: Clip.antiAlias,' \
-  '      clipBehavior: Clip.none,'
-
-# The hole goes back to the middle of the CARD: the densest part of the field
-# crosses the figure, and the still centre lands on the sentence and the ruler.
-mutate 'the still centre leaves the figure' "$FIELD_TEST" "$HERO_PARTS" \
-  '        stillCentre: centred
-            ? bioStillCentre(constraints.biggest)
-            : Alignment.center,' \
-  '        stillCentre: Alignment.center,'
-
-# `motion.css` resets `.age-value { margin: 0 }`; richer.css'"'"'s 20 comes back
-# and the square no longer starts directly under the eyebrow.
-mutate 'the centred display takes the inline layout gap' \
-  "$GEOMETRY_TEST" "$HERO" \
-  '    if (!centred) const SizedBox(height: valueGap),' \
-  '    const SizedBox(height: valueGap),'
-
-# The two margins stop being told apart: the divider'"'"'s own 16 is replaced by
-# the collapsed 18, which is only right when the caption abuts the rule.
-mutate 'the divider gap is always the collapsed one' "$GEOMETRY_TEST" "$HERO" \
-  '        height: caption != null && instrument == null ? ruleGap : dividerGap,' \
-  '        height: ruleGap,'
-
-# The eyebrow row stops being the control'"'"'s 32: the still centre'"'"'s arithmetic
-# is then wrong by the difference, and the square moves up.
-mutate 'the eyebrow row loses its pinned extent' "$GEOMETRY_TEST" "$HERO" \
-  '        minHeight: centred ? eyebrowExtent : 0,' \
-  '        minHeight: 0,'
-
-# The rim's dust handed the stream heads' glow — one line, and 1,120 grains
-# become solid balls six times too wide. This IS the defect the owner reported.
-SCALE_TEST=test/shared/instruments/halo_scale_test.dart
-mutate 'the rim dust wears the stream glow' \
-  "$SCALE_TEST" lib/shared/v02/instruments/halo_painter.dart \
-  '    dust.forEach(
-      (dot) => canvas.drawPoints(
-        ui.PointMode.points,
-        dot.at,
-        _dot(
-          glint: dot.glint,
-          width: dot.extent,' \
-  '    dust.forEach(
-      (dot) => canvas.drawPoints(
-        ui.PointMode.points,
-        dot.at,
-        _dot(
-          glint: dot.glint,
-          width: dot.extent * 6,'
 
 # ── Activity and Insights, rebuilt to v02 ──────────────────────────────────
 ACT_SECTIONS=lib/features/activity/activity_sections.dart
@@ -2602,7 +2467,7 @@ mutate 'a scatter is drawn from too few pairs to be a shape' \
 # point again and a reading of 50 could be an ordinary night or a remarkable one.
 mutate 'the baseline loses the spread it is only meaningful with' \
   "$H_GOLDEN_TEST test/features/today_screen_test.dart" "$H_TODAY_BODY" \
-  "  final spread = sd == null ? '' : ' ± \${sd.round()}';" \
+  "  final spread = sd == null ? '' : '\\u00a0±\\u00a0\${sd.round()}';" \
   "  final spread = '';"
 
 # ── the recorded track, and the basemap under it ────────────────────────────

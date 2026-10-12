@@ -311,6 +311,8 @@ String _baselineNote(int samples, double? baseline, String unit, [double? sd]) {
   if (baseline == null) {
     return nights;
   }
-  final spread = sd == null ? '' : ' ± ${sd.round()}';
-  return '$nights · baseline ${baseline.round()}$spread $unit';
+  // No-break spaces hold `55 ± 0 bpm` together: a narrow twin tile wraps the
+  // line, and a unit or a spread stranded on the next one reads as its own.
+  final spread = sd == null ? '' : '\u00a0±\u00a0${sd.round()}';
+  return '$nights · baseline ${baseline.round()}$spread\u00a0$unit';
 }

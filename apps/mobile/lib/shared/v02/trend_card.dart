@@ -205,10 +205,11 @@ class TrendCard extends StatelessWidget {
             text: '$inside of $measured $readings',
             style: TextStyle(fontWeight: FontWeight.w700, color: colors.ink),
           ),
+          // A no-break space before the unit, so a wrap never strands `%.`.
           TextSpan(
             text:
                 ' were inside your usual of ${_say(usual.low)} to '
-                '${_say(usual.high)} $unit.',
+                '${_say(usual.high)}\u00a0$unit.',
           ),
         ],
       ),

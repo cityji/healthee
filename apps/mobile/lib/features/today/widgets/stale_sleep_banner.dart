@@ -64,7 +64,7 @@ class StaleSleepBanner extends StatelessWidget {
                 Text(
                   'Overnight readings below are from your last sleep · '
                   '$nightLabel',
-                  style: HType.sans(colors.ink3, size: 11, height: 1.4),
+                  style: HType.sans(colors.ink3, size: 11),
                 ),
               ],
             ),

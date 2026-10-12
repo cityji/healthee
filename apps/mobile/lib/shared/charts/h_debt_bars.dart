@@ -28,7 +28,7 @@ library;
 import 'package:flutter/material.dart';
 import 'package:healthee/core/theme/tokens.dart';
 import 'package:healthee/core/theme/tone_scope.dart';
-import 'package:healthee/core/theme/typography.dart';
+import 'package:healthee/core/theme/type_ladder.dart';
 import 'package:healthee/shared/charts/chart_primitives.dart';
 
 /// Nightly sleep totals against a need line.
@@ -110,17 +110,8 @@ class _HDebtBarsState extends State<HDebtBars> {
                 family: context.family,
                 selected: _selected,
                 progress: widget.progress,
-                labelStyle: TextStyle(
-                  fontFamily: healtheeFontFamily,
-                  fontSize: 9,
-                  color: colors.ink3,
-                ),
-                bubbleStyle: TextStyle(
-                  fontFamily: healtheeFontFamily,
-                  fontSize: 11,
-                  fontWeight: FontWeight.w700,
-                  color: colors.ink,
-                ),
+                labelStyle: TypeLadder.micro.copyWith(color: colors.ink3),
+                bubbleStyle: TypeLadder.micro.copyWith(color: colors.ink),
               ),
             ),
           );
