@@ -59,9 +59,7 @@ import 'package:healthee/data/honesty/disclosure.dart';
 import 'package:healthee/data/honesty/last_known.dart';
 import 'package:healthee/data/today_repository.dart';
 import 'package:healthee/features/today/v02/today_hero.dart';
-import 'package:healthee/shared/metric_info/metric_detail.dart';
-import 'package:healthee/shared/metric_info/metric_info_sheet.dart';
-import 'package:healthee/shared/v02/bio_hero.dart';
+import 'package:healthee/shared/v02/age_orb_hero.dart';
 import 'package:healthee/shared/v02/bio_hero_parts.dart';
 
 /// Where the reader is sent for the paragraphs that used to be printed inline.
@@ -90,38 +88,27 @@ class TodayBioHeroWithheld extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final ink = context.colors.bioInk;
     // Lazy: nothing touches the 60-day tier until a hero is actually refused.
     // While the read is in flight the hero draws its no-value state, which is
     // the honest thing to show for "we do not yet know of an older one".
     final held = ref.watch(lastKnownBiologicalAgeProvider).value;
-    return BioHero(
-      eyebrow: TodayBioHero.eyebrow,
-      eyebrowAction: MetricInfoDot(
-        infoKey,
-        ink: ink,
-        detail: MetricDetail(
-          // The model line goes here rather than under the card, exactly as the
-          // live hero routes its own. `BioHero.infoKey` cannot be used instead:
-          // these disclosures are the refusal and its exclusions, which the
-          // `CaveatScope` the hero reads does not carry.
-          source: kPopulationModelLabel,
-          disclosures: <Disclosure>[
-            withheld,
-            ...exclusions,
-          ],
-          disclosuresLabel: kWithheldSheetLabel,
-        ),
-      ),
+    // The same orb as the live hero (`today_hero.dart`), so a refused number
+    // keeps the hero's place and shape. The model line, the refusal and its
+    // exclusions all go behind the ⓘ.
+    return AgeOrbHero(
       value: held == null ? BioWithheldFigure.noValue : figureOf(held.value),
       figure: BioWithheldFigure(
-        ink: ink,
+        ink: context.colors.ink,
         value: held == null ? null : figureOf(held.value),
         asOf: held?.day,
       ),
-      caption: caption(withheld, exclusions),
-      // Same ground as the live hero, which has no edge (`today_hero.dart`).
-      frameless: true,
+      subtitle: kAgeOrbSubtitle,
+      note: caption(withheld, exclusions),
+      infoKey: infoKey,
+      modelLabel: kPopulationModelLabel,
+      extraDisclosures: <Disclosure>[withheld, ...exclusions],
+      disclosuresLabel: kWithheldSheetLabel,
+      turning: false,
     );
   }
 

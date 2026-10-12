@@ -29,7 +29,7 @@ import 'package:healthee/features/today/v02/night_panels.dart';
 import 'package:healthee/features/today/v02/today_key_numbers.dart';
 import 'package:healthee/shared/metric_info/metric_info_blocks.dart';
 import 'package:healthee/shared/metric_info/metric_info_sheet.dart';
-import 'package:healthee/shared/v02/bio_hero.dart';
+import 'package:healthee/shared/v02/age_orb_hero.dart';
 import 'package:healthee/shared/v02/key_number_card.dart';
 import 'package:healthee/shared/v02/panel.dart';
 
@@ -158,7 +158,7 @@ void main() {
       tester
           .widget<MetricInfoDot>(
             find.descendant(
-              of: find.byType(BioHero),
+              of: find.byType(AgeOrbHero),
               matching: find.byType(MetricInfoDot),
             ),
           )
@@ -177,7 +177,7 @@ void main() {
       // replaced.
       await openToday(tester);
       final dot = find.descendant(
-        of: find.byType(BioHero),
+        of: find.byType(AgeOrbHero),
         matching: find.byType(MetricInfoDot),
       );
       await reveal(tester, dot);

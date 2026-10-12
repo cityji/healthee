@@ -20,14 +20,15 @@
 library;
 
 import 'package:flutter/material.dart';
-import 'package:healthee/core/theme/instrument_hues.dart';
 import 'package:healthee/data/models/biological_age.dart';
 import 'package:healthee/shared/reveal_once.dart';
-import 'package:healthee/shared/v02/bio_hero.dart';
-import 'package:healthee/shared/v02/bio_hero_parts.dart';
-import 'package:healthee/shared/v02/instruments/age_scale.dart';
-import 'package:healthee/shared/v02/instruments/bio_halo.dart';
-import 'package:solar_icons/solar_icons.dart';
+import 'package:healthee/shared/v02/age_orb_hero.dart';
+import 'package:healthee/shared/v02/bio_stats.dart';
+import 'package:healthee/shared/v02/instruments/age_slider.dart';
+import 'package:healthee/shared/v02/key_number_card.dart';
+
+/// Under the hero's title: what the number is, before anyone reads it.
+const String kAgeOrbSubtitle = 'An estimate, not a clinical age';
 
 /// What the prototype prints under the age when the server sent no disclaimer.
 const String kPopulationModelLabel =
@@ -76,59 +77,50 @@ class TodayBioHero extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return BioHero(
-      eyebrow: eyebrow,
-      // The model line and any caveat go behind this, not under the figure.
-      infoKey: 'biological_age',
-      eyebrowIcon: SolarIconsOutline.arrowRight,
-      onEyebrowTap: onOpenBody,
-      eyebrowSemantics: eyebrowSemantics,
+    final chronological = age.chronologicalAge;
+    return AgeOrbHero(
       value: _figure(age.biologicalAge),
-      unit: 'years',
-      caption: _caption(age),
-      artFillsCard: true,
-      centred: true,
-      art: const BioHalo(),
-      instrument: RevealOnce(
-        id: 'today.bio-age-scale',
-        registry: reveals,
-        builder: (context, t) => AgeScale(
-          estimate: age.biologicalAge,
-          chronologicalAge: age.chronologicalAge,
-          progress: t,
-        ),
-      ),
-      frameless: true,
+      verdict: _verdict(age),
+      subtitle: kAgeOrbSubtitle,
+      modelLabel: age.disclaimer ?? kPopulationModelLabel,
+      onOpen: onOpenBody,
+      openSemantics: eyebrowSemantics,
+      slider: chronological == null
+          ? null
+          : RevealOnce(
+              id: 'today.bio-age-scale',
+              registry: reveals,
+              builder: (context, t) => AgeSlider(
+                estimate: age.biologicalAge,
+                actual: chronological,
+                progress: t,
+              ),
+            ),
       stats: <BioStat>[
         for (final term in age.contributions)
           if (term.deltaYears case final double delta)
-            _stat(context.hues, term.term, delta),
+            BioStat(
+              _termName(term.term),
+              _years(delta),
+              onOpen: onOpenTerm == null ? null : () => onOpenTerm!(term.term),
+            ),
       ],
-      modelLabel: age.disclaimer ?? kPopulationModelLabel,
     );
   }
 
-  /// One term, with its family's badge when the term names a family this app
-  /// colours: fitness green with a runner, sleep violet with a moon. A term the
-  /// model adds later draws as plain text rather than borrowing a family.
-  BioStat _stat(InstrumentHues hues, String term, double delta) {
-    final family = switch (term) {
-      'fitness' => (SolarIconsOutline.running, hues.fitness, hues.fitnessSoft),
-      _ when term.startsWith('sleep') => (
-        SolarIconsOutline.moon,
-        hues.sleep,
-        hues.sleepSoft,
-      ),
-      _ => null,
-    };
-    return BioStat(
-      '${_termName(term)} contribution',
-      _years(delta),
-      onOpen: onOpenTerm == null ? null : () => onOpenTerm!(term),
-      icon: family?.$1,
-      hue: family?.$2,
-      hueSoft: family?.$3,
-    );
+  /// `1.7 years younger`, `2.0 years older`, or `Your actual age`; null when
+  /// nothing was compared.
+  static Verdict? _verdict(BiologicalAge age) {
+    final delta = age.deltaYears;
+    if (delta == null || age.chronologicalAge == null) {
+      return null;
+    }
+    final magnitude = delta.abs().toStringAsFixed(1);
+    return delta == 0
+        ? const Verdict('Your actual age', VerdictTone.neutral)
+        : delta < 0
+        ? Verdict('$magnitude years younger', VerdictTone.better)
+        : Verdict('$magnitude years older', VerdictTone.worse);
   }
 
   /// `34.3`, and `34` when the estimate is whole. Never `34.0`.
@@ -157,22 +149,5 @@ class TodayBioHero extends StatelessWidget {
       return term;
     }
     return words[0].toUpperCase() + words.substring(1);
-  }
-
-  /// `1.7 years below your chronological age of 36`, or null.
-  static String? _caption(BiologicalAge age) {
-    final delta = age.deltaYears;
-    final chronological = age.chronologicalAge;
-    if (delta == null || chronological == null) {
-      return null;
-    }
-    final magnitude = delta.abs().toStringAsFixed(1);
-    final side = delta < 0 ? 'below' : 'above';
-    final actual = chronological == chronological.roundToDouble()
-        ? chronological.round().toString()
-        : chronological.toStringAsFixed(1);
-    return delta == 0
-        ? 'The same as your chronological age of $actual'
-        : '$magnitude years $side your chronological age of $actual';
   }
 }

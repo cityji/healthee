@@ -90,12 +90,13 @@ void main() {
       );
       await tester.pumpAndSettle();
 
-      // The hero's row and the panel below it, for fitness. The sleep row is
-      // named `Sleep duration contribution` because that is the term the model
-      // sent — the hero prints the payload's own word and the panel prints the
-      // prototype's title, and neither invents the other's.
-      expect(find.text(FitnessTermPanel.title), findsNWidgets(2));
-      expect(find.text('Sleep duration contribution'), findsOneWidget);
+      // The hero's term and the panel below it, for fitness. The sleep term is
+      // `SLEEP DURATION` because that is the term the model sent — the hero
+      // prints the payload's own word and the panel prints the prototype's
+      // title, and neither invents the other's.
+      expect(find.text(FitnessTermPanel.title), findsOneWidget);
+      expect(find.text('FITNESS'), findsOneWidget);
+      expect(find.text('SLEEP DURATION'), findsOneWidget);
       expect(find.text(SleepTermPanel.title), findsOneWidget);
       // The sleep term is read at a value that is NOT the value measured, and
       // the panel has to show both or it is showing a number the model did not
