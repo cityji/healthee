@@ -7,6 +7,7 @@ import 'package:healthee/data/models/sleep_page.dart';
 import 'package:healthee/features/sleep/v02/trend_panels.dart';
 import 'package:healthee/shared/reveal_once.dart';
 import 'package:healthee/shared/v02/key_number_card.dart';
+import 'package:healthee/shared/v02/trend_card.dart';
 
 import '../_sleep_stubs.dart';
 import '_sleep_host.dart';

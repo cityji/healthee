@@ -66,6 +66,7 @@ class TodayKeyNumbers extends ConsumerWidget {
     this.onOpenRecovery,
     this.onOpenSleep,
     this.onOpenActivity,
+    this.onOpenTrends,
     super.key,
   });
 
@@ -76,6 +77,9 @@ class TodayKeyNumbers extends ConsumerWidget {
   final VoidCallback? onOpenRecovery;
   final VoidCallback? onOpenSleep;
   final VoidCallback? onOpenActivity;
+
+  /// The head's `Trends` link. Null draws the head without it.
+  final VoidCallback? onOpenTrends;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -93,7 +97,11 @@ class TodayKeyNumbers extends ConsumerWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: <Widget>[
-          const SectionHead(title: kKeyNumbersTitle),
+          SectionHead(
+            title: kKeyNumbersTitle,
+            actionLabel: onOpenTrends == null ? null : 'Trends',
+            onAction: onOpenTrends,
+          ),
           _recovery(history),
           const SizedBox(height: kKeyGap),
           _sleep(nights == null ? null : usualRangeOf(sleepValues)),

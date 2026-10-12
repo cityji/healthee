@@ -80,6 +80,9 @@ abstract final class Routes {
   /// against the owner's own baseline.
   static const String recovery = '/recovery';
 
+  /// `Your trends`: the main readings over a week, a month or six months.
+  static const String trends = '/trends';
+
   /// Every night in the window, and the way into one of them.
   static const String sleepHistory = '/sleep-history';
 
@@ -222,6 +225,7 @@ const Set<String> kDateAwareRoutes = <String>{
   Routes.fitness,
   Routes.history,
   Routes.sleepHistory,
+  Routes.trends,
   Routes.workouts,
   Routes.journal,
   Routes.recommendations,
