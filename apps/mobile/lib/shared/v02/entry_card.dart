@@ -16,7 +16,7 @@
 /// `color-mix(in oklch, var(--family) 25%, var(--line))` interpolates in OKLab
 /// and `Color.lerp` in sRGB; on a 1 px edge between two colours this close the
 /// two are indistinguishable, so the border is `Color.lerp(line, family, 0.25)`
-/// — the same argument `bio_hero.dart` records for its own hairline.
+/// — the same trade `summary_tile.dart` records for its meter's ground.
 ///
 /// A card with no [onOpen] draws **no action line at all** rather than a dead
 /// one. An entry point that leads nowhere is worse than an absent entry point:

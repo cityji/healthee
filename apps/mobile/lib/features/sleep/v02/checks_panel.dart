@@ -327,21 +327,29 @@ class _CheckRow extends StatelessWidget {
             ),
           ],
           const SizedBox(height: detailGap),
-          Wrap(
-            spacing: 8,
-            runSpacing: 6,
-            crossAxisAlignment: WrapCrossAlignment.center,
+          // A row, not a `Wrap`: the sentence wraps BESIDE the chip, so all
+          // four checks keep one shape whatever their sentence's length. A
+          // `Wrap` dropped the longer sentences under the chip and left the
+          // shorter ones beside it. `IntrinsicWidth` sizes the chip to its one
+          // word, since a row hands a non-flex child an unbounded width.
+          Row(
             children: <Widget>[
-              if (result != null && check.bar != null)
-                VerdictChip(
-                  Verdict(
-                    _word(result, check.bar!.wordFor()),
-                    result ? VerdictTone.neutral : VerdictTone.worse,
+              if (result != null && check.bar != null) ...<Widget>[
+                IntrinsicWidth(
+                  child: VerdictChip(
+                    Verdict(
+                      _word(result, check.bar!.wordFor()),
+                      result ? VerdictTone.neutral : VerdictTone.worse,
+                    ),
                   ),
                 ),
-              Text(
-                check.detail,
-                style: SleepType.checkDetail.copyWith(color: colors.ink2),
+                const SizedBox(width: 8),
+              ],
+              Expanded(
+                child: Text(
+                  check.detail,
+                  style: SleepType.checkDetail.copyWith(color: colors.ink2),
+                ),
               ),
             ],
           ),

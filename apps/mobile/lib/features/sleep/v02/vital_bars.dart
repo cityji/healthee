@@ -138,7 +138,9 @@ class VitalBars extends StatelessWidget {
                         ),
                         TextSpan(
                           text: ' ${vital.unit}',
-                          style: KeyType.rangeEnd.copyWith(color: colors.ink2),
+                          style: SleepType.vitalUnit.copyWith(
+                            color: colors.ink2,
+                          ),
                         ),
                       ],
                     ),

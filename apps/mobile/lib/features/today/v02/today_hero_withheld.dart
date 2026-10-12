@@ -35,11 +35,11 @@
 ///     not exist" is enforced structurally here: there is no instrument to draw
 ///     a marker on.
 ///   * **A held value never reaches the ruler either.** [LastKnown] is not a
-///     [Reading] and cannot be handed to `AgeScale`, `BioStat` or the caption
-///     builder, so a stale figure cannot become a ruler mark, a contribution, a
-///     delta against today, or a chart's latest point. That is the difference
-///     between this and the stale-as-current failure: the value is shown, dated,
-///     and fed to nothing.
+///     [Reading] and cannot be handed to an age instrument, `BioStat` or the
+///     caption builder, so a stale figure cannot become a ruler mark, a
+///     contribution, a delta against today, or a chart's latest point. That is
+///     the difference between this and the stale-as-current failure: the value
+///     is shown, dated, and fed to nothing.
 ///
 /// ## What is said, and where the rest of it went
 ///

@@ -71,9 +71,12 @@ class ChapterNav extends StatelessWidget {
   /// `.chapter-nav { margin-block: 20px 8px }`.
   static const EdgeInsets margin = EdgeInsets.only(top: 20, bottom: 8);
 
-  /// `.chapter-nav button { padding: 9px 12px }`.
+  /// `.chapter-nav button { padding: 9px 12px }`, with the sides at 10. The
+  /// CSS's 12 framed a 10 px label; at the ladder's 12 px caption, the 16 px
+  /// this takes back across Sleep's four pills is what fits them on a 390 px
+  /// phone without the last one cut at the edge (narrower phones scroll).
   static const EdgeInsets buttonPadding = EdgeInsets.symmetric(
-    horizontal: 12,
+    horizontal: 10,
     vertical: 9,
   );
 
@@ -215,7 +218,10 @@ class ChapterHeading extends StatelessWidget {
     final tone = this.tone;
     return tone == null
         ? _body(context)
-        : ToneScope(tone: tone, child: Builder(builder: _body));
+        : ToneScope(
+            tone: tone,
+            child: Builder(builder: _body),
+          );
   }
 
   /// The shortest the rule is allowed to get before the title gives way.
@@ -256,7 +262,8 @@ class ChapterHeading extends StatelessWidget {
       padding: margin,
       child: LayoutBuilder(
         builder: (context, constraints) {
-          final room = constraints.maxWidth - iconSize - gap - gap * 2 - minRule;
+          final room =
+              constraints.maxWidth - iconSize - gap - gap * 2 - minRule;
           final painter = TextPainter(
             text: TextSpan(text: title, style: style),
             maxLines: 1,

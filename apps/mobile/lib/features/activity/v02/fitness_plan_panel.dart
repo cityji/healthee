@@ -24,6 +24,7 @@ import 'package:flutter/material.dart';
 import 'package:healthee/core/theme/tokens.dart';
 import 'package:healthee/core/theme/tone.dart';
 import 'package:healthee/core/theme/tone_scope.dart';
+import 'package:healthee/core/theme/type_ladder.dart';
 import 'package:healthee/core/theme/type_scale.dart';
 import 'package:healthee/data/models/fitness_plan.dart';
 import 'package:healthee/shared/v02/panel.dart';
@@ -38,9 +39,6 @@ class FitnessPlanPanel extends StatelessWidget {
 
   /// The card's title.
   static const String title = 'Your VO₂max plan';
-
-  /// The projection row's figure size.
-  static const double figureSize = 30;
 
   /// The gap between the projection and the week's blocks.
   static const double blocksGap = 18;
@@ -113,10 +111,7 @@ class _Projection extends StatelessWidget {
       children: <Widget>[
         Text(
           plan.current?.toStringAsFixed(1) ?? '—',
-          style: TypeScale.panelValue.copyWith(
-            color: colors.ink2,
-            fontSize: FitnessPlanPanel.figureSize,
-          ),
+          style: TypeLadder.title1.copyWith(color: colors.ink2),
         ),
         Padding(
           padding: const EdgeInsets.symmetric(horizontal: 10),
@@ -128,10 +123,7 @@ class _Projection extends StatelessWidget {
         ),
         Text(
           plan.projected12wk!.toStringAsFixed(1),
-          style: TypeScale.panelValue.copyWith(
-            color: family,
-            fontSize: FitnessPlanPanel.figureSize,
-          ),
+          style: TypeLadder.title1.copyWith(color: family),
         ),
         const Spacer(),
         Flexible(

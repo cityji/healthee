@@ -185,7 +185,9 @@ class PanelHead extends StatelessWidget {
                 child: Text(
                   title,
                   style: TypeScale.panelTitle.copyWith(color: colors.ink),
-                  maxLines: 1,
+                  // Two lines before an ellipsis: a metric's own name wraps at
+                  // 320 rather than being cut (`typography_test.dart`).
+                  maxLines: 2,
                   overflow: TextOverflow.ellipsis,
                 ),
               ),
@@ -259,7 +261,8 @@ class PanelHead extends StatelessWidget {
           child: Text(
             title,
             style: TypeScale.panelTitleCompact.copyWith(color: ink),
-            maxLines: 1,
+            // Half a row is narrow: the name wraps rather than being cut.
+            maxLines: 2,
             overflow: TextOverflow.ellipsis,
           ),
         ),

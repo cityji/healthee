@@ -83,18 +83,21 @@ void main() {
     });
 
     group('$name — judgement and the accent', () {
-      test('text ON the accent, and on the error surface Material shares it', () {
-        expect(
-          contrast(colors.accent, colors.onAccent),
-          greaterThanOrEqualTo(kTextFloor),
-          reason: '$name: the label inside a filled accent button',
-        );
-        expect(
-          contrast(colors.alert, colors.onAccent),
-          greaterThanOrEqualTo(kTextFloor),
-          reason: '$name: app_theme wires onError to onAccent',
-        );
-      });
+      test(
+        'text ON the accent, and on the error surface Material shares it',
+        () {
+          expect(
+            contrast(colors.accent, colors.onAccent),
+            greaterThanOrEqualTo(kTextFloor),
+            reason: '$name: the label inside a filled accent button',
+          );
+          expect(
+            contrast(colors.alert, colors.onAccent),
+            greaterThanOrEqualTo(kTextFloor),
+            reason: '$name: app_theme wires onError to onAccent',
+          );
+        },
+      );
 
       test('each verdict reads as words on its own soft fill', () {
         for (final (role, ink, fill) in <(String, Color, Color)>[
@@ -152,30 +155,6 @@ void main() {
             reason: '$name: a ${tone.name} line on the page',
           );
         }
-      });
-    });
-
-    group('$name — the bio hero, which has its own surface', () {
-      test('its ink clears AA on its own background, not the page’s', () {
-        expect(
-          contrast(colors.bioInk, colors.bioBackground),
-          greaterThanOrEqualTo(kTextFloor),
-          reason: '$name: the 88px figure and everything under it',
-        );
-      });
-
-      test('the faded label at 80% still clears AA', () {
-        // `.model-label { opacity: .8 }` — the quietest text in the card, and
-        // the one that names the instrument, so it has to be readable.
-        final faded = Color.alphaBlend(
-          colors.bioInk.withValues(alpha: 0.8),
-          colors.bioBackground,
-        );
-        expect(
-          contrast(faded, colors.bioBackground),
-          greaterThanOrEqualTo(kTextFloor),
-          reason: '$name: which instrument produced the figure',
-        );
       });
     });
   }

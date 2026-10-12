@@ -53,13 +53,6 @@ void main() {
       expect(light.alert, const Color(0xFFA52A24), reason: '--danger');
       expect(light.alertSoft, const Color(0xFFFEE9E6));
     });
-
-    test('the bio hero’s own surface', () {
-      expect(light.bioBackground, const Color(0xFFD5ECD9));
-      expect(light.bioInk, const Color(0xFF0E2516));
-      expect(light.bioGlow, const Color(0xFF5AC480));
-      expect(light.bioLine, const Color(0xFF328B54));
-    });
   });
 
   group('scaffolding — dark, the default appearance for this direction', () {
@@ -86,13 +79,6 @@ void main() {
       expect(dark.unfSoft, const Color(0xFF2D220F));
       expect(dark.alert, const Color(0xFFF69C90));
       expect(dark.alertSoft, const Color(0xFF351C19));
-    });
-
-    test('the bio hero’s own surface', () {
-      expect(dark.bioBackground, const Color(0xFF132419));
-      expect(dark.bioInk, const Color(0xFFEEF8F0));
-      expect(dark.bioGlow, const Color(0xFF2D8C53));
-      expect(dark.bioLine, const Color(0xFF57AE74));
     });
   });
 
@@ -224,7 +210,10 @@ void main() {
     // `appearanceColors` leaves the palette alone at index 0, so a first entry
     // disagreeing with the theme would render one green before the owner opened
     // the picker and another after. The other six are the owner's own.
-    expect(AppearancePalette.accents.length, AppearanceVariant.accentNames.length);
+    expect(
+      AppearancePalette.accents.length,
+      AppearanceVariant.accentNames.length,
+    );
     expect(AppearancePalette.accents.first.first, light.accent);
     expect(AppearancePalette.accents.first.last, dark.accent);
   });

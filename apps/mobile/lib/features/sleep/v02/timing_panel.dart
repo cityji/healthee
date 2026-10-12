@@ -38,6 +38,7 @@ import 'package:flutter/material.dart';
 import 'package:healthee/core/theme/tokens.dart';
 import 'package:healthee/core/theme/tone.dart';
 import 'package:healthee/core/theme/tone_scope.dart';
+import 'package:healthee/core/theme/type_ladder.dart';
 import 'package:healthee/core/theme/type_scale.dart';
 import 'package:healthee/data/honesty/citations.dart';
 import 'package:healthee/data/honesty/reading.dart';
@@ -227,14 +228,14 @@ class _BandBlock extends StatelessWidget {
             Flexible(
               child: Text(
                 _times(block),
-                style: TypeScale.colourKey.copyWith(color: colors.ink3),
+                style: TypeScale.tinyLabel.copyWith(color: colors.ink3),
               ),
             ),
             if (block.late) ...<Widget>[
               const SizedBox(width: 8),
               Text(
                 'VERY LATE',
-                style: TypeScale.badge.copyWith(color: colors.alert),
+                style: TypeLadder.label.copyWith(color: colors.alert),
               ),
             ],
           ],
@@ -289,14 +290,14 @@ class _OffPattern extends StatelessWidget {
                     'bed ${night.bedtime ?? 'unrecorded'}',
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
-                    style: TypeScale.colourKey.copyWith(color: colors.ink2),
+                    style: TypeScale.tinyLabel.copyWith(color: colors.ink2),
                   ),
                 ),
                 const Spacer(),
                 if (night.deltaH case final double delta)
                   Text(
                     '${delta > 0 ? '+' : ''}${delta.toStringAsFixed(1)} h',
-                    style: TypeScale.colourKey.copyWith(color: colors.alert),
+                    style: TypeScale.tinyLabel.copyWith(color: colors.alert),
                   ),
               ],
             ),

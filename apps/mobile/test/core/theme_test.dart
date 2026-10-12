@@ -49,7 +49,6 @@ void main() {
         if (light.unf == dark.unf) 'unf',
         if (light.alert == dark.alert) 'alert',
         if (light.onAccent == dark.onAccent) 'onAccent',
-        if (light.bioInk == dark.bioInk) 'bioInk',
       ];
       expect(shared, isEmpty);
     });
