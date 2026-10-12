@@ -81,12 +81,14 @@ class SleepDurationPanel extends StatelessWidget {
   final VoidCallback? onDetails;
 
   /// Oldest first, with an unmeasured night kept as a gap.
-  List<double?> get series =>
-      <double?>[for (final night in nights.reversed) night.tstMin.valueOrNull];
+  List<double?> get series => <double?>[
+    for (final night in nights.reversed) night.tstMin.valueOrNull,
+  ];
 
   /// One short date per night, oldest first.
-  List<String> get dates =>
-      <String>[for (final night in nights.reversed) shortDate(night.date)];
+  List<String> get dates => <String>[
+    for (final night in nights.reversed) shortDate(night.date),
+  ];
 
   /// How many of those nights carry a total.
   int get measured => series.where((value) => value != null).length;
@@ -182,7 +184,9 @@ class NightStagesPanel extends StatelessWidget {
         icon: SolarIconsOutline.moonSleep,
         infoKey: 'sleep',
         detail: MetricDetail(
-          method: <String>['Each stage keeps the same colour throughout the app.'],
+          method: <String>[
+            'Each stage keeps the same colour throughout the app.',
+          ],
         ),
       ),
       child: Column(
@@ -290,7 +294,11 @@ class NightRow extends StatelessWidget {
           ),
           if (onOpen != null) ...<Widget>[
             const SizedBox(width: gap),
-            Icon(SolarIconsOutline.altArrowRight, size: chevronSize, color: colors.ink3),
+            Icon(
+              SolarIconsOutline.altArrowRight,
+              size: chevronSize,
+              color: colors.ink3,
+            ),
           ],
         ],
       ),
