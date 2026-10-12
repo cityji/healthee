@@ -278,6 +278,7 @@ List<PageSection> sleepSections({
         SleepTrendPanel(
           trend: trend,
           recent: windows.recent,
+          earlier: windows.earlier,
           reveals: reveals,
           onDetails: extras.onOpenMetric,
         ),

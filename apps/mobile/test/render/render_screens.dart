@@ -46,9 +46,6 @@ import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:healthee/core/theme/app_theme.dart';
-import 'package:healthee/data/history/dated_history.dart';
-import 'package:healthee/data/models/sleep_page.dart';
-import 'package:healthee/data/models/trend_point.dart';
 import 'package:healthee/data/store/local_store.dart';
 import 'package:healthee/features/actions/actions_screen.dart';
 import 'package:healthee/features/activity/activity_screen.dart';
@@ -59,8 +56,11 @@ import 'package:healthee/features/sleep/sleep_screen.dart';
 import '../_sleep_stubs.dart';
 import '../features/_today_host.dart';
 
+import 'render_samples.dart';
+
 /// A phone's width, and enough height that nothing is left unbuilt.
 const Size _renderSize = Size(390, 3400);
+const Size _tallSize = Size(390, 9000);
 
 /// Where the PNGs land. Ignored by git — this is a look, not an artefact.
 const String _outputDirectory = 'build/renders';
@@ -92,8 +92,8 @@ void main() {
         todayHost(
           store,
           themeOverride: theme.value,
-          history: _sampleHistory(),
-          sleep: _sleepWithSampleNight(),
+          history: sampleHistory(),
+          sleep: sleepWithSampleNight(),
         ),
       );
     });
@@ -108,8 +108,9 @@ void main() {
           // Pinned, so the night labels and the whole page eyebrow are the same
           // in every render rather than drifting with the wall clock.
           home: SleepScreen(now: kSleepNow),
-          sleep: _sleepWithSampleNight(),
+          sleep: sleepWithSampleNight(),
         ),
+        size: _tallSize,
       );
     });
 
@@ -164,9 +165,14 @@ void main() {
 }
 
 /// Pumps [app] at [_renderSize] and writes `<name>.png`.
-Future<void> _shoot(WidgetTester tester, String name, Widget app) async {
+Future<void> _shoot(
+  WidgetTester tester,
+  String name,
+  Widget app, {
+  Size size = _renderSize,
+}) async {
   tester.view
-    ..physicalSize = _renderSize
+    ..physicalSize = size
     ..devicePixelRatio = 1.0;
   addTearDown(tester.view.reset);
 
@@ -243,93 +249,5 @@ String _packageRoot(String package) {
   }
   fail(
     '$package is not in .dart_tool/package_config.json; run flutter pub get',
-  );
-}
-
-/// The preview's sample night: stage and minutes, in order. Invented numbers.
-const List<(String, int)> kRenderNight = <(String, int)>[
-  ('light', 14),
-  ('deep', 31),
-  ('light', 22),
-  ('rem', 9),
-  ('awake', 3),
-  ('light', 41),
-  ('deep', 19),
-  ('light', 18),
-  ('rem', 27),
-  ('light', 62),
-  ('deep', 16),
-  ('light', 21),
-  ('rem', 24),
-  ('awake', 4),
-  ('light', 33),
-  ('rem', 29),
-  ('awake', 3),
-  ('light', 17),
-];
-
-/// The contract snapshot's Sleep page with its newest night's timeline swapped
-/// for [kRenderNight]. Everything else is the wire's own.
-SleepPage _sleepWithSampleNight() {
-  final Map<String, Object?> json = loadJson(kSleepSnapshotPath);
-  final List<Object?> nights = json['nights']! as List<Object?>;
-  final Map<String, Object?> night = Map<String, Object?>.of(
-    nights.first! as Map<String, Object?>,
-  );
-  var at = 0;
-  night['stage_timeline'] = <Map<String, Object?>>[
-    for (final (String stage, int minutes) in kRenderNight)
-      <String, Object?>{
-        'stage': stage,
-        'start_offset_min': at.toDouble(),
-        'end_offset_min': (at += minutes).toDouble(),
-        'duration_min': minutes.toDouble(),
-      },
-  ];
-  // The nights before it vary, so the Today sleep card has a usual to draw.
-  var index = 0;
-  return SleepPage.fromJson(<String, Object?>{
-    ...json,
-    'nights': <Object?>[
-      night,
-      for (final Object? earlier in nights.skip(1))
-        <String, Object?>{
-          ...earlier! as Map<String, Object?>,
-          'tst_min': kRenderSleepMinutes[index++ % kRenderSleepMinutes.length],
-        },
-    ],
-  });
-}
-
-/// Invented nights and days for the two weeks before the sample day.
-const List<int> kRenderSleepMinutes = <int>[
-  402, 355, 371, 428, 348, 396, 410, 362, 433, 385, 351, 419, 377, 390,
-];
-const List<double> kRenderRecovery = <double>[
-  61, 72, 58, 66, 70, 55, 63, 74, 59, 68, 64, 57, 71, 62,
-];
-const List<double> kRenderSteps = <double>[
-  6420, 4810, 8930, 5230, 7700, 4180, 6060, 9420, 5590, 7110, 4630, 8210, 6840, 5050,
-];
-
-/// The dated history the Today cards read: the 14 days before 31 July.
-DatedHistory _sampleHistory() {
-  final end = DateTime.utc(2026, 7, 31);
-  List<TrendPoint> series(List<double> values) => <TrendPoint>[
-    for (var i = 0; i < values.length; i++)
-      TrendPoint(
-        date: end
-            .subtract(Duration(days: values.length - i))
-            .toIso8601String()
-            .substring(0, 10),
-        value: values[i],
-      ),
-  ];
-  return DatedHistory(
-    days: 90,
-    series: <String, List<TrendPoint>>{
-      'recovery_score': series(kRenderRecovery),
-      'steps_total': series(kRenderSteps),
-    },
   );
 }
