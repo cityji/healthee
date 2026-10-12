@@ -23,7 +23,7 @@ import 'package:healthee/features/today/v02/longer_panels.dart';
 import 'package:healthee/features/today/v02/night_panels.dart';
 import 'package:healthee/features/today/v02/today_chapters.dart';
 import 'package:healthee/features/today/v02/today_header.dart';
-import 'package:healthee/features/today/v02/today_hero.dart';
+import 'package:healthee/features/today/v02/today_key_numbers.dart';
 import 'package:healthee/features/today/widgets/actions_section.dart';
 import 'package:healthee/features/today/widgets/data_health_section.dart';
 import 'package:healthee/features/today/widgets/insights_section.dart';
@@ -87,7 +87,7 @@ void main() {
         // `H.bioHero()` — the halo, the figure, the ruler, the two terms.
         _indexOf<ReadingView<BiologicalAge>>(list),
         // `summaryTiles()` — recovery · sleep · movement.
-        _indexOf<TodaySummaryTiles>(list),
+        _indexOf<TodayKeyNumbers>(list),
         // `H.bridge('fitness', …)`.
         _nthOf<ContextBridge>(list, 0),
         // `<nav class="chapter-nav">`.

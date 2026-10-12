@@ -67,12 +67,12 @@ void main() {
   });
 
   group('from Today', () {
-    testWidgets('THE RECOVERY SUMMARY ROW OPENS RECOVERY', (tester) async {
+    testWidgets('THE RECOVERY KEY NUMBER OPENS RECOVERY', (tester) async {
       _tallPhone(tester);
       await tester.pumpWidget(routedApp(store));
       await tester.pumpAndSettle();
 
-      await _open(tester, find.bySemanticsLabel(RegExp(r'^Recovery · ')));
+      await _open(tester, find.bySemanticsLabel(RegExp(r'^Recovery\. ')));
       expect(find.byType(RecoveryScreen), findsOneWidget);
     });
 

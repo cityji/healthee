@@ -46,7 +46,9 @@ import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:healthee/core/theme/app_theme.dart';
+import 'package:healthee/data/history/dated_history.dart';
 import 'package:healthee/data/models/sleep_page.dart';
+import 'package:healthee/data/models/trend_point.dart';
 import 'package:healthee/data/store/local_store.dart';
 import 'package:healthee/features/actions/actions_screen.dart';
 import 'package:healthee/features/activity/activity_screen.dart';
@@ -87,7 +89,12 @@ void main() {
       await _shoot(
         tester,
         'today-${theme.key}',
-        todayHost(store, themeOverride: theme.value),
+        todayHost(
+          store,
+          themeOverride: theme.value,
+          history: _sampleHistory(),
+          sleep: _sleepWithSampleNight(),
+        ),
       );
     });
 
@@ -279,8 +286,50 @@ SleepPage _sleepWithSampleNight() {
         'duration_min': minutes.toDouble(),
       },
   ];
+  // The nights before it vary, so the Today sleep card has a usual to draw.
+  var index = 0;
   return SleepPage.fromJson(<String, Object?>{
     ...json,
-    'nights': <Object?>[night, ...nights.skip(1)],
+    'nights': <Object?>[
+      night,
+      for (final Object? earlier in nights.skip(1))
+        <String, Object?>{
+          ...earlier! as Map<String, Object?>,
+          'tst_min': kRenderSleepMinutes[index++ % kRenderSleepMinutes.length],
+        },
+    ],
   });
+}
+
+/// Invented nights and days for the two weeks before the sample day.
+const List<int> kRenderSleepMinutes = <int>[
+  402, 355, 371, 428, 348, 396, 410, 362, 433, 385, 351, 419, 377, 390,
+];
+const List<double> kRenderRecovery = <double>[
+  61, 72, 58, 66, 70, 55, 63, 74, 59, 68, 64, 57, 71, 62,
+];
+const List<double> kRenderSteps = <double>[
+  6420, 4810, 8930, 5230, 7700, 4180, 6060, 9420, 5590, 7110, 4630, 8210, 6840, 5050,
+];
+
+/// The dated history the Today cards read: the 14 days before 31 July.
+DatedHistory _sampleHistory() {
+  final end = DateTime.utc(2026, 7, 31);
+  List<TrendPoint> series(List<double> values) => <TrendPoint>[
+    for (var i = 0; i < values.length; i++)
+      TrendPoint(
+        date: end
+            .subtract(Duration(days: values.length - i))
+            .toIso8601String()
+            .substring(0, 10),
+        value: values[i],
+      ),
+  ];
+  return DatedHistory(
+    days: 90,
+    series: <String, List<TrendPoint>>{
+      'recovery_score': series(kRenderRecovery),
+      'steps_total': series(kRenderSteps),
+    },
+  );
 }

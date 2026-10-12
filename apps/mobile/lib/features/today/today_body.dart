@@ -37,6 +37,7 @@ import 'package:healthee/features/today/v02/recovery_panel.dart';
 import 'package:healthee/features/today/v02/today_chapters.dart';
 import 'package:healthee/features/today/v02/today_hero.dart';
 import 'package:healthee/features/today/v02/today_hero_withheld.dart';
+import 'package:healthee/features/today/v02/today_key_numbers.dart';
 import 'package:healthee/features/today/widgets/stale_sleep_banner.dart';
 import 'package:healthee/shared/instrument_screen.dart';
 import 'package:healthee/shared/page_section.dart';
@@ -101,7 +102,7 @@ void todayBody(
     ),
   );
   sections.add(
-    TodaySummaryTiles(
+    TodayKeyNumbers(
       facts: facts,
       onOpenRecovery: extras.onOpenRecovery,
       onOpenSleep: extras.onOpenSleep,
