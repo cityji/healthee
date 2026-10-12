@@ -57,10 +57,11 @@ import 'package:healthee/data/honesty/reading.dart';
 import 'package:healthee/data/models/sleep_night.dart';
 import 'package:healthee/features/sleep/sleep_format.dart';
 import 'package:healthee/features/today/v02/today_key_numbers.dart'
-    show kLearningUsual, kSleepTrackMax, kSleepTrackMin;
+    show kSleepTrackMax, kSleepTrackMin;
 import 'package:healthee/shared/usual_range.dart';
 import 'package:healthee/shared/v02/key_number_card.dart';
 import 'package:healthee/shared/v02/range_bar.dart';
+import 'package:healthee/shared/v02/steps_bar.dart' show kLearningUsual;
 
 /// What the strap's own number is, said where the number is.
 const String kDeviceScoreCaption = 'Amazfit score\nDevice estimate';

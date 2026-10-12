@@ -19,6 +19,7 @@ import 'package:healthee/data/models/trend_point.dart';
 import 'package:healthee/data/store/local_store.dart';
 import 'package:healthee/features/today/v02/today_key_numbers.dart';
 import 'package:healthee/shared/v02/key_number_card.dart';
+import 'package:healthee/shared/v02/steps_bar.dart';
 
 import '../_sleep_stubs.dart';
 import '_today_host.dart';

@@ -39,21 +39,15 @@ import 'package:healthee/shared/usual_range.dart';
 import 'package:healthee/shared/v02/key_number_card.dart';
 import 'package:healthee/shared/v02/range_bar.dart';
 import 'package:healthee/shared/v02/section_head.dart';
+import 'package:healthee/shared/v02/steps_bar.dart';
 import 'package:solar_icons/solar_icons.dart';
 
 /// The heading over the three cards, `proposal.js`'s own.
 const String kKeyNumbersTitle = "Today's three";
 
-/// What a bar says while there is no band yet.
-const String kLearningUsual = 'learning your usual';
-
 /// The track's ends for a night: four to nine hours, `proposal.js`'s scale.
 const int kSleepTrackMin = 240;
 const int kSleepTrackMax = 540;
-
-/// The step track's least far end, and the step it rounds up to.
-const int kStepsTrackMin = 12000;
-const int kStepsTrackStep = 2000;
 
 /// `.p-keys { gap: 10px }`.
 const double kKeyGap = 10;
@@ -248,7 +242,6 @@ class TodayKeyNumbers extends ConsumerWidget {
     final plateau = stepsPlateauTop(
       facts.snapshot.biologicalAge.valueOrNull?.chronologicalAge,
     );
-    final top = _stepsTrackTop(count, band);
     return KeyNumberCard(
       tone: Tone.movement,
       icon: SolarIconsOutline.walking,
@@ -262,25 +255,7 @@ class TodayKeyNumbers extends ConsumerWidget {
               worse: UsualSide.below,
               better: UsualSide.above,
             ),
-      bar: RangeBar(
-        value: steps,
-        min: 0,
-        max: top.toDouble(),
-        band: band,
-        startLabel: '0',
-        endLabel: '${top ~/ 1000}k',
-        usualLabel: _usual(
-          band,
-          _thousands,
-          prefix: live ? "by day's end" : 'usual',
-        ),
-        pendingLabel: kLearningUsual,
-        semanticLabel: _spokenBand(
-          '${commaGrouped(count)} steps',
-          band,
-          (v) => '${commaGrouped(v.round())} steps',
-        ),
-      ),
+      bar: stepsBar(count, band, live: live),
       lead: plateau == null || count >= plateau
           ? null
           : '${commaGrouped(plateau - count)} to go',
@@ -292,16 +267,6 @@ class TodayKeyNumbers extends ConsumerWidget {
                 '${live ? ' The day is not over.' : ''}',
       onOpen: onOpenActivity,
     );
-  }
-
-  /// The step track's far end: 12k, or past the band and the day by a margin.
-  static int _stepsTrackTop(int count, UsualRange? band) {
-    final reach = [
-      kStepsTrackMin.toDouble(),
-      count * 1.1,
-      (band?.high ?? 0) * 1.25,
-    ].reduce((a, b) => a > b ? a : b);
-    return (reach / kStepsTrackStep).ceil() * kStepsTrackStep;
   }
 
   /// `usual 55 to 72`, or `usual about 6h 20m` when both ends say the same.
@@ -317,9 +282,6 @@ class TodayKeyNumbers extends ConsumerWidget {
     final high = say(band.high);
     return low == high ? '$prefix about $low' : '$prefix $low to $high';
   }
-
-  static String _thousands(double steps) =>
-      '${(steps / 1000).toStringAsFixed(1)}k';
 
   static Verdict? _verdict(
     UsualSide? side, {
