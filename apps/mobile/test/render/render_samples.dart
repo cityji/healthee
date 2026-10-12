@@ -61,6 +61,7 @@ SleepPage sleepWithSampleNight() {
           'sri': kRenderSri[index % kRenderSri.length],
           'hrv_sleep_avg': kRenderHrv[index++ % kRenderHrv.length],
           'rhr': 52 + index % 6,
+          ..._sampleTimes(earlier, index),
           'stages': <String, Object?>{
             'deep': 70 + (index * 7) % 30,
             'light': 190 + (index * 11) % 40,
@@ -199,4 +200,24 @@ DatedHistory sampleHistory() {
       'steps_total': series(kRenderSteps),
     },
   );
+}
+
+/// A bedtime between 22:40 and 00:40 and a wake seven to eight hours later,
+/// on the night's own date, so the timing charts have a week to draw.
+Map<String, Object?> _sampleTimes(Object? night, int index) {
+  final date = DateTime.parse(
+    (night! as Map<String, Object?>)['date']! as String,
+  );
+  final bed = DateTime(
+    date.year,
+    date.month,
+    date.day - 1,
+    22,
+    40,
+  ).add(Duration(minutes: (index * 37) % 120));
+  final wake = bed.add(Duration(minutes: 420 + (index * 23) % 60));
+  return <String, Object?>{
+    'start_iso': bed.toIso8601String(),
+    'end_iso': wake.toIso8601String(),
+  };
 }
