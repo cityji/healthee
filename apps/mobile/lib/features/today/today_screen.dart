@@ -126,6 +126,7 @@ class _TodayScreenState extends ConsumerState<TodayScreen> {
           onOpenTerm: (term) => _openTerm(context, term),
           onOpenSleep: () => context.go(Routes.sleep),
           onOpenActivity: () => context.go(Routes.activity),
+          onOpenTrends: () => unawaited(context.push(Routes.trends)),
           // Every panel's `Details` link. The two tabs above use `go` because a
           // bar switches between siblings; everything below is a destination
           // the owner came from Today and expects to come back to, so it is

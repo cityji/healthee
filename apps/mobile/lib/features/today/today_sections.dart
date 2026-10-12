@@ -127,6 +127,7 @@ class TodayExtras {
     this.onOpenTerm,
     this.onOpenSleep,
     this.onOpenActivity,
+    this.onOpenTrends,
     this.onOpenMetric,
     this.onOpenFitness,
     this.onOpenWorkouts,
@@ -186,6 +187,9 @@ class TodayExtras {
 
   /// Opens the activity tab — the hero's third summary row.
   final VoidCallback? onOpenActivity;
+
+  /// Opens `Your trends`, from the head of Today's three.
+  final VoidCallback? onOpenTrends;
 
   /// Opens one metric's own dated series, by its canonical id.
   ///

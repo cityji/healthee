@@ -2,6 +2,8 @@
 /// weeks of nights and days before it. Sample numbers only, never anyone's.
 library;
 
+import 'dart:math' as math;
+
 import 'package:healthee/data/history/dated_history.dart';
 import 'package:healthee/data/models/sleep_page.dart';
 import 'package:healthee/data/models/trend_point.dart';
@@ -220,4 +222,28 @@ Map<String, Object?> _sampleTimes(Object? night, int index) {
     'start_iso': bed.toIso8601String(),
     'end_iso': wake.toIso8601String(),
   };
+}
+
+/// A year of invented daily readings for [metric], ending 31 July.
+List<TrendPoint> sampleSeries(String metric) {
+  final base = switch (metric) {
+    'rhr_daily' => 56.0,
+    'recovery_score' => 64.0,
+    'steps_total' => 6500.0,
+    'sleep_regularity_index' => 70.0,
+    _ => 46.0,
+  };
+  final end = DateTime.utc(2026, 7, 31);
+  return <TrendPoint>[
+    for (var i = 364; i >= 0; i--)
+      if (i % 11 != 3)
+        TrendPoint(
+          date: end
+              .subtract(Duration(days: i))
+              .toIso8601String()
+              .substring(0, 10),
+          value:
+              base * (1 + 0.08 * math.sin(i / 2.3) + 0.04 * math.cos(i / 17)),
+        ),
+  ];
 }

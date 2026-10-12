@@ -107,6 +107,7 @@ void todayBody(
       onOpenRecovery: extras.onOpenRecovery,
       onOpenSleep: extras.onOpenSleep,
       onOpenActivity: extras.onOpenActivity,
+      onOpenTrends: extras.onOpenTrends,
     ),
   );
   // No spacer: the bridge carries the gap itself so its rule can span it and

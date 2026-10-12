@@ -44,18 +44,22 @@ import 'dart:ui' as ui;
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:healthee/core/theme/app_theme.dart';
+import 'package:healthee/data/history/history_repository.dart';
 import 'package:healthee/data/store/local_store.dart';
+import 'package:healthee/data/store/store_provider.dart';
 import 'package:healthee/features/actions/actions_screen.dart';
 import 'package:healthee/features/activity/activity_screen.dart';
 import 'package:healthee/features/diagnostics/diagnostics_screen.dart';
 import 'package:healthee/features/insights/insights_screen.dart';
 import 'package:healthee/features/sleep/sleep_screen.dart';
+import 'package:healthee/features/trends/trends_period.dart';
+import 'package:healthee/features/trends/trends_screen.dart';
 
 import '../_sleep_stubs.dart';
 import '../features/_today_host.dart';
-
 import 'render_samples.dart';
 
 /// A phone's width, and enough height that nothing is left unbuilt.
@@ -111,6 +115,26 @@ void main() {
           sleep: sleepWithSampleNight(),
         ),
         size: _tallSize,
+      );
+    });
+
+    testWidgets('render trends — ${theme.key}', (tester) async {
+      await _shoot(
+        tester,
+        'trends-${theme.key}',
+        ProviderScope(
+          overrides: [
+            todayProvider.overrideWithValue('2026-07-31'),
+            for (final spec in kTrendSpecs)
+              for (final period in TrendPeriod.values)
+                metricHistoryProvider(
+                  spec.metric,
+                  period.fetchDays,
+                ).overrideWith((ref) async => sampleSeries(spec.metric.id)),
+          ],
+          child: MaterialApp(theme: theme.value, home: const TrendsScreen()),
+        ),
+        size: const Size(390, 4200),
       );
     });
 
