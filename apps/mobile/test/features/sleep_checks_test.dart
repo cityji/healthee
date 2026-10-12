@@ -11,12 +11,12 @@
 ///     face** and reachable from the ⓘ, which is where the owner put them.
 library;
 
-import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:healthee/data/models/sleep_page.dart';
 import 'package:healthee/features/sleep/v02/checks_panel.dart';
 import 'package:healthee/features/sleep/v02/sleep_cutoffs.dart';
 import 'package:healthee/shared/metric_info/metric_info_sheet.dart';
+import 'package:healthee/shared/v02/key_number_card.dart';
 
 import '../_sleep_stubs.dart';
 import '_sleep_host.dart';
@@ -117,7 +117,7 @@ void main() {
         expect(find.text(name), findsOneWidget, reason: name);
       }
       for (final target in _targets(_panel())) {
-        expect(find.text(target), findsOneWidget, reason: target);
+        expect(find.text('Reference $target'), findsOneWidget, reason: target);
       }
       // Every shape a combination would take. The payload's own `score` is 3 on
       // this fixture, so `3` in any of these dresses would be the four blended.
@@ -272,12 +272,8 @@ void main() {
       // reading had been scored — a judgement made out of nothing, which is the
       // defect this whole layer exists to make impossible.
       final ticks = tester
-          .widgetList<Icon>(
-            find.descendant(
-              of: find.byType(SleepChecksPanel),
-              matching: find.byIcon(Icons.check),
-            ),
-          )
+          .widgetList<VerdictChip>(find.byType(VerdictChip))
+          .where((chip) => chip.verdict.tone == VerdictTone.neutral)
           .length;
       expect(ticks, 2);
     });
