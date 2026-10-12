@@ -163,8 +163,7 @@ class _SleepAnalysisPanelState extends ConsumerState<SleepAnalysisPanel> {
     // nothing while they are scrolling past it.
     return HTap(
       onTap: () => setState(() => _open = !_open),
-      semanticLabel:
-          '${SleepAnalysisPanel.title}, ${_open ? 'hide' : 'show'}',
+      semanticLabel: '${SleepAnalysisPanel.title}, ${_open ? 'hide' : 'show'}',
       child: panel,
     );
   }

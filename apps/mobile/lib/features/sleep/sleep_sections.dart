@@ -200,7 +200,9 @@ List<PageSection> sleepSections({
       ),
     )
     ..gap(PageSpacing.panel)
-    ..add(StageTablePanel(night: night, reveals: reveals))
+    ..add(
+      StageTablePanel(night: night, reveals: reveals, recent: windows.recent),
+    )
     ..gap(PageSpacing.panel)
     ..add(
       OvernightPanel(

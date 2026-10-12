@@ -235,7 +235,9 @@ class _NapRow extends StatelessWidget {
     final cell = TypeScale.panelContext.copyWith(color: colors.ink2);
     return DecoratedBox(
       decoration: BoxDecoration(
-        border: Border(top: BorderSide(color: colors.line, width: hairline)),
+        border: Border(
+          top: BorderSide(color: colors.line, width: hairline),
+        ),
       ),
       child: Padding(
         padding: const EdgeInsets.symmetric(vertical: NapsPanel.cellPad),

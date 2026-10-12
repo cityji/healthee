@@ -115,9 +115,11 @@ String nightLabel(DateTime? end, DateTime now) {
   if (end == null) {
     return 'Last night';
   }
-  final daysAgo = DateTime(now.year, now.month, now.day)
-      .difference(DateTime(end.year, end.month, end.day))
-      .inDays;
+  final daysAgo = DateTime(
+    now.year,
+    now.month,
+    now.day,
+  ).difference(DateTime(end.year, end.month, end.day)).inDays;
   if (daysAgo <= 0) {
     return 'Last night';
   }
@@ -133,10 +135,28 @@ bool noSleepLastNight(DateTime? end, DateTime now) =>
     end != null && now.difference(end).inHours >= 24;
 
 const List<String> _months = <String>[
-  'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
-  'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec',
+  'Jan',
+  'Feb',
+  'Mar',
+  'Apr',
+  'May',
+  'Jun',
+  'Jul',
+  'Aug',
+  'Sep',
+  'Oct',
+  'Nov',
+  'Dec',
 ];
 
-const List<String> _weekdays = <String>['Mo', 'Tu', 'We', 'Th', 'Fr', 'Sa', 'Su'];
+const List<String> _weekdays = <String>[
+  'Mo',
+  'Tu',
+  'We',
+  'Th',
+  'Fr',
+  'Sa',
+  'Su',
+];
 
 DateTime? _date(String? iso) => iso == null ? null : DateTime.tryParse(iso);

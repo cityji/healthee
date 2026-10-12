@@ -61,6 +61,12 @@ SleepPage sleepWithSampleNight() {
           'sri': kRenderSri[index % kRenderSri.length],
           'hrv_sleep_avg': kRenderHrv[index++ % kRenderHrv.length],
           'rhr': 52 + index % 6,
+          'stages': <String, Object?>{
+            'deep': 70 + (index * 7) % 30,
+            'light': 190 + (index * 11) % 40,
+            'rem': 75 + (index * 5) % 25,
+            'awake': 15 + (index * 3) % 15,
+          },
           'respiratory_rate': 13 + (index % 3) * 0.6,
           'spo2_avg': 95 + index % 4,
           'skin_temp_c': 33.0 + (index % 5) * 0.15,
