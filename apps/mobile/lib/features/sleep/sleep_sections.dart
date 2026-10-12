@@ -54,6 +54,7 @@ import 'package:flutter/material.dart';
 import 'package:healthee/data/models/sleep_consistency.dart';
 import 'package:healthee/data/models/sleep_page.dart';
 import 'package:healthee/features/sleep/sleep_windows.dart';
+import 'package:healthee/features/sleep/v02/bed_wake_week.dart';
 import 'package:healthee/features/sleep/v02/checks_panel.dart';
 import 'package:healthee/features/sleep/v02/naps_panel.dart';
 import 'package:healthee/features/sleep/v02/need_panel.dart';
@@ -250,6 +251,10 @@ List<PageSection> sleepSections({
           reveals: reveals,
           onDetails: extras.onOpenHistory,
         ),
+      )
+      ..gap(PageSpacing.panel)
+      ..add(
+        BedWakeWeekPanel(nights: bedWakeWeek(windows.recent), reveals: reveals),
       );
   }
   sections

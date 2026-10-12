@@ -66,7 +66,7 @@
 library;
 
 import 'package:flutter/material.dart';
-import 'package:healthee/core/theme/tokens.dart';
+import 'package:healthee/core/theme/instrument_hues.dart';
 import 'package:healthee/core/theme/tone.dart';
 import 'package:healthee/data/honesty/disclosure.dart';
 import 'package:healthee/data/honesty/reading.dart';
@@ -248,10 +248,10 @@ class SleepNeedPanel extends StatelessWidget {
             // title is about. Three entries for three things the chart draws.
             ColourKey(<ColourKeyEntry>[
               ColourKeyEntry('Met ${hoursMinutes(need)}', tone: Tone.fitness),
-              const ColourKeyEntry('Slept', tone: Tone.heart),
+              const ColourKeyEntry('Slept', tone: Tone.sleep),
               ColourKeyEntry(
                 'Still needed',
-                colour: context.colors.alert.withValues(
+                colour: context.hues.sleep.withValues(
                   alpha: HDebtBars.ghostAlpha,
                 ),
               ),
