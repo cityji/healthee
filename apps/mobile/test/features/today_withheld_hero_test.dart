@@ -23,17 +23,16 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:healthee/data/honesty/disclosure.dart';
 import 'package:healthee/data/honesty/last_known.dart';
 import 'package:healthee/data/store/local_store.dart';
-import 'package:healthee/features/today/v02/today_hero.dart';
 import 'package:healthee/features/today/v02/today_hero_withheld.dart';
 import 'package:healthee/shared/metric_info/metric_info_sheet.dart';
-import 'package:healthee/shared/v02/bio_hero.dart';
+import 'package:healthee/shared/v02/age_orb_hero.dart';
 import 'package:healthee/shared/v02/bio_hero_parts.dart';
-import 'package:healthee/shared/v02/instruments/age_scale.dart';
+import 'package:healthee/shared/v02/instruments/age_orb.dart';
+import 'package:healthee/shared/v02/instruments/age_slider.dart';
 import 'package:healthee/shared/v02/instruments/bio_halo.dart';
 import 'package:healthee/shared/v02/withheld_panel.dart';
 
 import '../_today_stubs.dart';
-import '../shared/_v02_harness.dart';
 import '_today_host.dart';
 
 /// The consequence paragraph `analytics/biological_age.py` actually sends.
@@ -116,17 +115,15 @@ void main() {
   }
 
   group('the hero keeps its shape when the number is refused', () {
-    testWidgets('SAME GROUND, SAME RADIUS, SAME EYEBROW, SAME WIDTH', (
-      tester,
-    ) async {
+    testWidgets('SAME ORB, SAME TITLE, SAME WIDTH', (tester) async {
       // The live hero first, so the comparison is against what this screen
       // actually draws rather than against numbers copied into the test.
       phone(tester);
       await tester.pumpWidget(todayHost(store));
       await tester.pumpAndSettle();
-      final live = tester.getRect(find.byType(BioHero));
-      final liveGround = _ground(tester);
-      final liveEyebrow = tester.getRect(find.text(TodayBioHero.eyebrow));
+      final live = tester.getRect(find.byType(AgeOrbHero));
+      final liveOrb = tester.getRect(find.byType(AgeOrb));
+      final liveTitle = tester.getRect(find.text(kAgeOrbTitle));
 
       // Torn down between the two, so the second pump is a real remount rather
       // than a rebuild of the first tree with new overrides.
@@ -142,18 +139,14 @@ void main() {
             'the refused hero must not collapse into a panel — that is the '
             'small dashed box the owner read as the card being missing',
       );
-      final refused = tester.getRect(find.byType(BioHero));
+      final refused = tester.getRect(find.byType(AgeOrbHero));
       expect(refused.width, live.width);
       expect(refused.left, live.left);
-      // The ground and the corner are the hero's identity in both themes.
-      final ground = _ground(tester);
-      expect(groundOf(ground), groundOf(liveGround));
-      expect(radiusOf(ground), radiusOf(liveGround));
-      // The eyebrow sits exactly where it sits on a hero with a number.
-      expect(
-        tester.getRect(find.text(TodayBioHero.eyebrow)).left,
-        liveEyebrow.left,
-      );
+      // The orb is the hero's identity: same size, same place across.
+      final orb = tester.getRect(find.byType(AgeOrb));
+      expect(orb.size, liveOrb.size);
+      expect(orb.left, liveOrb.left);
+      expect(tester.getRect(find.text(kAgeOrbTitle)).left, liveTitle.left);
     });
 
     testWidgets('THE ESSAY IS NOT INLINE; A SHORT REASON IS', (tester) async {
@@ -197,18 +190,20 @@ void main() {
       // The ruler is the only thing on this card that can place a mark. It is
       // not drawn at all — not even with the chronological age alone, which
       // would leave a single dot a reader takes for the estimate.
-      expect(find.byType(AgeScale), findsNothing);
-      expect(find.byKey(AgeScale.plotKey), findsNothing);
+      expect(find.byType(AgeSlider), findsNothing);
+      expect(find.byKey(AgeSlider.plotKey), findsNothing);
       // And no contribution row, so the held figure cannot become a term.
-      expect(find.textContaining('contribution'), findsNothing);
+      expect(find.text('FITNESS'), findsNothing);
       expect(
-        find.textContaining('your chronological age of'),
+        find.textContaining('years younger'),
         findsNothing,
         reason: 'a delta against today from a value that is not today’s',
       );
     });
 
-    testWidgets('THE HALO DOES NOT RUN OVER AN ABSENT NUMBER', (tester) async {
+    testWidgets('THE ORB DOES NOT TURN AROUND AN ABSENT NUMBER', (
+      tester,
+    ) async {
       phone(tester);
       await tester.pumpWidget(
         todayHost(
@@ -260,7 +255,7 @@ void main() {
       final rect = tester.getRect(find.byKey(BioWithheldFigure.dateKey));
       expect(rect.height, greaterThan(0));
       expect(
-        tester.getRect(find.byType(BioHero)).contains(rect.center),
+        tester.getRect(find.byType(AgeOrbHero)).contains(rect.center),
         isTrue,
       );
       final paragraph = tester.renderObject<RenderParagraph>(
@@ -346,7 +341,7 @@ void main() {
 
       await tester.tap(
         find.descendant(
-          of: find.byType(BioHero),
+          of: find.byType(AgeOrbHero),
           matching: find.byType(MetricInfoDot),
         ),
       );
@@ -360,16 +355,6 @@ void main() {
       expect(find.textContaining('70,000 people'), findsOneWidget);
     });
   });
-}
-
-/// The card's ground and corner, as they were actually built.
-Decoration _ground(WidgetTester tester) {
-  final container = tester.widget<Container>(
-    find
-        .descendant(of: find.byType(BioHero), matching: find.byType(Container))
-        .first,
-  );
-  return container.decoration!;
 }
 
 /// The composite block, as the envelope hands it to the hero.

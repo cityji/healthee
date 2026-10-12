@@ -1,18 +1,19 @@
-/// Today's age card without its frame: no edge, no rule, and the model's terms
-/// as badges divided by a hairline — the owner's mockup, in both themes.
+/// Today's age hero on the page itself, WHOOP style: no card, no edge, and the
+/// model's terms as two coloured figures; the framed hero elsewhere keeps its
+/// edge and its rule.
 library;
 
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:healthee/core/theme/app_theme.dart';
 import 'package:healthee/core/theme/dimensions.dart';
-import 'package:healthee/core/theme/instrument_hues.dart';
+import 'package:healthee/core/theme/tokens.dart';
 import 'package:healthee/data/models/biological_age.dart';
 import 'package:healthee/features/today/v02/today_hero.dart';
 import 'package:healthee/shared/reveal_once.dart';
+import 'package:healthee/shared/v02/age_orb_hero.dart';
 import 'package:healthee/shared/v02/bio_hero.dart';
 import 'package:healthee/shared/v02/bio_hero_parts.dart';
-import 'package:solar_icons/solar_icons.dart';
 
 /// Invented numbers, in the payload's own shape.
 BiologicalAge _age({
@@ -47,7 +48,7 @@ void main() {
     'light': AppTheme.light,
     'dark': AppTheme.dark,
   }.entries) {
-    testWidgets('Today\'s hero has no edge and no rule — ${theme.key}', (
+    testWidgets('Today\'s hero has no card, edge or ground — ${theme.key}', (
       tester,
     ) async {
       await tester.pumpWidget(
@@ -56,19 +57,26 @@ void main() {
           theme.value,
         ),
       );
-      final hero = find.byType(BioHero);
-      final shape = _shapeOf(tester, hero) as OutlinedBorder;
-      expect(shape.side, BorderSide.none);
-      // The only hairline left is the upright divider between the two terms:
-      // no full-width rule runs across the card.
-      final rules = tester
-          .widgetList<SizedBox>(
-            find.descendant(of: hero, matching: find.byType(SizedBox)),
+      final hero = find.byType(AgeOrbHero);
+      expect(hero, findsOneWidget);
+      final colors = theme.value.extension<HealtheeColors>()!;
+      Color? fill(Decoration? d) => switch (d) {
+        final BoxDecoration box => box.color,
+        final ShapeDecoration shape => shape.color,
+        _ => null,
+      };
+      // No box under the hero is painted in a card's ground.
+      final grounds = tester
+          .widgetList<DecoratedBox>(
+            find.descendant(of: hero, matching: find.byType(DecoratedBox)),
           )
-          .where((box) => box.child is ColoredBox);
-      expect(rules, hasLength(1));
-      expect(rules.single.width, hairline);
-      expect(rules.single.height, BioStatsRow.dividerHeight);
+          .where(
+            (box) => <Color?>[
+              colors.surface,
+              colors.bioBackground,
+            ].contains(fill(box.decoration)),
+          );
+      expect(grounds, isEmpty, reason: 'the page is the ground');
     });
   }
 
@@ -92,7 +100,7 @@ void main() {
     expect(rule.single.width, isNull, reason: 'the rule spans the card');
   });
 
-  testWidgets('fitness wears the runner, sleep the moon, each in its hue', (
+  testWidgets('each term is named, and older is the amber side', (
     tester,
   ) async {
     await tester.pumpWidget(
@@ -101,17 +109,19 @@ void main() {
         AppTheme.light,
       ),
     );
-    final hues = AppTheme.light.extension<InstrumentHues>()!;
-    final runner = tester.widget<Icon>(find.byIcon(SolarIconsOutline.running));
-    final moon = tester.widget<Icon>(find.byIcon(SolarIconsOutline.moon));
-    expect(runner.color, hues.fitness);
-    expect(moon.color, hues.sleep);
-    expect(find.text('Fitness contribution'), findsOneWidget);
-    expect(find.text('Sleep duration contribution'), findsOneWidget);
-    expect(find.text('+1.1 years'), findsNWidgets(2));
+    expect(find.text('FITNESS'), findsOneWidget);
+    expect(find.text('SLEEP DURATION'), findsOneWidget);
+    final older = tester.widgetList<Text>(find.text('+1.1 years'));
+    expect(older, hasLength(2));
+    for (final figure in older) {
+      expect(
+        figure.style!.color,
+        AppTheme.light.extension<HealtheeColors>()!.unf,
+      );
+    }
   });
 
-  testWidgets('a term the app has no family for is drawn without a badge', (
+  testWidgets('a term the app has no family for is named all the same', (
     tester,
   ) async {
     await tester.pumpWidget(
@@ -123,9 +133,8 @@ void main() {
         AppTheme.light,
       ),
     );
-    expect(find.byIcon(SolarIconsOutline.running), findsOneWidget);
-    expect(find.byIcon(SolarIconsOutline.moon), findsNothing);
-    expect(find.text('Blood pressure contribution'), findsOneWidget);
+    expect(find.text('FITNESS'), findsOneWidget);
+    expect(find.text('BLOOD PRESSURE'), findsOneWidget);
   });
 
   testWidgets('a wrapped label does not move its figure off its neighbour\'s', (

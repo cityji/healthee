@@ -28,10 +28,9 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:healthee/core/theme/app_theme.dart';
 import 'package:healthee/data/store/local_store.dart';
 import 'package:healthee/shared/v02/instruments/bio_halo.dart';
-
-import '_today_host.dart';
 
 /// The widths a phone actually is. See the library docstring.
 const List<double> kPhoneWidths = <double>[320, 360, 390, 414];
@@ -53,10 +52,11 @@ Future<void> loadFigtree() async {
   await loader.load();
 }
 
-/// Today at [width], tall enough that the whole hero is built in one pass.
+/// The halo on its own, at a phone's [width] and the old hero's height.
 ///
-/// [reducedMotion] false leaves the field running, which means the tree never
-/// goes idle — so that case pumps a fixed number of frames rather than settling.
+/// Today no longer draws the halo (the hero is the orb, `age_orb.dart`), so
+/// the halo is measured where it is still a widget: alone, in a box the size
+/// of the card it was drawn in. [store] is kept so callers did not change.
 Future<void> pumpHeroAt(
   WidgetTester tester,
   LocalStore store,
@@ -69,7 +69,23 @@ Future<void> pumpHeroAt(
     ..devicePixelRatio = 1.0;
   addTearDown(tester.view.reset);
   await tester.pumpWidget(
-    todayHost(store, reducedMotion: reducedMotion, themeOverride: theme),
+    MaterialApp(
+      theme: theme ?? AppTheme.light,
+      home: MediaQuery(
+        data: MediaQueryData(
+          size: Size(width, 3000),
+          disableAnimations: reducedMotion,
+        ),
+        child: Align(
+          alignment: Alignment.topLeft,
+          child: SizedBox(
+            width: width,
+            height: kHaloProbeHeight,
+            child: const BioHalo(),
+          ),
+        ),
+      ),
+    ),
   );
   if (reducedMotion) {
     await tester.pumpAndSettle();
@@ -78,3 +94,6 @@ Future<void> pumpHeroAt(
     await tester.pump(const Duration(milliseconds: 120));
   }
 }
+
+/// The old hero's height at a phone width, near enough for the halo's scale.
+const double kHaloProbeHeight = 520;

@@ -1,17 +1,16 @@
-/// The halo is IN the hero, it RUNS there, and it STOPS when it leaves.
+/// The orb is IN the hero, it TURNS there, and it STOPS when it leaves.
 ///
-/// `bio_halo.dart` already proves the three ways the field stops, against a
-/// pumped clock and a scripted scroll position. What it cannot prove is that
-/// Today wired any of it up: a hero that dropped the halo, or placed it outside
-/// the scroll it watches, would pass every one of those tests.
+/// `age_orb.dart` turns its finished layer slowly and stops under reduced
+/// motion. What a widget test of it alone cannot prove is that Today wired it
+/// up: a hero that dropped the orb would pass every one of those tests.
 ///
 /// So this suite asks the screen. The observable is **whether the tree ever goes
 /// idle**, which is the one thing a running ticker changes and the one thing a
 /// presence check cannot see:
 ///
 ///   * with motion allowed, `pumpAndSettle` on Today times out — something is
-///     animating, and the halo is the only ambient thing on the screen;
-///   * scrolled far past the hero, it settles — the field paused itself.
+///     animating, and the orb is the only ambient thing on the screen;
+///   * scrolled far past the hero, it settles — the lazy list let it go.
 ///
 /// Every other suite in this directory pumps `todayHost` with reduced motion on
 /// for exactly this reason (see its docstring). This one turns it off.
@@ -24,9 +23,8 @@ import 'package:healthee/features/today/steps_plateau.dart';
 import 'package:healthee/features/today/today_labels.dart';
 import 'package:healthee/features/today/v02/today_key_numbers.dart';
 import 'package:healthee/shared/metric_info/metric_info_sheet.dart';
-import 'package:healthee/shared/v02/bio_hero.dart';
-import 'package:healthee/shared/v02/bio_hero_parts.dart';
-import 'package:healthee/shared/v02/instruments/bio_halo.dart';
+import 'package:healthee/shared/v02/age_orb_hero.dart';
+import 'package:healthee/shared/v02/instruments/age_orb.dart';
 import 'package:healthee/shared/v02/key_number_card.dart';
 
 import '../_today_stubs.dart';
@@ -80,20 +78,22 @@ void main() {
     addTearDown(tester.view.reset);
   }
 
-  testWidgets('THE HALO IS INSIDE THE HERO, NOT BESIDE IT', (tester) async {
+  testWidgets('THE ORB IS INSIDE THE HERO, AROUND THE FIGURE', (tester) async {
     phone(tester);
     await tester.pumpWidget(todayHost(store));
     await tester.pumpAndSettle();
 
-    expect(find.byType(BioHero), findsOneWidget);
+    expect(find.byType(AgeOrbHero), findsOneWidget);
     expect(
-      find.descendant(of: find.byType(BioHero), matching: find.byType(BioHalo)),
+      find.descendant(
+        of: find.byType(AgeOrbHero),
+        matching: find.byType(AgeOrb),
+      ),
       findsOneWidget,
-      reason: 'the ring belongs around the figure, not somewhere near it',
+      reason: 'the orb belongs around the figure, not somewhere near it',
     );
-    // And it is the card's art, so it is behind the number rather than over it:
-    // the figure is laid out inside the halo's own box.
-    final halo = tester.getRect(find.byType(BioHalo));
+    // The figure is laid out inside the orb's own box.
+    final halo = tester.getRect(find.byType(AgeOrb));
     final figure = tester.getRect(find.text('34.3'));
     expect(halo.contains(figure.center), isTrue);
   });
@@ -116,17 +116,17 @@ void main() {
     expect(
       await _settles(tester),
       isFalse,
-      reason: 'the halo is not ticking, so the hero is a still image',
+      reason: 'the orb is not turning, so the hero is a still image',
     );
 
-    // Off screen: the field watches the enclosing scroll and stops itself.
+    // Off screen: the lazy list drops the hero, and its ticker with it.
     await tester.drag(find.byType(Scrollable).first, const Offset(0, -3000));
     await tester.pump();
 
     expect(
       await _settles(tester),
       isTrue,
-      reason: 'a halo that keeps ticking off screen is 30 fps of nothing',
+      reason: 'an orb that keeps turning off screen is frames of nothing',
     );
   });
 
@@ -140,7 +140,7 @@ void main() {
     await tester.pumpWidget(todayHost(store));
     await tester.pumpAndSettle();
 
-    expect(find.byType(BioHalo), findsOneWidget);
+    expect(find.byType(AgeOrb), findsOneWidget);
   });
 
   group('what the hero says about the estimate', () {
@@ -152,20 +152,20 @@ void main() {
       await tester.pumpAndSettle();
 
       expect(find.text('34.3'), findsOneWidget);
-      expect(
-        find.textContaining('below your chronological age of'),
-        findsOneWidget,
-      );
+      expect(find.text('1.7 years younger'), findsOneWidget);
+      expect(find.text('FITNESS'), findsOneWidget);
       // The model line is ALWAYS reachable: an estimate that does not say what
       // made it is the failure the whole tier system exists to stop. It moved
       // off the card into the eyebrow's ⓘ, so this opens the ⓘ and reads it
       // there — the claim is that the owner can get to the sentence, not that
       // it is printed in nine-point grey under the contributions.
-      expect(find.byType(BioModelLabel), findsNothing);
-      final model = tester.widget<BioHero>(find.byType(BioHero)).modelLabel!;
+      final model = tester
+          .widget<AgeOrbHero>(find.byType(AgeOrbHero))
+          .modelLabel!;
+      expect(find.text(model), findsNothing, reason: 'off the face');
       await tester.tap(
         find.descendant(
-          of: find.byType(BioHero),
+          of: find.byType(AgeOrbHero),
           matching: find.byType(MetricInfoDot),
         ),
       );
@@ -194,7 +194,8 @@ void main() {
       await tester.pumpAndSettle();
 
       expect(find.text('34.3'), findsOneWidget);
-      expect(find.textContaining('chronological age'), findsNothing);
+      expect(find.textContaining('years younger'), findsNothing);
+      expect(find.textContaining('your age'), findsNothing);
     });
   });
 

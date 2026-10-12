@@ -93,10 +93,7 @@ void main() {
       await tester.pumpWidget(routedApp(store));
       await tester.pumpAndSettle();
 
-      await _open(
-        tester,
-        find.bySemanticsLabel(RegExp('^Fitness contribution')),
-      );
+      await _open(tester, find.bySemanticsLabel(RegExp('^Fitness: ')));
       expect(find.byType(FitnessScreen), findsOneWidget);
     });
 
