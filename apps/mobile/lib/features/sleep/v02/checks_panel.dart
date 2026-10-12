@@ -308,7 +308,7 @@ class _CheckRow extends StatelessWidget {
           ),
           const SizedBox(height: targetGap),
           Text(
-            'Reference ${check.target}',
+            check.target,
             style: SleepType.checkTarget.copyWith(color: colors.ink2),
           ),
           if (check.bar case final CheckBar bar) ...<Widget>[
@@ -323,7 +323,7 @@ class _CheckRow extends StatelessWidget {
               usualLabel: bar.bandLabel,
               semanticLabel:
                   '${check.name} ${check.reading}. '
-                  'Reference ${check.target}.',
+                  'Against ${check.target}.',
             ),
           ],
           const SizedBox(height: detailGap),

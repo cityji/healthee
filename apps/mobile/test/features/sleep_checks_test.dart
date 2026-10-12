@@ -117,7 +117,7 @@ void main() {
         expect(find.text(name), findsOneWidget, reason: name);
       }
       for (final target in _targets(_panel())) {
-        expect(find.text('Reference $target'), findsOneWidget, reason: target);
+        expect(find.text(target), findsOneWidget, reason: target);
       }
       // Every shape a combination would take. The payload's own `score` is 3 on
       // this fixture, so `3` in any of these dresses would be the four blended.

@@ -53,6 +53,7 @@ library;
 import 'package:flutter/material.dart';
 import 'package:healthee/data/models/sleep_consistency.dart';
 import 'package:healthee/data/models/sleep_page.dart';
+import 'package:healthee/features/sleep/sleep_chapters.dart';
 import 'package:healthee/features/sleep/sleep_windows.dart';
 import 'package:healthee/features/sleep/v02/bed_wake_week.dart';
 import 'package:healthee/features/sleep/v02/checks_panel.dart';
@@ -113,6 +114,7 @@ class SleepExtras {
     this.onOpenJournal,
     this.onOpenHistory,
     this.onOpenAllMetrics,
+    this.chapters,
   });
 
   /// Opens settings. The avatar's destination.
@@ -134,6 +136,9 @@ class SleepExtras {
 
   /// Opens the metric DIRECTORY — `H.panel('Your body overnight',…,'metrics')`.
   final VoidCallback? onOpenAllMetrics;
+
+  /// The chapter anchors. Null draws no chapter nav.
+  final SleepChapters? chapters;
 }
 
 /// Builds the ordered section list for one render of Sleep.
@@ -157,6 +162,16 @@ List<PageSection> sleepSections({
   final night = windows.latest;
   final sections = SectionList()
     ..add(V02PageHeader(title: 'Sleep', date: night.date, status: view.status));
+  final chapters = extras.chapters;
+  if (chapters != null) {
+    sections.addPinned(
+      SleepChapterNav(
+        chapters: chapters,
+        patterns: !past && page.findings.isNotEmpty,
+      ),
+      ChapterNav.extentOf,
+    );
+  }
   // **The analysis opens the screen.** It was the last panel on a page that
   // scrolls for four screens, so the one thing on Sleep written FOR the owner
   // — a grounded reading of these nights, citation-validated — was the thing
@@ -183,6 +198,7 @@ List<PageSection> sleepSections({
   sections
     ..add(
       SleepReading(
+        key: chapters?.night,
         night: night,
         usual: usualOfNights(
           page.nights,
@@ -222,7 +238,13 @@ List<PageSection> sleepSections({
         notes: page.researchNotes,
       ),
     )
-    ..gap(PageSpacing.panel)
+    ..add(
+      ChapterHeading(
+        key: chapters?.week,
+        title: kSleepWeekChapter,
+        icon: SolarIconsOutline.calendar,
+      ),
+    )
     // `sleep-history-view.js` refuses exactly this panel on a past day:
     // *"Historical sleep-need and debt analyses are not included. The latest
     // debt is not carried backward."* Debt is a fourteen-night model computed
@@ -274,7 +296,8 @@ List<PageSection> sleepSections({
     )
     ..gap(PageSpacing.block)
     ..add(
-      const ChapterHeading(
+      ChapterHeading(
+        key: chapters?.longer,
         title: kSleepTrendsChapter,
         icon: SolarIconsOutline.chartSquare,
       ),
@@ -319,7 +342,9 @@ List<PageSection> sleepSections({
     if (page.findings.isNotEmpty) {
       sections
         ..gap(PageSpacing.block)
-        ..add(FindingsSection(findings: page.findings));
+        ..add(
+          FindingsSection(key: chapters?.patterns, findings: page.findings),
+        );
     }
   }
   sections

@@ -155,7 +155,7 @@ void main() {
       // The row is still there with its published range, so the reader can see
       // WHAT was not measured rather than a check quietly disappearing.
       expect(find.text('Regularity · SRI'), findsOneWidget);
-      expect(find.text('Reference 70 or above'), findsOneWidget);
+      expect(find.text('70 or above'), findsOneWidget);
     });
   });
 
