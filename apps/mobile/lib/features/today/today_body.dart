@@ -38,6 +38,7 @@ import 'package:healthee/features/today/v02/today_chapters.dart';
 import 'package:healthee/features/today/v02/today_hero.dart';
 import 'package:healthee/features/today/v02/today_hero_withheld.dart';
 import 'package:healthee/features/today/v02/today_key_numbers.dart';
+import 'package:healthee/features/today/v02/today_tonight.dart';
 import 'package:healthee/features/today/widgets/stale_sleep_banner.dart';
 import 'package:healthee/shared/instrument_screen.dart';
 import 'package:healthee/shared/page_section.dart';
@@ -110,6 +111,7 @@ void todayBody(
       onOpenTrends: extras.onOpenTrends,
     ),
   );
+  sections.add(TodayTonight(live: facts.snapshot.asOf?.isToday ?? true));
   // No spacer: the bridge carries the gap itself so its rule can span it and
   // reach the tiles above. See `ContextBridge.leadIn`.
   sections.add(
