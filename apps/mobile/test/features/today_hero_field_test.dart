@@ -93,18 +93,22 @@ void main() {
       );
     });
 
-    testWidgets('IT IS CLIPPED TO THE 28px ROUNDED RECT', (tester) async {
-      // `.bio-hero { overflow: clip }` over `border-radius: 28px`. Asked of the
-      // clip path itself: a point 2px into the corner is outside a 28px radius,
-      // and the same distance along the top edge is inside it.
+    testWidgets('IT IS CLIPPED TO ITS GROUND: square on top, round below', (
+      tester,
+    ) async {
+      // Today's hero is merged into the page (`proposal.css` `.p-hero`): edge
+      // to edge, with only its bottom corners rounded on a light page. Asked of
+      // the clip itself: 2px into a bottom corner is outside, 2px into a top
+      // one is inside, and the field cannot paint past either.
       await pumpHeroAt(tester, store, 390);
       final clip = find
           .descendant(of: find.byType(BioHero), matching: find.byType(ClipPath))
           .first;
       final size = tester.getSize(clip);
       final path = tester.widget<ClipPath>(clip).clipper!.getClip(size);
-      expect(path.contains(const Offset(2, 2)), isFalse);
-      expect(path.contains(Offset(size.width / 2, 2)), isTrue);
+      expect(path.contains(Offset(2, size.height - 2)), isFalse);
+      expect(path.contains(const Offset(2, 2)), isTrue);
+      expect(path.contains(Offset(size.width / 2, size.height - 2)), isTrue);
     });
 
     testWidgets('ITS HOLE SITS OVER THE FIGURE, not over the sentence', (

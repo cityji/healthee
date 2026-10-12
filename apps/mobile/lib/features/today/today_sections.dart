@@ -238,6 +238,7 @@ List<PageSection> todaySections(ScreenData data, TodayExtras extras) {
       navigation: extras.navigation,
       batteryPercent: extras.batteryPercent ?? data.day.batteryPercent,
       onOpenProfile: extras.onOpenProfile,
+      onOpenCoach: extras.onOpenCoach,
     ),
   );
   // The live-feed trust card is an age measured against right now, so it belongs

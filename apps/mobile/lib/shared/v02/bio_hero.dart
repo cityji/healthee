@@ -261,7 +261,8 @@ class BioHero extends StatelessWidget {
   /// every caller written against `richer.css` alone is unchanged.
   final bool centred;
 
-  /// Today's hero (`proposal.css` `.p-hero`): no edge, no rule, badged terms.
+  /// Today's hero (`proposal.css` `.p-hero`): edge to edge, faded into the
+  /// page, no rule, badged terms. See `bioHeroMergedSkin`.
   final bool frameless;
 
   @override
@@ -286,17 +287,15 @@ class BioHero extends StatelessWidget {
   ) {
     return Container(
       clipBehavior: Clip.antiAlias,
-      decoration: bioHeroSkin(
-        colors,
-        radius: radius,
-        lineMix: lineMix,
-        framed: !frameless,
-      ),
+      decoration: frameless
+          ? bioHeroMergedSkin(colors)
+          : bioHeroSkin(colors, radius: radius, lineMix: lineMix),
       child: Stack(
         children: <Widget>[
           // FIRST, so it paints behind the content, and POSITIONED, so the
           // card's height is the content's and never the field's.
           if (art != null) _art(),
+          if (frameless) ...bioHeroFades(colors),
           Padding(
             padding: const EdgeInsets.symmetric(vertical: padding),
             child: Column(

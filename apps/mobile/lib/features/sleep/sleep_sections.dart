@@ -59,6 +59,7 @@ import 'package:healthee/features/sleep/v02/naps_panel.dart';
 import 'package:healthee/features/sleep/v02/need_panel.dart';
 import 'package:healthee/features/sleep/v02/night_panels.dart';
 import 'package:healthee/features/sleep/v02/sleep_reading.dart';
+import 'package:healthee/features/sleep/v02/sleep_usual.dart';
 import 'package:healthee/features/sleep/v02/tail_panels.dart';
 import 'package:healthee/features/sleep/v02/timing_panel.dart';
 import 'package:healthee/features/sleep/v02/trend_panels.dart';
@@ -88,7 +89,8 @@ const String kSleepDebtPast =
     'is not carried backward.';
 
 /// The tail of the screen — the lever, the analysis, the correlations.
-const String kSleepTonightPastTitle = 'Tonight’s lever and this week’s analysis';
+const String kSleepTonightPastTitle =
+    'Tonight’s lever and this week’s analysis';
 
 /// When the chosen day is older than every night the window holds.
 const String kNoNightTitle = 'No night on or before this day';
@@ -120,7 +122,6 @@ class SleepExtras {
 
   /// Opens the journal.
   final VoidCallback? onOpenJournal;
-
 
   /// Opens the sleep history.
   ///
@@ -154,13 +155,7 @@ List<PageSection> sleepSections({
   }
   final night = windows.latest;
   final sections = SectionList()
-    ..add(
-      V02PageHeader(
-        title: 'Sleep',
-        date: night.date,
-        status: view.status,
-      ),
-    );
+    ..add(V02PageHeader(title: 'Sleep', date: night.date, status: view.status));
   // **The analysis opens the screen.** It was the last panel on a page that
   // scrolls for four screens, so the one thing on Sleep written FOR the owner
   // — a grounded reading of these nights, citation-validated — was the thing
@@ -185,7 +180,17 @@ List<PageSection> sleepSections({
       ..gap(PageSpacing.panel);
   }
   sections
-    ..add(SleepReading(night: night))
+    ..add(
+      SleepReading(
+        night: night,
+        usual: usualOfNights(
+          page.nights,
+          night.date,
+          (n) => n.tstMin.valueOrNull,
+        ),
+        needMin: page.sleepDebt?.needMin,
+      ),
+    )
     ..gap(PageSpacing.panel)
     ..add(
       NightTimelinePanel(
@@ -222,7 +227,10 @@ List<PageSection> sleepSections({
     // honestly carry.
     ..add(
       past
-          ? const PastDayNotice(title: kSleepDebtPastTitle, body: kSleepDebtPast)
+          ? const PastDayNotice(
+              title: kSleepDebtPastTitle,
+              body: kSleepDebtPast,
+            )
           : SleepNeedPanel(
               night: night,
               nights: windows.debt,
@@ -282,9 +290,7 @@ List<PageSection> sleepSections({
   // night. None of them takes a day, so none of them may wear an older one.
   if (!past) {
     sections
-      ..add(
-        NapsPanel(naps: page.naps, onOpenJournal: extras.onOpenJournal),
-      )
+      ..add(NapsPanel(naps: page.naps, onOpenJournal: extras.onOpenJournal))
       ..gap(PageSpacing.block);
   }
   // **No `Sleep recommendations` link.** It sat between the naps card and the
@@ -320,11 +326,7 @@ List<PageSection> sleepSections({
 /// read as a night of no sleep, and this is a fact about the WINDOW.
 List<PageSection> _noNight(ViewDay view, SleepExtras extras) => <PageSection>[
   PageSection(
-    V02PageHeader(
-      title: 'Sleep',
-      date: view.day,
-      status: view.status,
-    ),
+    V02PageHeader(title: 'Sleep', date: view.day, status: view.status),
     gap: 0,
   ),
   const PageSection(

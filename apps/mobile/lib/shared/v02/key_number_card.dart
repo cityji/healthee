@@ -82,13 +82,6 @@ class KeyNumberCard extends StatelessWidget {
   /// `.p-key-line { margin-top: 10px }`.
   static const double lineGap = 10;
 
-  /// `.p-chip { padding: 4px 9px }`, its dot 6 and gap 6.
-  static const EdgeInsets chipPadding = EdgeInsets.symmetric(
-    horizontal: 9,
-    vertical: 4,
-  );
-  static const double chipDot = 6;
-
   /// The card's family.
   final Tone tone;
 
@@ -177,39 +170,12 @@ class KeyNumberCard extends StatelessWidget {
         Expanded(
           child: Text(name, style: KeyType.name.copyWith(color: family)),
         ),
-        if (verdict case final Verdict said) _chip(said, colors),
+        if (verdict case final Verdict said) VerdictChip(said),
         if (onOpen != null) ...<Widget>[
           const SizedBox(width: 8),
           Icon(SolarIconsOutline.altArrowRight, size: 14, color: colors.ink3),
         ],
       ],
-    );
-  }
-
-  Widget _chip(Verdict said, HealtheeColors colors) {
-    final (ink, ground) = switch (said.tone) {
-      VerdictTone.worse => (colors.unf, colors.unfSoft),
-      VerdictTone.better => (colors.fav, colors.favSoft),
-      VerdictTone.neutral => (colors.ink, colors.surface2),
-    };
-    return DecoratedBox(
-      decoration: ShapeDecoration(color: ground, shape: const StadiumBorder()),
-      child: Padding(
-        padding: chipPadding,
-        child: Row(
-          mainAxisSize: MainAxisSize.min,
-          children: <Widget>[
-            SizedBox.square(
-              dimension: chipDot,
-              child: DecoratedBox(
-                decoration: BoxDecoration(color: ink, shape: BoxShape.circle),
-              ),
-            ),
-            const SizedBox(width: chipDot),
-            Text(said.words, style: KeyType.chip.copyWith(color: ink)),
-          ],
-        ),
-      ),
     );
   }
 
@@ -247,4 +213,49 @@ class KeyNumberCard extends StatelessWidget {
       ],
     ),
   );
+}
+
+/// `.p-chip` — a verdict in words, with a dot in its colour.
+class VerdictChip extends StatelessWidget {
+  /// Draws [verdict].
+  const VerdictChip(this.verdict, {super.key});
+
+  /// `.p-chip { padding: 4px 9px }`, its dot 6 and gap 6.
+  static const EdgeInsets padding = EdgeInsets.symmetric(
+    horizontal: 9,
+    vertical: 4,
+  );
+  static const double dot = 6;
+
+  /// What it says.
+  final Verdict verdict;
+
+  @override
+  Widget build(BuildContext context) {
+    final colors = context.colors;
+    final (ink, ground) = switch (verdict.tone) {
+      VerdictTone.worse => (colors.unf, colors.unfSoft),
+      VerdictTone.better => (colors.fav, colors.favSoft),
+      VerdictTone.neutral => (colors.ink, colors.surface2),
+    };
+    return DecoratedBox(
+      decoration: ShapeDecoration(color: ground, shape: const StadiumBorder()),
+      child: Padding(
+        padding: padding,
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: <Widget>[
+            SizedBox.square(
+              dimension: dot,
+              child: DecoratedBox(
+                decoration: BoxDecoration(color: ink, shape: BoxShape.circle),
+              ),
+            ),
+            const SizedBox(width: dot),
+            Text(verdict.words, style: KeyType.chip.copyWith(color: ink)),
+          ],
+        ),
+      ),
+    );
+  }
 }

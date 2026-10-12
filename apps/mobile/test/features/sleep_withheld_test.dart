@@ -71,15 +71,15 @@ void main() {
     });
 
     test(
-      'an unmeasured time in bed drops its key rather than writing a dash',
+      'an unmeasured time in bed drops its figure rather than writing a dash',
       () {
         // A legend entry for a value nobody has is not a smaller truth, it is
         // noise — and the refusal is still stated, in the note under the block.
         final page = sleepPageWithout(<String>['tib_min']);
         final night = page.nights.first;
         expect(
-          SleepReading.keys(night).map((entry) => entry.label),
-          isNot(contains(contains('in bed'))),
+          SleepReading.stats(night).map((stat) => stat.$1),
+          isNot(contains('Time in bed')),
         );
         expect(SleepReading.refusals(night), contains(contains('Time in bed')));
       },
