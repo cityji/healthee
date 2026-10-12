@@ -252,7 +252,12 @@ class VerdictChip extends StatelessWidget {
               ),
             ),
             const SizedBox(width: dot),
-            Text(verdict.words, style: KeyType.chip.copyWith(color: ink)),
+            Flexible(
+              child: Text(
+                verdict.words,
+                style: KeyType.chip.copyWith(color: ink),
+              ),
+            ),
           ],
         ),
       ),

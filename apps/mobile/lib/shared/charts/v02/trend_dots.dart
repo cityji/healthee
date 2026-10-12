@@ -123,7 +123,7 @@ class TrendDotsPainter extends CustomPainter {
 
     canvas.saveLayer(
       Offset.zero & size,
-      Paint()..color = Color.fromRGBO(0, 0, 0, progress.clamp(0, 1)),
+      Paint()..color = colors.ink.withValues(alpha: progress.clamp(0, 1)),
     );
     final grid = Paint()
       ..color = colors.line
