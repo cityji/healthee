@@ -28,14 +28,17 @@
 library;
 
 import 'package:flutter/material.dart';
+import 'package:healthee/core/theme/tokens.dart';
 import 'package:healthee/core/theme/tone.dart';
+import 'package:healthee/core/theme/type_scale_keys.dart';
 import 'package:healthee/data/honesty/reading.dart';
 import 'package:healthee/data/honesty/sleep_gap.dart';
 import 'package:healthee/data/models/sleep_night.dart';
 import 'package:healthee/features/sleep/sleep_format.dart';
-import 'package:healthee/shared/charts/v02/chart_curve.dart';
-import 'package:healthee/shared/charts/v02/v02_line_chart.dart';
+import 'package:healthee/shared/charts/v02/trend_dots.dart';
 import 'package:healthee/shared/reveal_once.dart';
+import 'package:healthee/shared/usual_range.dart';
+import 'package:healthee/shared/v02/key_number_card.dart';
 import 'package:healthee/shared/v02/panel.dart';
 import 'package:healthee/shared/v02/panel_head.dart';
 import 'package:healthee/shared/v02/panel_parts.dart';
@@ -53,6 +56,8 @@ class SleepTrend {
     required this.read,
     this.digits = 0,
     this.infoKey,
+    this.higherIsBetter = true,
+    this.ceiling,
   });
 
   /// The prototype's panel title.
@@ -75,6 +80,12 @@ class SleepTrend {
 
   /// Which ⓘ entry belongs to it.
   final String? infoKey;
+
+  /// Which way is better. All three are higher today.
+  final bool higherIsBetter;
+
+  /// A scale the reading cannot pass, 100 for a percentage.
+  final double? ceiling;
 }
 
 /// The three, in the prototype's order.
@@ -87,6 +98,7 @@ const List<SleepTrend> kSleepTrends = <SleepTrend>[
     read: _efficiency,
     digits: 1,
     infoKey: 'sleep_health',
+    ceiling: 100,
   ),
   SleepTrend(
     title: 'Sleep regularity',
@@ -110,28 +122,43 @@ Reading<double> _efficiency(SleepNight night) => night.efficiencyPct;
 Reading<double> _sri(SleepNight night) => night.sri;
 Reading<double> _hrv(SleepNight night) => night.hrvSleepAvg;
 
-/// One `H.historyPanel` — the latest reading and the fortnight behind it.
+/// What the band, the line and a hollow dot mean, said once per card.
+const String kTrendLegend =
+    'Shaded: the middle half of the fortnight before. Dashed: this '
+    'average. Hollow: a night outside the shaded part.';
+
+/// One trend card: the fortnight's average, its change, and every night on
+/// the owner's usual band (`proposal.js::trendCard`).
+///
+/// The band is `usual_range.dart`'s middle half, taken from the fourteen
+/// nights before these, so a fortnight is read against the one before it and
+/// never against itself. With fewer than seven earlier nights there is no band
+/// and no change, and the card says it is still learning.
 class SleepTrendPanel extends StatelessWidget {
-  /// [recent] is newest first, the order `/api/sleep` sends.
+  /// [recent] and [earlier] are newest first, the order `/api/sleep` sends.
   const SleepTrendPanel({
     required this.trend,
     required this.recent,
     required this.reveals,
+    this.earlier = const <SleepNight>[],
     this.onDetails,
     super.key,
   });
 
-  /// The plot's height, before its readout line.
-  static const double chartHeight = 150;
+  /// Between the figure and the chart, and around the sentence.
+  static const double chartGap = 10;
 
-  /// The gap between the figure and the chart.
-  static const double chartGap = 8;
+  /// A change under one unit is said as none.
+  static const double flat = 1;
 
-  /// Which trend this panel draws.
+  /// Which trend this card draws.
   final SleepTrend trend;
 
   /// The fortnight, newest first.
   final List<SleepNight> recent;
+
+  /// The fortnight before it, newest first.
+  final List<SleepNight> earlier;
 
   /// Where "already revealed" is remembered.
   final RevealRegistry reveals;
@@ -140,32 +167,67 @@ class SleepTrendPanel extends StatelessWidget {
   final void Function(String metric)? onDetails;
 
   /// Oldest first, with an unmeasured night kept as a gap.
-  List<double?> get series =>
-      <double?>[for (final night in recent.reversed) trend.read(night).valueOrNull];
+  List<double?> get series => <double?>[
+    for (final night in recent.reversed) trend.read(night).valueOrNull,
+  ];
 
   /// One short date per night, oldest first.
-  List<String> get dates =>
-      <String>[for (final night in recent.reversed) shortDate(night.date)];
+  List<String> get dates => <String>[
+    for (final night in recent.reversed) shortDate(night.date),
+  ];
 
   /// How many of those nights carry a reading.
   int get measured => series.where((value) => value != null).length;
 
-  /// The line under the chart: how much data is behind it.
-  String get note {
-    if (measured == 0) {
-      return 'No night in the last fortnight carries this reading.';
+  List<double> get _before => <double>[
+    for (final night in earlier)
+      if (trend.read(night).valueOrNull case final double value) value,
+  ];
+
+  /// The usual band, from the fortnight before.
+  UsualRange? get band => usualRangeOf(_before);
+
+  /// The line under the chart when there is nothing to read.
+  String get note => measured == 0
+      ? 'No night in the last fortnight carries this reading.'
+      : '$measured ${measured == 1 ? 'night' : 'nights'} measured'
+            '${dates.isEmpty ? '' : ' through ${dates.last}'}.';
+
+  static double? _mean(Iterable<double> values) =>
+      values.isEmpty ? null : values.reduce((a, b) => a + b) / values.length;
+
+  String _say(double value) => value.toStringAsFixed(trend.digits);
+
+  Verdict? _change(double? mean) {
+    final before = _before;
+    final then = _mean(before);
+    if (mean == null || then == null || before.length < kUsualMinDays) {
+      return null;
     }
-    final through = dates.isEmpty ? '' : ' through ${dates.last}';
-    return '$measured ${measured == 1 ? 'night' : 'nights'} '
-        'measured$through.';
+    final change = mean - then;
+    if (change.abs() < flat) {
+      return const Verdict(
+        'No change vs the fortnight before',
+        VerdictTone.neutral,
+      );
+    }
+    return Verdict(
+      '${change > 0 ? '↑' : '↓'} ${change.abs().round()} vs the fortnight before',
+      (change > 0) == trend.higherIsBetter
+          ? VerdictTone.better
+          : VerdictTone.worse,
+    );
   }
 
   @override
   Widget build(BuildContext context) {
+    final values = series;
+    final mean = _mean(<double>[for (final v in values) ?v]);
+    final usual = band;
+    final change = _change(mean);
     final latest = recent.isEmpty
         ? Withheld<double>(SleepGap.noSession.disclosure)
         : trend.read(recent.first);
-    final value = latest.valueOrNull;
     return Panel(
       tone: trend.tone,
       label: trend.title,
@@ -176,37 +238,93 @@ class SleepTrendPanel extends StatelessWidget {
         actionLabel: onDetails == null ? null : 'Details',
         onAction: onDetails == null ? null : () => onDetails!(trend.metric),
       ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        mainAxisSize: MainAxisSize.min,
-        children: <Widget>[
-          PanelValue(
-            value == null ? '—' : value.toStringAsFixed(trend.digits),
-            unit: trend.unit,
-            context_: dates.isEmpty ? null : dates.last,
+      child: Builder(
+        builder: (context) {
+          final colors = context.colors;
+          return Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            mainAxisSize: MainAxisSize.min,
+            children: <Widget>[
+              PanelValue(
+                mean == null ? '—' : _say(mean),
+                unit: trend.unit,
+                context_: measured == 0
+                    ? null
+                    : 'average over $measured nights',
+              ),
+              Wrap(
+                spacing: 8,
+                runSpacing: 6,
+                crossAxisAlignment: WrapCrossAlignment.center,
+                children: <Widget>[
+                  if (change case final Verdict said) VerdictChip(said),
+                  Text(
+                    trend.higherIsBetter
+                        ? 'Higher is better.'
+                        : 'Lower is better.',
+                    style: KeyType.line.copyWith(color: colors.ink2),
+                  ),
+                ],
+              ),
+              const SizedBox(height: chartGap),
+              RevealOnce(
+                id: 'sleep.trend.${trend.metric}',
+                registry: reveals,
+                builder: (context, t) => TrendDots(
+                  values: values,
+                  progress: t,
+                  band: usual,
+                  average: mean,
+                  digits: trend.digits,
+                  ceiling: trend.ceiling,
+                  captions: dates.isEmpty
+                      ? const <String>[]
+                      : <String>[dates.first, dates.last],
+                  semanticLabel: '${trend.title} over the recent nights',
+                ),
+              ),
+              const SizedBox(height: chartGap),
+              _sentence(colors, values, usual),
+              if (usual != null) const PanelNote(kTrendLegend),
+              PanelNote(note),
+              if (latest case Withheld<double>(:final disclosure))
+                PanelNote('Latest reading: ${disclosure.message}'),
+            ],
+          );
+        },
+      ),
+    );
+  }
+
+  Widget _sentence(
+    HealtheeColors colors,
+    List<double?> values,
+    UsualRange? usual,
+  ) {
+    final style = KeyType.line.copyWith(color: colors.ink2);
+    if (usual == null) {
+      return Text(
+        'Your usual range needs $kUsualMinDays measured nights before these. '
+        'It is still being learned.',
+        style: style,
+      );
+    }
+    final inside = values
+        .where((v) => v != null && usual.sideOf(v) == UsualSide.within)
+        .length;
+    return Text.rich(
+      TextSpan(
+        style: style,
+        children: <InlineSpan>[
+          TextSpan(
+            text: '$inside of $measured nights',
+            style: TextStyle(fontWeight: FontWeight.w700, color: colors.ink),
           ),
-          const SizedBox(height: chartGap),
-          RevealOnce(
-            id: 'sleep.trend.${trend.metric}',
-            registry: reveals,
-            builder: (context, t) => V02LineChart(
-              series,
-              progress: t,
-              height: chartHeight,
-              unit: trend.unit,
-              digits: trend.digits,
-              // Nightly readings. See the library docstring.
-              curve: SeriesCurve.straight,
-              captions: dates.isEmpty
-                  ? const <String>[]
-                  : <String>[dates.first, dates.last],
-              sampleLabels: dates,
-              semanticLabel: '${trend.title} over the recent nights',
-            ),
+          TextSpan(
+            text:
+                ' were inside your usual of ${_say(usual.low)} to '
+                '${_say(usual.high)} ${trend.unit}.',
           ),
-          PanelNote(note),
-          if (latest case Withheld<double>(:final disclosure))
-            PanelNote('Latest reading: ${disclosure.message}'),
         ],
       ),
     );
