@@ -52,10 +52,15 @@ import 'package:healthee/core/theme/tokens.dart';
 import 'package:healthee/core/theme/tone.dart';
 import 'package:healthee/core/theme/tone_scope.dart';
 import 'package:healthee/core/theme/type_scale.dart';
+import 'package:healthee/core/theme/type_scale_keys.dart';
 import 'package:healthee/data/honesty/reading.dart';
 import 'package:healthee/data/models/sleep_night.dart';
 import 'package:healthee/features/sleep/sleep_format.dart';
-import 'package:healthee/shared/v02/colour_key.dart';
+import 'package:healthee/features/today/v02/today_key_numbers.dart'
+    show kLearningUsual, kSleepTrackMax, kSleepTrackMin;
+import 'package:healthee/shared/usual_range.dart';
+import 'package:healthee/shared/v02/key_number_card.dart';
+import 'package:healthee/shared/v02/range_bar.dart';
 
 /// What the strap's own number is, said where the number is.
 const String kDeviceScoreCaption = 'Amazfit score\nDevice estimate';
@@ -63,10 +68,30 @@ const String kDeviceScoreCaption = 'Amazfit score\nDevice estimate';
 /// The night's headline: time asleep, and the strap's own score beside it.
 class SleepReading extends StatelessWidget {
   /// [night] is the most recent session on the payload.
-  const SleepReading({required this.night, super.key});
+  const SleepReading({
+    required this.night,
+    this.usual,
+    this.needMin,
+    super.key,
+  });
 
   /// The night being read.
   final SleepNight night;
+
+  /// The owner's usual time asleep (`sleep_usual.dart`), or null while there
+  /// are too few nights to have one.
+  final UsualRange? usual;
+
+  /// The server's sleep need, minutes, when it sent one.
+  final int? needMin;
+
+  /// Between the range bar's line and the three small figures.
+  static const double statsGap = 14;
+
+  /// The three small figures' gap, corner and padding.
+  static const double statGap = 8;
+  static const double statRadius = 16;
+  static const EdgeInsets statPadding = EdgeInsets.fromLTRB(12, 10, 12, 12);
 
   /// `padding: 8px 4px 20px`.
   static const EdgeInsets padding = EdgeInsets.fromLTRB(4, 8, 4, 20);
@@ -116,8 +141,17 @@ class SleepReading extends StatelessWidget {
             ],
           ),
         ),
-        const SizedBox(height: keyGap),
-        ColourKey(keys(night)),
+        if (night.tstMin.valueOrNull case final double minutes) ...<Widget>[
+          const SizedBox(height: keyGap),
+          _bar(minutes),
+          const SizedBox(height: 10),
+          _verdictLine(colors, minutes),
+        ],
+        if (stats(night) case final List<(String, String)> figures
+            when figures.isNotEmpty) ...<Widget>[
+          const SizedBox(height: statsGap),
+          _stats(colors, figures),
+        ],
         if (refusals(night) case final List<String> lines when lines.isNotEmpty)
           Padding(
             padding: const EdgeInsets.only(top: noteGap),
@@ -130,14 +164,111 @@ class SleepReading extends StatelessWidget {
     );
   }
 
-  /// `bedtime`, `wake`, `in bed` — each dropped when it was not recorded.
-  static List<ColourKeyEntry> keys(SleepNight night) => <ColourKeyEntry>[
-    if (night.start case final DateTime start)
-      ColourKeyEntry('${clock(start)} bedtime', tone: Tone.sleep),
-    if (night.end case final DateTime end)
-      ColourKeyEntry('${clock(end)} wake', tone: Tone.movement),
+  /// The night against the owner's usual, on the 4 to 9 hour track Today uses.
+  Widget _bar(double minutes) {
+    final band = usual;
+    return RangeBar(
+      value: minutes,
+      min: kSleepTrackMin.toDouble(),
+      max: kSleepTrackMax.toDouble(),
+      band: band,
+      startLabel: '4h',
+      endLabel: '9h',
+      usualLabel: band == null
+          ? null
+          : 'usual ${hoursMinutes(band.low)} to ${hoursMinutes(band.high)}',
+      pendingLabel: kLearningUsual,
+      semanticLabel: 'Asleep ${hoursMinutes(minutes)}.',
+    );
+  }
+
+  /// The verdict, and how far the night was from the server's need.
+  Widget _verdictLine(HealtheeColors colors, double minutes) {
+    final side = usual?.sideOf(minutes);
+    final need = needMin;
+    final gap = need == null ? null : (need - minutes).round();
+    return Wrap(
+      spacing: 8,
+      runSpacing: 6,
+      crossAxisAlignment: WrapCrossAlignment.center,
+      children: <Widget>[
+        if (side != null)
+          VerdictChip(
+            Verdict(
+              side.words,
+              side == UsualSide.below ? VerdictTone.worse : VerdictTone.neutral,
+            ),
+          ),
+        if (need != null && gap != null)
+          Text.rich(
+            TextSpan(
+              style: KeyType.line.copyWith(color: colors.ink2),
+              children: <InlineSpan>[
+                TextSpan(
+                  text: gap == 0
+                      ? 'Exactly'
+                      : '${hoursMinutes(gap.abs())} ${gap > 0 ? 'short' : 'over'}',
+                  style: TextStyle(
+                    fontWeight: FontWeight.w700,
+                    color: colors.ink,
+                  ),
+                ),
+                TextSpan(
+                  text:
+                      ' ${gap == 0 ? 'your' : 'of your'} ${hoursMinutes(need)} need.',
+                ),
+              ],
+            ),
+          ),
+      ],
+    );
+  }
+
+  Widget _stats(HealtheeColors colors, List<(String, String)> figures) => Row(
+    children: <Widget>[
+      for (var i = 0; i < figures.length; i++) ...<Widget>[
+        if (i > 0) const SizedBox(width: statGap),
+        Expanded(
+          child: DecoratedBox(
+            decoration: ShapeDecoration(
+              color: colors.surface,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(statRadius),
+                side: BorderSide(color: colors.line, width: hairline),
+              ),
+            ),
+            child: Padding(
+              padding: statPadding,
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: <Widget>[
+                  Text(
+                    figures[i].$1,
+                    style: TypeScale.small.copyWith(color: colors.ink2),
+                  ),
+                  const SizedBox(height: 6),
+                  Align(
+                    alignment: Alignment.centerRight,
+                    child: Text(
+                      figures[i].$2,
+                      style: KeyType.name.copyWith(color: colors.ink),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ),
+      ],
+    ],
+  );
+
+  /// `In bed`, `Up`, `Time in bed` — each dropped when it was not recorded.
+  static List<(String, String)> stats(SleepNight night) => <(String, String)>[
+    if (night.start case final DateTime start) ('In bed', clock(start)),
+    if (night.end case final DateTime end) ('Up', clock(end)),
     if (night.tibMin.valueOrNull case final double minutes)
-      ColourKeyEntry.plain('${hoursMinutes(minutes)} in bed'),
+      ('Time in bed', hoursMinutes(minutes)),
   ];
 
   /// The server's own reason for every field this block could not draw.

@@ -24,7 +24,9 @@ library;
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:healthee/core/theme/tokens.dart';
 import 'package:healthee/core/theme/tone.dart';
+import 'package:healthee/core/theme/type_scale.dart';
 import 'package:healthee/data/history/dated_history.dart';
 import 'package:healthee/data/models/recovery_score.dart';
 import 'package:healthee/data/models/sleep_night.dart';
@@ -36,7 +38,11 @@ import 'package:healthee/shared/states/current_account_value.dart';
 import 'package:healthee/shared/usual_range.dart';
 import 'package:healthee/shared/v02/key_number_card.dart';
 import 'package:healthee/shared/v02/range_bar.dart';
+import 'package:healthee/shared/v02/section_head.dart';
 import 'package:solar_icons/solar_icons.dart';
+
+/// The heading over the three cards, `proposal.js`'s own.
+const String kKeyNumbersTitle = "Today's three";
 
 /// What a bar says while there is no band yet.
 const String kLearningUsual = 'learning your usual';
@@ -81,16 +87,37 @@ class TodayKeyNumbers extends ConsumerWidget {
         if (night.tstMin.valueOrNull case final double minutes)
           if (_before(night.date, day)) minutes,
     ];
+    final colors = context.colors;
     return Padding(
-      padding: const EdgeInsets.only(top: 12),
+      padding: const EdgeInsets.only(top: 22),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: <Widget>[
+          const SectionHead(title: kKeyNumbersTitle),
           _recovery(history),
           const SizedBox(height: kKeyGap),
           _sleep(nights == null ? null : usualRangeOf(sleepValues)),
           const SizedBox(height: kKeyGap),
           _movement(history),
+          const SizedBox(height: 12),
+          Text.rich(
+            TextSpan(
+              style: TypeScale.panelContext.copyWith(color: colors.ink2),
+              children: <InlineSpan>[
+                const TextSpan(
+                  text: 'The shaded part of each bar is the middle half of ',
+                ),
+                TextSpan(
+                  text: 'your own last $kUsualWindowDays days',
+                  style: TextStyle(
+                    fontWeight: FontWeight.w700,
+                    color: colors.ink,
+                  ),
+                ),
+                const TextSpan(text: '. The mark is today.'),
+              ],
+            ),
+          ),
         ],
       ),
     );

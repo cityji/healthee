@@ -93,7 +93,12 @@ typedef SectionExtent = double Function(BuildContext context);
 @immutable
 class PageSection {
   /// Builds one entry of a screen's list.
-  const PageSection(this.child, {this.gap = PageSpacing.card, this.pinnedExtent});
+  const PageSection(
+    this.child, {
+    this.gap = PageSpacing.card,
+    this.pinnedExtent,
+    this.bleed = false,
+  });
 
   /// What to draw.
   final Widget child;
@@ -108,4 +113,8 @@ class PageSection {
   /// nav — and this is that, in the only shape a scroll view has for it. The
   /// screen shell reads it; nothing else needs to know.
   final SectionExtent? pinnedExtent;
+
+  /// True draws [child] edge to edge, without the page's side padding: the
+  /// Today hero, which fades into the page rather than sitting on it.
+  final bool bleed;
 }

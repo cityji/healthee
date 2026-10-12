@@ -228,8 +228,9 @@ void main() {
     for (final width in kPhoneWidths) {
       final frame = await _frameAt(tester, store, width);
       // The box is the card's, so a claim in units is a claim about this phone
-      // and not about the 800 px surface `flutter test` defaults to.
-      expect(frame.field.size.width, lessThan(width));
+      // and not about the 800 px surface `flutter test` defaults to. Today's
+      // hero runs edge to edge now, so the card is the phone's full width.
+      expect(frame.field.size.width, lessThanOrEqualTo(width));
       expect(frame.dots, isNotEmpty);
       for (final batch in frame.dots) {
         expect(

@@ -67,6 +67,11 @@ class _TodayScreenState extends ConsumerState<TodayScreen> {
     // The wall-clock day, NOT the selection: it is the control's forward bound
     // and the day `Latest` returns to, so it has to keep meaning "now".
     final today = ref.watch(todayProvider);
+    // Held, not watched: the Sleep key number's usual is built from these
+    // nights, and the card is a list item that unmounts when scrolled away.
+    // Without a listener here the page would be dropped and fetched again
+    // every time the card came back into view.
+    ref.listen(sleepPageProvider, (_, _) {});
     final push = ref.watch(pushStampProvider).value;
     // `.value?.signedIn` and not `.requireValue`: while the keystore read is in
     // flight this is null, which the data-health strip reads as "not yet known"
@@ -107,8 +112,8 @@ class _TodayScreenState extends ConsumerState<TodayScreen> {
           // location and leave the sign-in screen with nothing beneath it.
           onSignIn: () => unawaited(context.push(Routes.serverSignIn)),
           onOpenProfile: () => unawaited(context.push(Routes.settings)),
-          // The coach is a route now — `app_shell.dart`'s FAB pushes the same
-          // one, so the entry card and the FAB cannot drift apart. No topic:
+          // The coach is a route now — the header's button pushes the same
+          // one, so the entry card and the button cannot drift apart. No topic:
           // this card asks nothing in particular.
           onOpenCoach: () => unawaited(context.push(Routes.coach)),
           onOpenActions: () => context.go(Routes.actions),
@@ -144,8 +149,6 @@ class _TodayScreenState extends ConsumerState<TodayScreen> {
       context.go(Routes.sleep);
       return;
     }
-    unawaited(
-      context.push(term == 'fitness' ? Routes.fitness : Routes.body),
-    );
+    unawaited(context.push(term == 'fitness' ? Routes.fitness : Routes.body));
   }
 }

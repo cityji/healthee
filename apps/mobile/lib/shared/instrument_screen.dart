@@ -232,6 +232,18 @@ class _SectionList extends StatelessWidget {
     }
 
     for (final section in sections) {
+      if (section.bleed) {
+        flush();
+        slivers.add(
+          SliverToBoxAdapter(
+            child: Padding(
+              padding: EdgeInsets.only(bottom: section.gap),
+              child: section.child,
+            ),
+          ),
+        );
+        continue;
+      }
       if (section.pinnedExtent case final SectionExtent extent) {
         flush();
         slivers.add(
@@ -296,4 +308,3 @@ class _PinnedSection extends SliverPersistentHeaderDelegate {
       oldDelegate.background != background ||
       oldDelegate.child != child;
 }
-

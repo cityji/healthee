@@ -81,7 +81,7 @@ void todayBody(
   // the screen: it collapsed the card the owner reads first into a small dashed
   // box. `today_hero_withheld.dart` keeps the hero's ground, radius, padding,
   // eyebrow and model label, and puts the server's prose behind the ⓘ.
-  sections.add(
+  sections.addBleed(
     ReadingView<BiologicalAge>(
       reading: snapshot.biologicalAge,
       label: 'Biological age · estimate',

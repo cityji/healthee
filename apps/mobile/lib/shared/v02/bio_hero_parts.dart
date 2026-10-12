@@ -231,28 +231,75 @@ class BioModelLabel extends StatelessWidget {
 /// [lineMix] fades the edge toward the page rather than fading the edge itself,
 /// so a hero on a light page keeps a visible boundary and one on a dark page
 /// does not draw a second frame around the card behind it.
-///
-/// [framed] false draws the ground with no edge at all: the redesigned Today
-/// hero (`design/mobile-preview/proposal.css`, `.p-hero .bio-hero { border: 0 }`),
-/// where the tinted ground is the boundary and a hairline around it read as a
-/// frame the owner called odd.
 ShapeDecoration bioHeroSkin(
   HealtheeColors colors, {
   required double radius,
   required double lineMix,
-  bool framed = true,
 }) => ShapeDecoration(
   color: colors.bioBackground,
   shape: hSquircle(
     radius,
-    side: framed
-        ? BorderSide(
-            color: Color.lerp(colors.bioLine, colors.surface, 1 - lineMix)!,
-            width: hairline,
-          )
-        : BorderSide.none,
+    side: BorderSide(
+      color: Color.lerp(colors.bioLine, colors.surface, 1 - lineMix)!,
+      width: hairline,
+    ),
   ),
 );
+
+/// `.p-hero .bio-hero` from `proposal.css`: Today's hero merged into the page.
+///
+/// It is drawn edge to edge (`PageSection.bleed`) with no border. On a light
+/// page its ground ends in [kBioMergedRadius] corners at the bottom only, so it
+/// reads as the top of the screen tinted; on a dark one it has no corners at
+/// all, and [bioHeroFades] dissolve its top and bottom into the page.
+ShapeDecoration bioHeroMergedSkin(HealtheeColors colors) => ShapeDecoration(
+  color: colors.bioBackground,
+  shape: RoundedRectangleBorder(
+    borderRadius: _isDark(colors)
+        ? BorderRadius.zero
+        : const BorderRadius.vertical(
+            bottom: Radius.circular(kBioMergedRadius),
+          ),
+  ),
+);
+
+/// `:root:not([data-theme='dark']) .p-hero .bio-hero { border-radius: 0 0 32px 32px }`.
+const double kBioMergedRadius = 32;
+
+/// `.p-hero .bio-hero::before / ::after { height: 72px }`.
+const double kBioFadeHeight = 72;
+
+/// The dark hero's two fades, page colour to clear, at its top and bottom.
+/// None on a light page, where the ground's own edge is the boundary.
+List<Widget> bioHeroFades(HealtheeColors colors) {
+  if (!_isDark(colors)) {
+    return const <Widget>[];
+  }
+  Widget fade(Alignment from) => Positioned(
+    left: 0,
+    right: 0,
+    top: from == Alignment.topCenter ? 0 : null,
+    bottom: from == Alignment.bottomCenter ? 0 : null,
+    height: kBioFadeHeight,
+    child: IgnorePointer(
+      child: DecoratedBox(
+        decoration: BoxDecoration(
+          gradient: LinearGradient(
+            begin: from,
+            end: -from,
+            colors: <Color>[colors.bg, colors.bg.withValues(alpha: 0)],
+          ),
+        ),
+      ),
+    ),
+  );
+  return <Widget>[fade(Alignment.topCenter), fade(Alignment.bottomCenter)];
+}
+
+/// Dark when the page is darker than the hero's ink: true of the dark theme
+/// whatever its exact values, and of no light one.
+bool _isDark(HealtheeColors colors) =>
+    colors.bg.computeLuminance() < colors.bioInk.computeLuminance();
 
 /// `.bio-art` geometry, measured from the padding box.
 const Rect kBioArtRect = Rect.fromLTWH(0, 18, 300, 230);
