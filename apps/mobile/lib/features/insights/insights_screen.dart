@@ -57,6 +57,7 @@ class InsightsScreen extends ConsumerWidget {
           // whose Details link and whose button both open the coach. No topic:
           // the panel's own question is what would you like to understand.
           onOpenCoach: () => unawaited(context.push(Routes.coach)),
+          onOpenTrends: () => unawaited(context.push(Routes.trends)),
           onOpenSleepHistory: () =>
               unawaited(context.push(Routes.sleepHistory)),
           onOpenFitness: () => unawaited(context.push(Routes.fitness)),
