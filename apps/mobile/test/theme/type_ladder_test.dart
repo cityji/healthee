@@ -27,7 +27,6 @@ import 'package:healthee/core/theme/meter_type_scale.dart';
 import 'package:healthee/core/theme/sleep_type_scale.dart';
 import 'package:healthee/core/theme/type_ladder.dart';
 import 'package:healthee/core/theme/type_scale.dart';
-import 'package:healthee/core/theme/type_scale_bio.dart';
 import 'package:healthee/core/theme/type_scale_dates.dart';
 import 'package:healthee/core/theme/type_scale_forms.dart';
 import 'package:healthee/core/theme/type_scale_keys.dart';
@@ -177,8 +176,6 @@ Map<String, TextStyle> _otherScales() => <String, TextStyle>{
   'KeyType.chip': KeyType.chip,
   'KeyType.rangeEnd': KeyType.rangeEnd,
   'KeyType.rangeUsual': KeyType.rangeUsual,
-  'BioType.bioAge': BioType.bioAge,
-  'BioType.bioContext': BioType.bioContext,
   'DateType.dateCaret': DateType.dateCaret,
   'DateType.calendarMonth': DateType.calendarMonth,
   'DateType.calendarDay': DateType.calendarDay,

@@ -58,7 +58,9 @@ import 'package:healthee/features/sleep/sleep_screen.dart';
 import 'package:healthee/features/trends/trends_period.dart';
 import 'package:healthee/features/trends/trends_screen.dart';
 
+import '../_bio_age_stubs.dart';
 import '../_sleep_stubs.dart';
+import '../_today_stubs.dart';
 import '../features/_today_host.dart';
 import 'render_samples.dart';
 
@@ -96,6 +98,28 @@ void main() {
         todayHost(
           store,
           themeOverride: theme.value,
+          history: sampleHistory(),
+          sleep: sleepWithSampleNight(),
+        ),
+      );
+    });
+
+    // The paused age: the committed withheld shape with a weight 41 days old,
+    // so the hero draws the headline, the server's sentence, the caption and
+    // the button, and no number.
+    testWidgets('render today paused — ${theme.key}', (tester) async {
+      await _shoot(
+        tester,
+        'today-paused-${theme.key}',
+        todayHost(
+          store,
+          themeOverride: theme.value,
+          server: todayView(
+            mutate: pausedToday(absentTerms: [staleWeightTerm()]),
+          ),
+          profile: profileFixture(
+            mutate: (json) => <String, Object?>{...json, 'weight_age_days': 41},
+          ),
           history: sampleHistory(),
           sleep: sleepWithSampleNight(),
         ),

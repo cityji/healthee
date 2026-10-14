@@ -136,11 +136,7 @@ class _BodyScreenState extends ConsumerState<BodyScreen> {
 /// The screen's body. Public so the screen tests can host it directly.
 class BodyDetail extends StatelessWidget {
   /// Builds the detail for one render of `/api/today`.
-  const BodyDetail({
-    required this.snapshot,
-    required this.reveals,
-    super.key,
-  });
+  const BodyDetail({required this.snapshot, required this.reveals, super.key});
 
   /// `.panel { margin-top: 12px }`.
   static const double panelGap = 12;
@@ -173,8 +169,15 @@ class BodyDetail extends StatelessWidget {
   /// the number leans, the other says a lever is not in it at all. The panel
   /// above already draws the second, and drawing it twice would read as two
   /// exclusions.
+  ///
+  /// A paused day has no caveats on the reading, but the server still sent the
+  /// three that say which way the surviving terms lean; they come from the
+  /// block, which is the panel's own docstring promise.
   List<Disclosure> get caveats => <Disclosure>[
-    for (final caveat in snapshot.biologicalAge.caveatsOrEmpty)
+    for (final caveat in switch (snapshot.biologicalAge) {
+      Withheld<BiologicalAge>() => snapshot.bioAgeBlock.caveats,
+      final reading => reading.caveatsOrEmpty,
+    })
       if (!exclusions.contains(caveat)) caveat,
   ];
 
@@ -186,12 +189,20 @@ class BodyDetail extends StatelessWidget {
       children: <Widget>[
         switch (snapshot.biologicalAge) {
           Withheld<BiologicalAge>(:final disclosure, :final exclusions) =>
-            TodayBioHeroWithheld(withheld: disclosure, exclusions: exclusions),
+            TodayBioHeroWithheld(
+              withheld: disclosure,
+              block: snapshot.bioAgeBlock,
+              vo2maxWithheld: snapshot.vo2maxWithheld,
+              exclusions: exclusions,
+            ),
           _ when age != null => TodayBioHero(age: age, reveals: reveals),
           _ => const SizedBox.shrink(),
         },
         ContextBridge.text(kContributorsBridge),
-        if (age != null) ..._calculation(context, age),
+        if (age != null)
+          ..._calculation(context, age)
+        else
+          ..._terms(context, snapshot.bioAgeBlock.contributions),
         if (exclusions.isNotEmpty) ...<Widget>[
           const SizedBox(height: panelGap),
           ExcludedTermsPanel(
@@ -202,7 +213,8 @@ class BodyDetail extends StatelessWidget {
         const SizedBox(height: panelGap),
         AgeConfidencePanel(
           caveats: caveats,
-          researchNotes: age?.researchNotes ?? const <String>[],
+          researchNotes:
+              age?.researchNotes ?? snapshot.bioAgeBlock.researchNotes,
         ),
         const SizedBox(height: blockGap),
         const DataFooter(),
@@ -222,29 +234,43 @@ class BodyDetail extends StatelessWidget {
           reveals: reveals,
         ),
       ],
-      for (final term in age.contributions) ...<Widget>[
-        const SizedBox(height: panelGap),
-        if (ageTermTone(term.term) == Tone.sleep)
-          SleepTermPanel(
-            term: term,
-            onOpenSleep: () => unawaited(context.push(Routes.sleep)),
-          )
-        else
-          FitnessTermPanel(
-            term: term,
-            vo2max: snapshot.vo2max.valueOrNull,
-            reveals: reveals,
-            onOpenFitness: () => unawaited(context.push(Routes.fitness)),
-          ),
-      ],
+      ..._terms(context, age.contributions),
     ];
   }
+
+  /// One panel per lever the server priced. On a paused day these are the
+  /// levers that ARE current (the partial case); the absent one has no panel
+  /// because the server sent no contribution for it.
+  List<Widget> _terms(
+    BuildContext context,
+    List<AgeContribution> contributions,
+  ) => <Widget>[
+    for (final term in contributions) ...<Widget>[
+      const SizedBox(height: panelGap),
+      if (ageTermTone(term.term) == Tone.sleep)
+        SleepTermPanel(
+          term: term,
+          onOpenSleep: () => unawaited(context.push(Routes.sleep)),
+        )
+      else
+        FitnessTermPanel(
+          term: term,
+          vo2max: snapshot.vo2max.valueOrNull,
+          reveals: reveals,
+          onOpenFitness: () => unawaited(context.push(Routes.fitness)),
+        ),
+    ],
+  ];
 }
 
 /// The page every state of this screen is drawn in, so the head and the gutter
 /// cannot differ between them.
 class _Frame extends StatelessWidget {
-  const _Frame({required this.children, this.date, this.status = kLatestSample});
+  const _Frame({
+    required this.children,
+    this.date,
+    this.status = kLatestSample,
+  });
 
   final List<Widget> children;
   final String? date;

@@ -7,8 +7,8 @@
 /// ## What the control must never be allowed to cause
 ///
 /// A date control creates a way to have one day's numbers on screen with another
-/// day's date above them, which is **stale-as-current**: the failure `LastKnown`
-/// exists for, the one `vo2max_tier.py`'s freshness horizon exists for, and the
+/// day's date above them, which is **stale-as-current**: the failure
+/// `vo2max_tier.py`'s freshness horizon exists for, and the
 /// one this repo has already swept three times.
 ///
 /// The answer used to be a refusal — `/api/today` took no day, so the screen drew

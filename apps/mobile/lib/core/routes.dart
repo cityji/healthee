@@ -11,6 +11,8 @@
 /// the paths are wanted — `core/parent_tabs.dart` does.
 library;
 
+import 'package:healthee/core/profile_field.dart';
+
 /// Every route's path, in one place. Screens reference these, never string
 /// literals — Standards section 3 bans the string-literal habit for user
 /// constants and the reasoning is the same here: a typo'd path fails at
@@ -198,6 +200,30 @@ String coachLocation([String? topic]) {
 String? coachTopicOf(Uri uri) {
   final String subject = uri.queryParameters['topic']?.trim() ?? '';
   return subject.isEmpty ? null : subject;
+}
+
+/// The query parameter the profile's focused field rides in.
+const String kFocusParameter = 'focus';
+
+/// The profile's location, opened on [focus] when there is one.
+///
+/// `/profile?focus=weight`. The same pattern as [coachLocation]: one builder,
+/// so a caller cannot spell the field a way [profileFocusOf] does not read.
+String profileLocation({ProfileField? focus}) => focus == null
+    ? Routes.profile
+    : '${Routes.profile}?$kFocusParameter=${focus.name}';
+
+/// [profileLocation] read back: the field named in [uri], or null for the
+/// plain profile. An unknown name is no field, the same answer a link that
+/// carried none gets, rather than a guess at which field was meant.
+ProfileField? profileFocusOf(Uri uri) {
+  final String? raw = uri.queryParameters[kFocusParameter];
+  for (final ProfileField field in ProfileField.values) {
+    if (field.name == raw) {
+      return field;
+    }
+  }
+  return null;
 }
 
 /// The query parameter the selected day rides in — `?date=2026-07-29`.

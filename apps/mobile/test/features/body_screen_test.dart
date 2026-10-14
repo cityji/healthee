@@ -26,6 +26,7 @@ import 'package:healthee/shared/reveal_once.dart';
 import 'package:healthee/shared/v02/comparison_bars.dart';
 import 'package:healthee/shared/v02/instruments/age_waterfall.dart';
 
+import '../_bio_age_stubs.dart';
 import '../_today_stubs.dart';
 import '_settings_harness.dart' show tallViewport;
 import '_today_host.dart';
@@ -131,29 +132,51 @@ void main() {
         todayHost(
           store,
           server: todayView(
-            mutate: (json) => <String, Object?>{
-              ...json,
-              'biological_age': <String, Object?>{
-                ...json['biological_age']! as Map<String, Object?>,
-                'biological_age': null,
-                'withheld': <String, Object?>{
-                  'reason': 'logged_weight_stale',
-                  'message': 'Log a weigh-in and this comes back.',
-                },
-              },
-            },
+            mutate: pausedToday(
+              absentTerms: <Map<String, Object?>>[staleWeightTerm()],
+            ),
           ),
           home: const BodyScreen(),
         ),
       );
       await tester.pumpAndSettle();
 
-      expect(find.textContaining('Log a weigh-in'), findsWidgets);
+      expect(find.textContaining('Log a weight and it returns'), findsWidgets);
       expect(find.textContaining(_exclusionOpening), findsOneWidget);
-      // Nothing that needs numbers is drawn.
+      // Nothing that needs the number is drawn.
       expect(find.byType(AgeWaterfall), findsNothing);
+      expect(find.byType(AgeLadderPanel), findsNothing);
+      // The absent term has no panel; the server sent no contribution for it.
       expect(find.text(FitnessTermPanel.title), findsNothing);
-      expect(find.text(SleepTermPanel.title), findsNothing);
+    });
+
+    testWidgets('a PARTIAL day still draws the term that is current', (
+      tester,
+    ) async {
+      tallViewport(tester);
+      await tester.pumpWidget(
+        todayHost(
+          store,
+          server: todayView(
+            mutate: pausedToday(
+              absentTerms: <Map<String, Object?>>[staleWeightTerm()],
+            ),
+          ),
+          home: const BodyScreen(),
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      expect(find.text(SleepTermPanel.title), findsOneWidget);
+      // And the caveats the server sent with the paused block reach the
+      // confidence panel instead of an empty list.
+      final detail = tester.widget<BodyDetail>(find.byType(BodyDetail));
+      expect(detail.caveats, isNotEmpty);
+      final panel = tester.widget<AgeConfidencePanel>(
+        find.byType(AgeConfidencePanel),
+      );
+      expect(panel.caveats, hasLength(3));
+      expect(panel.researchNotes, <String>['biological_age_estimate']);
     });
 
     test('THE COMPARISON SCALE COMES FROM THE DATA, NOT FROM AN AXIS', () {

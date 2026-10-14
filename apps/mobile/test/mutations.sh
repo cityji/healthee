@@ -1185,7 +1185,7 @@ mutate 'the movement tile invents a step target' "$HERO_TEST" \
 # ── the v02 Today fixes (withheld hero · provenance off the cards) ───────────
 ENVELOPE=lib/data/honesty/envelope.dart
 WITHHELD_HERO=lib/features/today/v02/today_hero_withheld.dart
-HERO_PARTS=lib/shared/v02/bio_hero_parts.dart
+AGE_PAUSED=lib/features/today/v02/age_paused.dart
 SHEET=lib/shared/metric_info/metric_info_sheet.dart
 NIGHT=lib/features/today/v02/night_panels.dart
 RECOVERY=lib/features/today/v02/recovery_panel.dart
@@ -1210,28 +1210,34 @@ mutate 'the composite withheld block is unreadable again' \
   '    return null;'
 
 # The essay back on the card's face, by the shortest route there is.
-mutate 'the withheld hero prints the server prose inline' \
+mutate 'the withheld hero prints the exclusion essay inline' \
   "$WITHHELD_HERO_TEST" "$WITHHELD_HERO" \
-  '      kWithheldPointer,
-      if (left.isNotEmpty)' \
-  '      withheld.message,
-      for (final term in withheld.terms) term.message,
-      for (final exclusion in exclusions) exclusion.message,
-      kWithheldPointer,
-      if (left.isNotEmpty)'
+  "    return 'Left out of this number: \$list.';" \
+  "    return exclusions.map((e) => e.message).join(' ');"
 
-# The date blanked. A held figure with no date IS the stale-as-current bug.
-mutate 'the last-known date is blanked' \
-  "$WITHHELD_HERO_TEST" "$HERO_PARTS" \
-  "          '\$asOfPrefix\${plainDay(day)}'," \
-  "          ''," 
+# A number back inside the paused orb. A paused estimate shows no figure and no
+# older figure standing in for it.
+mutate 'the paused orb draws a figure again' \
+  "$WITHHELD_HERO_TEST" "$WITHHELD_HERO" \
+  '      paused: true,' \
+  '      paused: false,'
 
-# The refused hero collapsed back into a panel — the small dashed box the owner
+# The button that fixes the pause opens the profile with nothing focused, so the
+# owner lands on a form and has to find the field.
+mutate 'the paused age button loses its field' \
+  test/features/age_paused_test.dart "$AGE_PAUSED" \
+  'context.push(profileLocation(focus: pause.action))' \
+  'context.push(profileLocation())'
+
+# The refused hero collapsed back into a panel, the small dashed box the owner
 # read as the card being missing.
 mutate 'the refused hero collapses into a panel' \
   "$WITHHELD_HERO_TEST" "$BODY" \
   '      withheldBuilder: (context, disclosure) => TodayBioHeroWithheld(
         withheld: disclosure,
+        block: snapshot.bioAgeBlock,
+        vo2maxWithheld: snapshot.vo2maxWithheld,
+        onOpen: extras.onOpenBody,
         exclusions: switch (snapshot.biologicalAge) {
           Withheld<BiologicalAge>(:final exclusions) => exclusions,
           _ => const <Disclosure>[],
