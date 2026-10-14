@@ -129,14 +129,20 @@ class AgeOrbHero extends StatelessWidget {
   /// The gap between the sphere and the line under it.
   static const double lineGap = 4;
 
+  /// The breakdown line's style: Callout, ink2.
+  static TextStyle breakdownStyle(HealtheeColors colors) =>
+      TypeLadder.callout.copyWith(color: colors.ink2);
+
   /// The figure, `34.3`. Also what a screen reader hears.
   final String value;
 
   /// Under the figure: `1.7 years younger`, coloured by which side it is.
   final Verdict? verdict;
 
-  /// The Callout under the sphere: what moved the estimate.
-  final String? breakdown;
+  /// The Callout under the sphere: what moved the estimate. A span, built by
+  /// the caller in [breakdownStyle] (`ageBreakdownSpan`), so its signs are
+  /// tightened against the digits.
+  final TextSpan? breakdown;
 
   /// The Caption under that: the not-clinical disclaimer.
   final String? caption;
@@ -231,12 +237,12 @@ class AgeOrbHero extends StatelessWidget {
           );
         },
       ),
-      if (breakdown case final String line) ...<Widget>[
+      if (breakdown case final TextSpan line) ...<Widget>[
         const SizedBox(height: Insets.sm),
-        Text(
+        Text.rich(
           line,
           textAlign: TextAlign.center,
-          style: TypeLadder.callout.copyWith(color: colors.ink2),
+          style: breakdownStyle(colors),
         ),
       ],
       if (caption case final String line) ...<Widget>[

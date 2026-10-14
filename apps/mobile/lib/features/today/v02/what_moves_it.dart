@@ -68,9 +68,8 @@ String ageBreakdownLine(BioAgeBlock block, {bool spoken = false}) {
 TextSpan whatMovesItSummarySpan(BioAgeBlock block, TextStyle style) =>
     _termsSpan(block, style, units: false);
 
-/// [ageBreakdownLine] as a span, tightened the same way, for a surface that
-/// can draw rich text (today's hero takes a `String`, so it adopts this when
-/// its owner moves it onto spans). `toPlainText` is exactly the line.
+/// [ageBreakdownLine] as a span, tightened the same way; today's hero draws
+/// it. `toPlainText` is exactly the line.
 TextSpan ageBreakdownSpan(BioAgeBlock block, TextStyle style) =>
     _termsSpan(block, style, units: true);
 

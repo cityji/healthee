@@ -11,7 +11,7 @@
 /// `delta_years` and `chronological_age` and is **omitted entirely** when
 /// either is null, rather than saying "0.0 years below" about an age nothing
 /// compared. The breakdown line is the block's own terms in the payload's
-/// order (`ageBreakdownLine`), so a term the server stops sending stops being
+/// order (`ageBreakdownSpan`), so a term the server stops sending stops being
 /// shown, and one it left out or could not count is named as such.
 ///
 /// The caption is the server's `disclaimer` when it fits one line, and the
@@ -20,6 +20,7 @@
 library;
 
 import 'package:flutter/material.dart';
+import 'package:healthee/core/theme/tokens.dart';
 import 'package:healthee/data/models/bio_age_block.dart';
 import 'package:healthee/data/models/biological_age.dart';
 import 'package:healthee/features/today/v02/what_moves_it.dart';
@@ -62,11 +63,14 @@ class TodayBioHero extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final breakdown = ageBreakdownLine(block);
+    final breakdown = ageBreakdownSpan(
+      block,
+      AgeOrbHero.breakdownStyle(context.colors),
+    );
     return AgeOrbHero(
       value: figureOf(age.biologicalAge),
       verdict: verdictOf(age),
-      breakdown: breakdown.isEmpty ? null : breakdown,
+      breakdown: breakdown.toPlainText().isEmpty ? null : breakdown,
       caption: captionOf(age),
       modelLabel: age.disclaimer ?? kPopulationModelLabel,
       onOpen: onOpenBody,

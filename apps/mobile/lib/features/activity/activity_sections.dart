@@ -62,6 +62,7 @@ import 'package:healthee/features/activity/v02/fitness_plan_panel.dart';
 import 'package:healthee/features/activity/v02/movement_panels.dart';
 import 'package:healthee/features/activity/v02/training_panels.dart';
 import 'package:healthee/features/activity/v02/zones_panel.dart';
+import 'package:healthee/shared/format/age_lever_format.dart';
 import 'package:healthee/shared/format/duration.dart';
 import 'package:healthee/shared/insight_card.dart';
 import 'package:healthee/shared/instrument_screen.dart';
@@ -89,13 +90,20 @@ const String kActivityRecoveryBridge =
 /// The years come from the payload's own `contributions` entry. There is no
 /// fallback sentence: a bridge that names a contribution the server did not send
 /// would be inventing the one number it exists to carry.
-String ageBridge(double years) =>
-    'The fitness component contributes ${_signed(years)} years to the age '
-    'model. That is a model output, not a change in actual age.';
-
-String _signed(double years) => years < 0
-    ? '−${(-years).toStringAsFixed(1)}'
-    : '+${years.toStringAsFixed(1)}';
+///
+/// A span, so the sign goes through [signedYearsSpan] and sits against its
+/// digits; [style] must carry a `fontSize`.
+TextSpan ageBridgeSpan(double years, TextStyle style) => TextSpan(
+  children: <InlineSpan>[
+    const TextSpan(text: 'The fitness component contributes '),
+    signedYearsSpan(years, style),
+    const TextSpan(
+      text:
+          ' years to the age model. That is a model output, not a change in '
+          'actual age.',
+    ),
+  ],
+);
 
 /// `history-screens.js::screens.activity` — `panels([…])`, in its order.
 ///
@@ -220,8 +228,8 @@ List<PageSection> activitySections(ScreenData data, ActivityExtras extras) {
     if (fitnessContributionYears(snapshot.biologicalAge.valueOrNull)
         case final double y) {
       sections.add(
-        ContextBridge.link(
-          ageBridge(y),
+        ContextBridge.richLink(
+          (style) => ageBridgeSpan(y, style),
           label: 'See the calculation',
           onOpen: extras.onOpenBody,
         ),
