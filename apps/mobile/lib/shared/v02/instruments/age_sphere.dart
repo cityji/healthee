@@ -99,6 +99,7 @@ class _AgeSphereState extends State<AgeSphere>
   bool _resumed = true;
   bool _visible = true;
   bool _entryDecided = false;
+  bool _recheckQueued = false;
   double _angleAtStart = kStillAngle;
   Duration _lastNotified = Duration.zero;
   int _frames = 0;
@@ -164,7 +165,17 @@ class _AgeSphereState extends State<AgeSphere>
     super.dispose();
   }
 
-  void _onScroll(ScrollNotification _) => _recheck();
+  /// A scroll notification can arrive in the middle of a layout, when a render
+  /// box may not read its size, so the check waits for the frame to finish.
+  void _onScroll(ScrollNotification _) {
+    if (_recheckQueued) return;
+    _recheckQueued = true;
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _recheckQueued = false;
+      _recheck();
+    });
+    WidgetsBinding.instance.ensureVisualUpdate();
+  }
 
   void _recheck() {
     if (!mounted) return;

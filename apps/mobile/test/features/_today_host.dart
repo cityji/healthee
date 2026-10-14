@@ -89,9 +89,9 @@ Widget todayHost(
     history: history,
     child: MaterialApp(
       theme: themeOverride ?? AppTheme.light,
-      // **Reduced motion, always.** Today's hero carries `AgeOrb`, a particle
+      // **Reduced motion, always.** Today's hero carries `AgeSphere`, a dot
       // field on a ticker, and a running one times out every `pumpAndSettle`.
-      // `age_orb.dart` holds still under `disableAnimations`, as a phone would.
+      // `age_sphere.dart` holds still under `disableAnimations`, as a phone would.
       builder: (context, child) => MediaQuery(
         data: MediaQuery.of(context).copyWith(disableAnimations: reducedMotion),
         child: child!,

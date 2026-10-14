@@ -99,7 +99,6 @@ class TodayBioHeroWithheld extends StatelessWidget {
       disclosuresLabel: kWithheldSheetLabel,
       onOpen: onOpen,
       openSemantics: TodayBioHero.eyebrowSemantics,
-      turning: false,
     );
   }
 

@@ -1,6 +1,6 @@
 /// The orb is IN the hero, it TURNS there, and it STOPS when it leaves.
 ///
-/// `age_orb.dart` turns its finished layer slowly and stops under reduced
+/// `age_sphere.dart` turns its dots slowly and stops under reduced
 /// motion. What a widget test of it alone cannot prove is that Today wired it
 /// up: a hero that dropped the orb would pass every one of those tests.
 ///
@@ -24,7 +24,7 @@ import 'package:healthee/features/today/today_labels.dart';
 import 'package:healthee/features/today/v02/today_key_numbers.dart';
 import 'package:healthee/shared/metric_info/metric_info_sheet.dart';
 import 'package:healthee/shared/v02/age_orb_hero.dart';
-import 'package:healthee/shared/v02/instruments/age_orb.dart';
+import 'package:healthee/shared/v02/instruments/age_sphere.dart';
 import 'package:healthee/shared/v02/key_number_card.dart';
 
 import '../_today_stubs.dart';
@@ -78,7 +78,9 @@ void main() {
     addTearDown(tester.view.reset);
   }
 
-  testWidgets('THE ORB IS INSIDE THE HERO, AROUND THE FIGURE', (tester) async {
+  testWidgets('THE SPHERE IS INSIDE THE HERO, AROUND THE FIGURE', (
+    tester,
+  ) async {
     phone(tester);
     await tester.pumpWidget(todayHost(store));
     await tester.pumpAndSettle();
@@ -87,13 +89,13 @@ void main() {
     expect(
       find.descendant(
         of: find.byType(AgeOrbHero),
-        matching: find.byType(AgeOrb),
+        matching: find.byType(AgeSphere),
       ),
       findsOneWidget,
       reason: 'the orb belongs around the figure, not somewhere near it',
     );
     // The figure is laid out inside the orb's own box.
-    final halo = tester.getRect(find.byType(AgeOrb));
+    final halo = tester.getRect(find.byType(AgeSphere));
     final figure = tester.getRect(find.text('34.3'));
     expect(halo.contains(figure.center), isTrue);
   });
@@ -140,7 +142,7 @@ void main() {
     await tester.pumpWidget(todayHost(store));
     await tester.pumpAndSettle();
 
-    expect(find.byType(AgeOrb), findsOneWidget);
+    expect(find.byType(AgeSphere), findsOneWidget);
   });
 
   group('what the hero says about the estimate', () {

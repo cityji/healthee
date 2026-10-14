@@ -18,8 +18,8 @@ import 'package:healthee/features/today/v02/age_paused.dart';
 import 'package:healthee/features/today/v02/today_hero_withheld.dart';
 import 'package:healthee/shared/metric_info/metric_info_sheet.dart';
 import 'package:healthee/shared/v02/age_orb_hero.dart';
-import 'package:healthee/shared/v02/instruments/age_orb.dart';
 import 'package:healthee/shared/v02/instruments/age_slider.dart';
+import 'package:healthee/shared/v02/instruments/age_sphere.dart';
 import 'package:healthee/shared/v02/withheld_panel.dart';
 
 import '../_bio_age_stubs.dart';
@@ -64,7 +64,7 @@ void main() {
       await tester.pumpWidget(todayHost(store));
       await tester.pumpAndSettle();
       final live = tester.getRect(find.byType(AgeOrbHero));
-      final liveOrb = tester.getRect(find.byType(AgeOrb));
+      final liveOrb = tester.getRect(find.byType(AgeSphere));
       final liveTitle = tester.getRect(find.text(kAgeOrbTitle));
 
       await tester.pumpWidget(const SizedBox.shrink());
@@ -80,7 +80,7 @@ void main() {
       final refused = tester.getRect(find.byType(AgeOrbHero));
       expect(refused.width, live.width);
       expect(refused.left, live.left);
-      final orb = tester.getRect(find.byType(AgeOrb));
+      final orb = tester.getRect(find.byType(AgeSphere));
       expect(orb.size, liveOrb.size);
       expect(orb.left, liveOrb.left);
       expect(tester.getRect(find.text(kAgeOrbTitle)).left, liveTitle.left);
@@ -122,7 +122,7 @@ void main() {
       expect(digits, findsNothing);
     });
 
-    testWidgets('THE ORB DOES NOT TURN AROUND AN ABSENT NUMBER', (
+    testWidgets('THE SPHERE DOES NOT TURN AROUND AN ABSENT NUMBER', (
       tester,
     ) async {
       phone(tester);
@@ -136,7 +136,7 @@ void main() {
       await tester.pump();
       await tester.pump(const Duration(milliseconds: 200));
 
-      expect(tester.widget<AgeOrb>(find.byType(AgeOrb)).turning, isFalse);
+      expect(tester.widget<AgeSphere>(find.byType(AgeSphere)).withheld, isTrue);
       var settled = true;
       try {
         await tester.pumpAndSettle(
