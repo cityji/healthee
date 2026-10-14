@@ -47,6 +47,9 @@ enum LeverAbsence {
   final String words;
 }
 
+/// What a withheld row says when its reason is printed above the card.
+const String kReasonAbove = 'Reason above';
+
 /// The key a row is found by in tests.
 Key leverRowKey(String term) => ValueKey<String>('lever-row-$term');
 
@@ -212,12 +215,7 @@ class AgeLeverRow extends StatelessWidget {
       'h' => 'hours',
       final String other => other,
     };
-    final text = signedYears(delta);
-    final years = text.startsWith(kMinus)
-        ? 'minus ${text.substring(1)} years'
-        : text.startsWith('+')
-        ? 'plus ${text.substring(1)} years'
-        : '$text years';
+    final years = spokenYears(delta);
     return '$name ${shown.value} $unit, $years';
   }
 }
@@ -229,6 +227,7 @@ class AgeAbsentRow extends StatelessWidget {
     required this.term,
     required this.absence,
     this.message,
+    this.note,
     this.onOpen,
     super.key,
   });
@@ -242,6 +241,9 @@ class AgeAbsentRow extends StatelessWidget {
   /// The sentence shown under the name, verbatim; null shows none.
   final String? message;
 
+  /// A Caption in place of [message], for a reason said elsewhere on screen.
+  final String? note;
+
   /// Called with the term when the row is tapped.
   final void Function(String term)? onOpen;
 
@@ -249,23 +251,30 @@ class AgeAbsentRow extends StatelessWidget {
   Widget build(BuildContext context) {
     final colors = context.colors;
     final text = message;
+    final aside = note;
     return _RowFrame(
       rowKey: leverRowKey(term),
       term: term,
       onOpen: onOpen,
       semantics:
           '${leverLabel(term)}, ${absence.words.toLowerCase()}'
-          '${text == null || text.isEmpty ? '' : '. $text'}',
+          '${text == null || text.isEmpty ? '' : '. $text'}'
+          '${aside == null ? '' : '. $aside'}',
       children: <Widget>[
         Row(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: <Widget>[
             Expanded(
-              child: text == null || text.isEmpty
-                  ? const SizedBox.shrink()
-                  : Text(
+              child: text != null && text.isNotEmpty
+                  ? Text(
                       text,
                       style: TypeLadder.callout.copyWith(color: colors.ink2),
+                    )
+                  : aside == null
+                  ? const SizedBox.shrink()
+                  : Text(
+                      aside,
+                      style: TypeLadder.caption.copyWith(color: colors.ink3),
                     ),
             ),
             const SizedBox(width: Insets.sm),

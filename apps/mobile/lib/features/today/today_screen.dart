@@ -117,13 +117,12 @@ class _TodayScreenState extends ConsumerState<TodayScreen> {
           // this card asks nothing in particular.
           onOpenCoach: () => unawaited(context.push(Routes.coach)),
           onOpenActions: () => context.go(Routes.actions),
-          // The three hero summary rows and the hero's own arrow. Pushed,
+          // The three key numbers and the biological-age hero. Pushed,
           // because they are destinations the owner came from Today and
           // expects to return to; the two that ARE tabs use `go`, because a
           // bar switches between siblings (`router.dart`'s table).
           onOpenRecovery: () => unawaited(context.push(Routes.recovery)),
           onOpenBody: () => unawaited(context.push(Routes.body)),
-          onOpenTerm: (term) => _openTerm(context, term),
           onOpenSleep: () => context.go(Routes.sleep),
           onOpenActivity: () => context.go(Routes.activity),
           onOpenTrends: () => unawaited(context.push(Routes.trends)),
@@ -137,19 +136,5 @@ class _TodayScreenState extends ConsumerState<TodayScreen> {
         ),
       ),
     );
-  }
-
-  /// One contribution row's destination, by the term the model named.
-  ///
-  /// `.bio-bottom` points its two anchors at `#fitness` and `#sleep`. A term
-  /// this app has no screen for opens the calculation instead, which is the one
-  /// screen that can always say something about any term — never nothing, and
-  /// never a screen about a different measurement.
-  void _openTerm(BuildContext context, String term) {
-    if (term.toLowerCase().contains('sleep')) {
-      context.go(Routes.sleep);
-      return;
-    }
-    unawaited(context.push(term == 'fitness' ? Routes.fitness : Routes.body));
   }
 }

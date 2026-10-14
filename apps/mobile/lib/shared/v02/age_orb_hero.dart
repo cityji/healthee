@@ -1,29 +1,27 @@
-/// Today's biological-age hero in the WHOOP Healthspan layout the owner asked
-/// for: no card, the page itself as the ground, a centred title, the orb with
-/// the figure inside it, a tick slider against the actual age, and the
-/// model's contributions as two figures under it.
+/// Today's biological-age hero: no card, the page itself as the ground. A
+/// Label row with the ⓘ, the sphere with the figure inside it, one Callout
+/// line of what moved it, and the not-clinical caption. No ruler, no stat
+/// columns, no slider: the Biological age screen has those.
 ///
-/// It is layout only. The figure, the sentence and the contributions are the
-/// caller's (`today_hero.dart`), and the model line and caveats go behind the
-/// ⓘ exactly as they did on the card this replaces: the hero reads the
-/// `CaveatScope` it is given and routes it into that one sheet.
+/// It is layout only. The figure, the breakdown line and the caption are the
+/// caller's (`today_hero.dart`). The model line and caveats go behind the ⓘ:
+/// the hero reads the `CaveatScope` it is given and routes it into that one
+/// sheet. The whole face is one button to the Biological age screen.
 library;
 
 import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
+import 'package:healthee/core/theme/dimensions.dart';
 import 'package:healthee/core/theme/tokens.dart';
 import 'package:healthee/core/theme/type_ladder.dart';
-import 'package:healthee/core/theme/type_scale_keys.dart';
 import 'package:healthee/data/honesty/disclosure.dart';
 import 'package:healthee/shared/instrument/h_tap.dart';
 import 'package:healthee/shared/metric_info/metric_detail.dart';
 import 'package:healthee/shared/metric_info/metric_info_sheet.dart';
 import 'package:healthee/shared/states/caveat_scope.dart';
-import 'package:healthee/shared/v02/bio_stats.dart';
 import 'package:healthee/shared/v02/instruments/age_sphere.dart';
 import 'package:healthee/shared/v02/key_number_card.dart';
-import 'package:solar_icons/solar_icons.dart';
 
 /// The hero's title, WHOOP's uppercase label.
 const String kAgeOrbTitle = 'BIOLOGICAL AGE';
@@ -106,7 +104,8 @@ class AgeOrbHero extends StatelessWidget {
   const AgeOrbHero({
     required this.value,
     this.verdict,
-    this.subtitle,
+    this.breakdown,
+    this.caption,
     this.below,
     this.infoKey = 'biological_age',
     this.modelLabel,
@@ -114,8 +113,6 @@ class AgeOrbHero extends StatelessWidget {
     this.disclosuresLabel,
     this.onOpen,
     this.openSemantics,
-    this.slider,
-    this.stats = const <BioStat>[],
     this.paused = false,
     super.key,
   });
@@ -126,17 +123,27 @@ class AgeOrbHero extends StatelessWidget {
   /// The sphere's canvas: 300 on Today, less on a narrower screen.
   static const double orbMax = 300;
 
+  /// The gap between the Label row and the sphere.
+  static const double headGap = 8;
+
+  /// The gap between the sphere and the line under it.
+  static const double lineGap = 4;
+
   /// The figure, `34.3`. Also what a screen reader hears.
   final String value;
 
   /// Under the figure: `1.7 years younger`, coloured by which side it is.
   final Verdict? verdict;
 
-  /// Under the title.
-  final String? subtitle;
+  /// The Callout under the sphere: what moved the estimate.
+  final String? breakdown;
 
-  /// Drawn under the orb, for a hero whose number is withheld: the reason, in
-  /// the caller's own widget.
+  /// The Caption under that: the not-clinical disclaimer.
+  final String? caption;
+
+  /// Drawn under the sphere for a hero whose number is withheld: the reason,
+  /// in the caller's own widget. It holds a button, so it is not in the hero's
+  /// one semantics node.
   final Widget? below;
 
   /// Whether the number is paused. The orb then holds nothing: no figure, no
@@ -153,15 +160,12 @@ class AgeOrbHero extends StatelessWidget {
   final List<Disclosure> extraDisclosures;
   final String? disclosuresLabel;
 
-  /// Where the arrow goes: the calculation behind the figure.
+  /// Where a tap on the hero goes: the Biological age screen.
   final VoidCallback? onOpen;
+
+  /// The one label the hero speaks: figure, delta, breakdown, and where a tap
+  /// goes.
   final String? openSemantics;
-
-  /// The age against the actual age.
-  final Widget? slider;
-
-  /// The model's contributions.
-  final List<BioStat> stats;
 
   @override
   Widget build(BuildContext context) {
@@ -177,64 +181,74 @@ class AgeOrbHero extends StatelessWidget {
           mainAxisSize: MainAxisSize.min,
           children: <Widget>[
             _head(colors, disclosed, scope?.label),
-            const SizedBox(height: 14),
-            LayoutBuilder(
-              builder: (context, box) {
-                final canvas = math.min(orbMax, box.maxWidth);
-                final figure = ageOrbCentre(
-                  context,
-                  colors,
-                  canvas: canvas,
-                  value: value,
-                  verdict: verdict,
-                  paused: paused,
-                );
-                return Center(
-                  child: AgeSphere(
-                    canvas: canvas,
-                    withheld: paused,
-                    clearHalfWidth: figure.halfWidth,
-                    centre: figure.centre,
-                  ),
-                );
-              },
+            const SizedBox(height: headGap),
+            HTap(
+              onTap: onOpen,
+              semanticLabel: openSemantics,
+              child: ExcludeSemantics(
+                excluding: openSemantics != null,
+                child: _face(colors),
+              ),
             ),
-            if (below case final Widget notice) ...<Widget>[
-              const SizedBox(height: 14),
-              notice,
-            ],
-            if (slider case final Widget scale) ...<Widget>[
-              const SizedBox(height: 18),
-              Text(
-                'AGAINST YOUR AGE',
-                style: _caps.copyWith(color: colors.ink2),
+            if (below case final Widget notice)
+              GestureDetector(
+                behavior: HitTestBehavior.opaque,
+                onTap: onOpen,
+                excludeFromSemantics: true,
+                child: Padding(
+                  padding: const EdgeInsets.only(top: 14),
+                  child: notice,
+                ),
               ),
-              const SizedBox(height: 6),
-              Row(
-                children: <Widget>[
-                  Text('Younger', style: _side.copyWith(color: colors.ink2)),
-                  const Spacer(),
-                  Text('Older', style: _side.copyWith(color: colors.ink2)),
-                ],
-              ),
-              scale,
-            ],
-            if (stats.isNotEmpty) ...<Widget>[
-              const SizedBox(height: 16),
-              _stats(colors),
-            ],
           ],
         ),
       ),
     );
   }
 
-  static final TextStyle _caps = KeyType.chip.copyWith(
-    fontSize: 11.5,
-    letterSpacing: 1.6,
-    fontWeight: FontWeight.w700,
+  Widget _face(HealtheeColors colors) => Column(
+    crossAxisAlignment: CrossAxisAlignment.stretch,
+    mainAxisSize: MainAxisSize.min,
+    children: <Widget>[
+      LayoutBuilder(
+        builder: (context, box) {
+          final canvas = math.min(orbMax, box.maxWidth);
+          final figure = ageOrbCentre(
+            context,
+            colors,
+            canvas: canvas,
+            value: value,
+            verdict: verdict,
+            paused: paused,
+          );
+          return Center(
+            child: AgeSphere(
+              canvas: canvas,
+              withheld: paused,
+              clearHalfWidth: figure.halfWidth,
+              centre: figure.centre,
+            ),
+          );
+        },
+      ),
+      if (breakdown case final String line) ...<Widget>[
+        const SizedBox(height: Insets.sm),
+        Text(
+          line,
+          textAlign: TextAlign.center,
+          style: TypeLadder.callout.copyWith(color: colors.ink2),
+        ),
+      ],
+      if (caption case final String line) ...<Widget>[
+        const SizedBox(height: lineGap),
+        Text(
+          line,
+          textAlign: TextAlign.center,
+          style: TypeLadder.caption.copyWith(color: colors.ink3),
+        ),
+      ],
+    ],
   );
-  static final TextStyle _side = KeyType.line.copyWith(fontSize: 12.5);
 
   Widget _head(
     HealtheeColors colors,
@@ -242,100 +256,21 @@ class AgeOrbHero extends StatelessWidget {
     String? label,
   ) => Row(
     children: <Widget>[
-      const SizedBox(width: 56),
       Expanded(
-        child: Column(
-          children: <Widget>[
-            Text(
-              kAgeOrbTitle,
-              style: _caps.copyWith(color: colors.ink, fontSize: 13),
-            ),
-            if (subtitle case final String line) ...<Widget>[
-              const SizedBox(height: 3),
-              Text(
-                line,
-                textAlign: TextAlign.center,
-                style: KeyType.rangeEnd.copyWith(
-                  color: colors.ink2,
-                  fontSize: 12,
-                ),
-              ),
-            ],
-          ],
+        child: Text(
+          kAgeOrbTitle,
+          style: TypeLadder.label.copyWith(color: colors.ink2),
         ),
       ),
-      SizedBox(
-        width: 56,
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.end,
-          children: <Widget>[
-            MetricInfoDot(
-              infoKey,
-              ink: colors.ink2,
-              detail: MetricDetail(
-                source: modelLabel,
-                disclosures: disclosed,
-                disclosuresLabel: label ?? disclosuresLabel,
-              ),
-            ),
-            if (onOpen != null) ...<Widget>[
-              const SizedBox(width: 10),
-              HTap(
-                onTap: onOpen,
-                semanticLabel: openSemantics ?? 'Biological age',
-                child: Icon(
-                  SolarIconsOutline.arrowRight,
-                  size: 18,
-                  color: colors.ink2,
-                ),
-              ),
-            ],
-          ],
+      MetricInfoDot(
+        infoKey,
+        ink: colors.ink3,
+        detail: MetricDetail(
+          source: modelLabel,
+          disclosures: disclosed,
+          disclosuresLabel: label ?? disclosuresLabel,
         ),
       ),
     ],
   );
-
-  Widget _stats(HealtheeColors colors) => IntrinsicHeight(
-    child: Row(
-      crossAxisAlignment: CrossAxisAlignment.stretch,
-      children: <Widget>[
-        for (var i = 0; i < stats.length; i++) ...<Widget>[
-          if (i > 0)
-            VerticalDivider(width: 1, thickness: 1, color: colors.line),
-          Expanded(child: _stat(colors, stats[i])),
-        ],
-      ],
-    ),
-  );
-
-  Widget _stat(HealtheeColors colors, BioStat stat) {
-    final years = stat.value.trim();
-    final tone = years.startsWith('−')
-        ? colors.fav
-        : years.startsWith('+')
-        ? colors.unf
-        : colors.ink;
-    return HTap(
-      onTap: stat.onOpen,
-      semanticLabel: '${stat.label}: ${stat.value}',
-      child: Padding(
-        padding: const EdgeInsets.symmetric(vertical: 6),
-        child: Column(
-          children: <Widget>[
-            Text(
-              stat.value,
-              style: KeyType.name.copyWith(fontSize: 20, color: tone),
-            ),
-            const SizedBox(height: 4),
-            Text(
-              stat.label.toUpperCase(),
-              textAlign: TextAlign.center,
-              style: TypeLadder.label.copyWith(color: colors.ink2),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
 }

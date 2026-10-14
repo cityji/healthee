@@ -9,10 +9,11 @@
 ///
 /// ## What it draws now
 ///
-/// The same orb as the live hero, still, with nothing inside it: **no number,
-/// and no older number standing in for it.** Under the orb stands
-/// [AgePausedNotice], which says why in the server's own words and offers the
-/// one profile field that would fix it. The ⓘ keeps the long prose (the
+/// The same layout as the live hero: the Label and the ⓘ, then the orb, still,
+/// with nothing inside it: **no number, and no older number standing in for
+/// it.** Under the orb stands [AgePausedNotice], which says why in the server's
+/// own words and offers the one profile field that would fix it. A tap on the
+/// orb or the notice's text opens the Biological age screen, as it does live. The ⓘ keeps the long prose (the
 /// `consequence` and each term's remedy), and the permanent exclusions keep a
 /// one-line signpost on the card, because a lever this number deliberately does
 /// not price must stay visible.
@@ -32,6 +33,10 @@ import 'package:healthee/shared/v02/age_orb_hero.dart';
 
 /// What the ⓘ calls the server's refusal prose.
 const String kWithheldSheetLabel = 'WHY THERE IS NO NUMBER TODAY';
+
+/// What a screen reader hears for the paused orb.
+const String kPausedSpoken =
+    'Biological age estimate paused. Opens the breakdown.';
 
 /// The paused biological-age hero.
 class TodayBioHeroWithheld extends StatelessWidget {
@@ -61,7 +66,7 @@ class TodayBioHeroWithheld extends StatelessWidget {
   /// Levers this number permanently does not price. Signposted, never blamed.
   final List<Disclosure> exclusions;
 
-  /// Where the arrow goes: the calculation behind the estimate.
+  /// A tap on the hero: the Biological age screen.
   final VoidCallback? onOpen;
 
   @override
@@ -71,7 +76,6 @@ class TodayBioHeroWithheld extends StatelessWidget {
     return AgeOrbHero(
       value: '',
       paused: true,
-      subtitle: kAgeOrbSubtitle,
       below: Column(
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -98,7 +102,7 @@ class TodayBioHeroWithheld extends StatelessWidget {
       ],
       disclosuresLabel: kWithheldSheetLabel,
       onOpen: onOpen,
-      openSemantics: TodayBioHero.eyebrowSemantics,
+      openSemantics: kPausedSpoken,
     );
   }
 

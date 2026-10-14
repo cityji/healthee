@@ -33,6 +33,18 @@ String signedYears(double delta, {int digits = 1}) {
   return '${delta < 0 ? kMinus : '+'}$text';
 }
 
+/// [signedYears] as it is spoken: `minus 1.7 years`, `plus 2.1 years`,
+/// `0.0 years`.
+String spokenYears(double delta) {
+  final text = signedYears(delta);
+  if (text.startsWith(kMinus)) {
+    return 'minus ${text.substring(1)} years';
+  }
+  return text.startsWith('+')
+      ? 'plus ${text.substring(1)} years'
+      : '$text years';
+}
+
 /// [signedYears] as a span whose sign is its own child, tightened by
 /// [kMinusTrackingEm] of the font size. [style] must carry a `fontSize`.
 TextSpan signedYearsSpan(double delta, TextStyle style, {int digits = 1}) {

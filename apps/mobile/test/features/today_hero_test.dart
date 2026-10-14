@@ -146,7 +146,7 @@ void main() {
   });
 
   group('what the hero says about the estimate', () {
-    testWidgets('the figure, the delta and the two terms are the server’s', (
+    testWidgets('the figure, the delta and the terms are the server’s', (
       tester,
     ) async {
       phone(tester);
@@ -155,7 +155,7 @@ void main() {
 
       expect(find.text('34.3'), findsOneWidget);
       expect(find.text('1.7 years younger'), findsOneWidget);
-      expect(find.text('FITNESS'), findsOneWidget);
+      expect(find.textContaining('Fitness −1.7 years'), findsOneWidget);
       // The model line is ALWAYS reachable: an estimate that does not say what
       // made it is the failure the whole tier system exists to stop. It moved
       // off the card into the eyebrow's ⓘ, so this opens the ⓘ and reads it

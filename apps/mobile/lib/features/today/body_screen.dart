@@ -244,6 +244,9 @@ class BodyDetail extends StatelessWidget {
           block: block,
           reveals: reveals,
           openByDefault: paused,
+          // The notice above says why in the server's words; the rows say
+          // only that the term is not counted.
+          reasonsShownAbove: age == null,
           onOpenLever: (term) => openAgeLever(
             context,
             term,

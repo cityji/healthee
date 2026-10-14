@@ -18,7 +18,7 @@ import 'package:healthee/features/today/v02/age_paused.dart';
 import 'package:healthee/features/today/v02/today_hero_withheld.dart';
 import 'package:healthee/shared/metric_info/metric_info_sheet.dart';
 import 'package:healthee/shared/v02/age_orb_hero.dart';
-import 'package:healthee/shared/v02/instruments/age_slider.dart';
+import 'package:healthee/shared/v02/instruments/age_ruler.dart';
 import 'package:healthee/shared/v02/instruments/age_sphere.dart';
 import 'package:healthee/shared/v02/withheld_panel.dart';
 
@@ -105,7 +105,7 @@ void main() {
     testWidgets('NO NUMBER AND NO MARKER IS DRAWN', (tester) async {
       await pump(tester);
 
-      expect(find.byType(AgeSlider), findsNothing);
+      expect(find.byType(AgeRuler), findsNothing);
       expect(find.text('YEARS'), findsNothing);
       expect(find.text('FITNESS'), findsNothing);
       expect(find.textContaining('years younger'), findsNothing);

@@ -84,12 +84,10 @@ void main() {
         _indexOf<TodayHeader>(list),
         // `H.scenarioNotice()`'s live equivalent — see `today_sections.dart`.
         _indexOf<DataHealthSection>(list),
-        // `H.bioHero()` — the halo, the figure, the ruler, the two terms.
+        // `H.bioHero()` — the sphere, the figure, the line of what moved it.
         _indexOf<ReadingView<BiologicalAge>>(list),
         // `summaryTiles()` — recovery · sleep · movement.
         _indexOf<TodayKeyNumbers>(list),
-        // `H.bridge('fitness', …)`.
-        _nthOf<ContextBridge>(list, 0),
         // `<nav class="chapter-nav">`.
         _indexOf<TodayChapterNav>(list),
         // `H.chapter('overnight','Last night → today', …)`.
@@ -103,7 +101,7 @@ void main() {
         // `H.panel('Sleep health, beyond duration', …)`.
         _indexOf<ReadingView<SleepHealth>>(list),
         // `H.bridge('sleep', …)`.
-        _nthOf<ContextBridge>(list, 1),
+        _nthOf<ContextBridge>(list, 0),
         // The second `.twin-panels` — blood oxygen beside need & debt.
         _nthOf<TwinPanels>(list, 1),
         // `H.chapter('daytime','Movement → recovery', …)`.
@@ -113,7 +111,7 @@ void main() {
         // `H.panel('Steps & energy', …)`.
         _indexOf<StepsEnergyPanel>(list),
         // `H.bridge('movement', …)`.
-        _nthOf<ContextBridge>(list, 2),
+        _nthOf<ContextBridge>(list, 1),
         // `H.panel('Effort in context', …)`.
         _indexOf<ReadingView<CardioLoad>>(list),
         // The third `.twin-panels` — active minutes beside strength. The

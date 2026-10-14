@@ -381,43 +381,23 @@ mutate "the prototype's chapter order is swapped" "$ORDER_TEST" "$BODY" \
   '  todayDaySections(sections, facts, data, extras);
   _nightChapter(sections, facts, reveals, extras);'
 
-# The bridge under the hero moves above it. It still reads as a sentence about
-# the estimate, the chapters are untouched, and nothing looks wrong — the
-# connective line has simply stopped connecting the two things it names.
-mutate 'the context bridge is drawn before the hero' "$ORDER_TEST" "$BODY" \
+# The key numbers move above the hero. Every card still draws and the page
+# still scrolls; the estimate the owner reads first is now the third thing on
+# the screen.
+mutate 'the key numbers are drawn above the hero' "$ORDER_TEST" "$BODY" \
+  '  sections.addBleed(
+    ReadingView<BiologicalAge>(' \
   '  sections.add(
-    TodaySummaryTiles(
+    TodayKeyNumbers(
       facts: facts,
       onOpenRecovery: extras.onOpenRecovery,
       onOpenSleep: extras.onOpenSleep,
       onOpenActivity: extras.onOpenActivity,
+      onOpenTrends: extras.onOpenTrends,
     ),
   );
-  // No spacer: the bridge carries the gap itself so its rule can span it and
-  // reach the tiles above. See `ContextBridge.leadIn`.
-  sections.add(
-    ContextBridge.link(
-      kAgeBridge,
-      label: '"'"'See the contributors'"'"',
-      onOpen: extras.onOpenBody,
-    ),
-  );' \
-  '  sections.add(
-    ContextBridge.link(
-      kAgeBridge,
-      label: '"'"'See the contributors'"'"',
-      onOpen: extras.onOpenBody,
-    ),
-  );
-  sections.add(
-    TodaySummaryTiles(
-      facts: facts,
-      onOpenRecovery: extras.onOpenRecovery,
-      onOpenSleep: extras.onOpenSleep,
-      onOpenActivity: extras.onOpenActivity,
-    ),
-  );
-  sections.gap(PageSpacing.block);'
+  sections.addBleed(
+    ReadingView<BiologicalAge>('
 
 # A section quietly dropped. Legacy draws the week whenever it has two nights;
 # a card that stops appearing is the failure mode a rendered-scroll test cannot
@@ -1178,9 +1158,43 @@ mutate "the method essay is printed on the card again" \
 # step goal, so any fraction here is this app inventing the owner's target and
 # then reporting progress against it.
 mutate 'the movement tile invents a step target' "$HERO_TEST" \
-  lib/features/today/v02/today_hero.dart \
-  '      fraction: plateau == null ? null : steps / plateau,' \
-  '      fraction: steps / 10000,'
+  lib/features/today/v02/today_key_numbers.dart \
+  '      lead: plateau == null || count >= plateau' \
+  '      lead: count >= (plateau ?? 10000)'
+
+# ── Today's biological age: on the page, one door, each fact once ───────────
+AGE_ORB_TEST=test/features/today_age_orb_test.dart
+HERO_SRC=lib/features/today/v02/today_hero.dart
+LEVERS_SRC=lib/features/today/v02/age_levers.dart
+SUMMARY_SRC=lib/features/today/v02/what_moves_it.dart
+
+# The hero is a picture again: nothing opens when it is tapped, and the only way
+# into the breakdown is a row further down the page.
+mutate 'the Today hero stops being a door' "$AGE_ORB_TEST" "$BODY" \
+  '        block: snapshot.bioAgeBlock,
+        onOpenBody: extras.onOpenBody,
+      ),' \
+  '        block: snapshot.bioAgeBlock,
+      ),'
+
+# A term the model never prices is left off the line under the sphere, so the
+# estimate reads as if fitness and sleep were the whole of it.
+mutate 'the hero breakdown forgets what was left out' "$AGE_ORB_TEST" "$SUMMARY_SRC" \
+  '  for (final d in block.exclusions) leftOut(leverShortName(d.term ?? d.reason)),' \
+  ''
+
+# The server's two-line disclaimer under the sphere, wrapping the face.
+mutate 'the hero caption prints a disclaimer too long for one line' \
+  "$AGE_ORB_TEST" "$HERO_SRC" \
+  'said.isNotEmpty && said.length <= kAgeCaptionMaxChars' \
+  'said.isNotEmpty'
+
+# The paused screen says the server's sentence twice: once in the notice and
+# once more in the lever row under it.
+mutate 'the paused lever row repeats the notice sentence' \
+  test/features/body_screen_paused_test.dart "$LEVERS_SRC" \
+  '          message: reasonsShownAbove ? null : d.message,' \
+  '          message: d.message,'
 
 # ── the v02 Today fixes (withheld hero · provenance off the cards) ───────────
 ENVELOPE=lib/data/honesty/envelope.dart
