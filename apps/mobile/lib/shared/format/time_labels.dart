@@ -37,6 +37,22 @@ String ageLabel(DateTime at, {required DateTime now}) {
   return '${elapsed.inDays} d ago';
 }
 
+/// `Updated today` when [at] falls on the same local calendar day as [now],
+/// else `Updated ` and [ageLabel]: "Updated 3 d ago".
+///
+/// Two readings the same day are both "today" however many hours apart, which
+/// is what a person means by it; across midnight the floored age says how old
+/// the reading really is.
+String updatedLabel(DateTime at, {required DateTime now}) {
+  final local = at.toLocal();
+  final today = now.toLocal();
+  final sameDay =
+      local.year == today.year &&
+      local.month == today.month &&
+      local.day == today.day;
+  return sameDay ? 'Updated today' : 'Updated ${ageLabel(at, now: now)}';
+}
+
 /// How long until [at], **ceiled** — "in 3 min", "in 2 h", "in 6 days".
 ///
 /// The mirror of [ageLabel] and it rounds the other way for the same reason. A

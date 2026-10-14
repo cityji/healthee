@@ -80,8 +80,8 @@ class TodayBioHero extends StatelessWidget {
   Widget build(BuildContext context) {
     final chronological = age.chronologicalAge;
     return AgeOrbHero(
-      value: _figure(age.biologicalAge),
-      verdict: _verdict(age),
+      value: figureOf(age.biologicalAge),
+      verdict: verdictOf(age),
       subtitle: kAgeOrbSubtitle,
       modelLabel: age.disclaimer ?? kPopulationModelLabel,
       onOpen: onOpenBody,
@@ -111,7 +111,7 @@ class TodayBioHero extends StatelessWidget {
 
   /// `1.7 years younger`, `2.0 years older`, or `Your actual age`; null when
   /// nothing was compared.
-  static Verdict? _verdict(BiologicalAge age) {
+  static Verdict? verdictOf(BiologicalAge age) {
     final delta = age.deltaYears;
     if (delta == null || age.chronologicalAge == null) {
       return null;
@@ -125,7 +125,7 @@ class TodayBioHero extends StatelessWidget {
   }
 
   /// `34.3`, and `34` when the estimate is whole. Never `34.0`.
-  static String _figure(double value) => value == value.roundToDouble()
+  static String figureOf(double value) => value == value.roundToDouble()
       ? value.round().toString()
       : value.toStringAsFixed(1);
 

@@ -28,6 +28,79 @@ import 'package:solar_icons/solar_icons.dart';
 /// The hero's title, WHOOP's uppercase label.
 const String kAgeOrbTitle = 'BIOLOGICAL AGE';
 
+/// The sphere's radius as a share of its canvas.
+const double _radiusShare = 0.425;
+
+/// The widest the figure may paint, in radii; wider is scaled down.
+const double _figureRadii = 1.4;
+
+/// The sphere's centre and the half width it paints, for the dots to clear.
+///
+/// Shared by Today's hero and the biological-age screen, so the two draw the
+/// same figure. The number is measured at the current text scale and, when
+/// wider than 1.4 R, scaled down to that width so a large text scale never
+/// clips. [paused] draws no figure and no verdict, only the spoken state.
+({Widget centre, double halfWidth}) ageOrbCentre(
+  BuildContext context,
+  HealtheeColors colors, {
+  required double canvas,
+  required String value,
+  required bool paused,
+  Verdict? verdict,
+}) {
+  if (paused) {
+    return (
+      centre: Semantics(
+        label: 'Biological age estimate paused',
+        child: const SizedBox.shrink(),
+      ),
+      halfWidth: 0,
+    );
+  }
+  final style = TypeLadder.display.copyWith(color: colors.ink);
+  final limit = canvas * _radiusShare * _figureRadii;
+  final measured = TextPainter(
+    text: TextSpan(text: value, style: style),
+    textDirection: Directionality.of(context),
+    textScaler: MediaQuery.textScalerOf(context),
+  )..layout();
+  final wide = measured.width;
+  measured.dispose();
+  final painted = math.min(wide, limit);
+  final centre = Semantics(
+    label: 'Biological age $value years',
+    child: ExcludeSemantics(
+      child: ConstrainedBox(
+        constraints: BoxConstraints(maxWidth: limit),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: <Widget>[
+            FittedBox(
+              fit: BoxFit.scaleDown,
+              child: Text(value, style: style, maxLines: 1),
+            ),
+            if (verdict case final Verdict said) ...<Widget>[
+              const SizedBox(height: 8),
+              Text(
+                said.words,
+                textAlign: TextAlign.center,
+                style: TypeLadder.bodyStrong.copyWith(
+                  color: switch (said.tone) {
+                    VerdictTone.better => colors.fav,
+                    VerdictTone.worse => colors.unf,
+                    VerdictTone.neutral => colors.ink2,
+                  },
+                ),
+              ),
+            ],
+          ],
+        ),
+      ),
+    ),
+  );
+  return (centre: centre, halfWidth: painted / 2);
+}
+
 /// The hero.
 class AgeOrbHero extends StatelessWidget {
   const AgeOrbHero({
@@ -52,12 +125,6 @@ class AgeOrbHero extends StatelessWidget {
 
   /// The sphere's canvas: 300 on Today, less on a narrower screen.
   static const double orbMax = 300;
-
-  /// The sphere's radius as a share of its canvas.
-  static const double _radiusShare = 0.425;
-
-  /// The widest the figure may paint, in radii; wider is scaled down.
-  static const double _figureRadii = 1.4;
 
   /// The figure, `34.3`. Also what a screen reader hears.
   final String value;
@@ -114,7 +181,14 @@ class AgeOrbHero extends StatelessWidget {
             LayoutBuilder(
               builder: (context, box) {
                 final canvas = math.min(orbMax, box.maxWidth);
-                final figure = _figure(context, colors, canvas);
+                final figure = ageOrbCentre(
+                  context,
+                  colors,
+                  canvas: canvas,
+                  value: value,
+                  verdict: verdict,
+                  paused: paused,
+                );
                 return Center(
                   child: AgeSphere(
                     canvas: canvas,
@@ -221,68 +295,6 @@ class AgeOrbHero extends StatelessWidget {
       ),
     ],
   );
-
-  /// The sphere's centre and the half width it paints, for the dots to clear.
-  ///
-  /// The number is measured at the current text scale and, when wider than
-  /// 1.4 R, scaled down to that width so a large text scale never clips.
-  ({Widget centre, double halfWidth}) _figure(
-    BuildContext context,
-    HealtheeColors colors,
-    double canvas,
-  ) {
-    if (paused) {
-      return (
-        centre: Semantics(
-          label: 'Biological age estimate paused',
-          child: const SizedBox.shrink(),
-        ),
-        halfWidth: 0,
-      );
-    }
-    final style = TypeLadder.display.copyWith(color: colors.ink);
-    final limit = canvas * _radiusShare * _figureRadii;
-    final measured = TextPainter(
-      text: TextSpan(text: value, style: style),
-      textDirection: Directionality.of(context),
-      textScaler: MediaQuery.textScalerOf(context),
-    )..layout();
-    final wide = measured.width;
-    measured.dispose();
-    final painted = math.min(wide, limit);
-    final centre = Semantics(
-      label: 'Biological age $value years',
-      child: ExcludeSemantics(
-        child: ConstrainedBox(
-          constraints: BoxConstraints(maxWidth: limit),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: <Widget>[
-              FittedBox(
-                fit: BoxFit.scaleDown,
-                child: Text(value, style: style, maxLines: 1),
-              ),
-              if (verdict case final Verdict said) ...<Widget>[
-                const SizedBox(height: 8),
-                Text(
-                  said.words,
-                  textAlign: TextAlign.center,
-                  style: TypeLadder.bodyStrong.copyWith(
-                    color: switch (said.tone) {
-                      VerdictTone.better => colors.fav,
-                      VerdictTone.worse => colors.unf,
-                      VerdictTone.neutral => colors.ink2,
-                    },
-                  ),
-                ),
-              ],
-            ],
-          ),
-        ),
-      ),
-    );
-    return (centre: centre, halfWidth: painted / 2);
-  }
 
   Widget _stats(HealtheeColors colors) => IntrinsicHeight(
     child: Row(

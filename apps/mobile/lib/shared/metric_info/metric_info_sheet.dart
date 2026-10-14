@@ -299,6 +299,14 @@ class _MetricInfoSheet extends StatelessWidget {
               style: HType.serif(colors.ink, size: 24),
             ),
             const SizedBox(height: 18),
+            if (detail.figure case final Widget figure) ...<Widget>[
+              figure,
+              const SizedBox(height: 16),
+            ],
+            if (detail.action case final MetricAction action) ...<Widget>[
+              InfoActionButton(action),
+              const SizedBox(height: 8),
+            ],
             if (explainer != null) ...<Widget>[
               InfoBlock(
                 icon: SolarIconsOutline.documentText,
