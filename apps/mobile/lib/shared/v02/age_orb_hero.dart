@@ -9,6 +9,8 @@
 /// `CaveatScope` it is given and routes it into that one sheet.
 library;
 
+import 'dart:math' as math;
+
 import 'package:flutter/material.dart';
 import 'package:healthee/core/theme/tokens.dart';
 import 'package:healthee/core/theme/type_ladder.dart';
@@ -19,7 +21,7 @@ import 'package:healthee/shared/metric_info/metric_detail.dart';
 import 'package:healthee/shared/metric_info/metric_info_sheet.dart';
 import 'package:healthee/shared/states/caveat_scope.dart';
 import 'package:healthee/shared/v02/bio_stats.dart';
-import 'package:healthee/shared/v02/instruments/age_orb.dart';
+import 'package:healthee/shared/v02/instruments/age_sphere.dart';
 import 'package:healthee/shared/v02/key_number_card.dart';
 import 'package:solar_icons/solar_icons.dart';
 
@@ -41,7 +43,6 @@ class AgeOrbHero extends StatelessWidget {
     this.openSemantics,
     this.slider,
     this.stats = const <BioStat>[],
-    this.turning = true,
     this.paused = false,
     super.key,
   });
@@ -49,9 +50,14 @@ class AgeOrbHero extends StatelessWidget {
   /// Side padding; the hero is edge to edge.
   static const double side = 20;
 
-  /// The orb's share of the width, and its largest size.
-  static const double orbShare = 0.74;
+  /// The sphere's canvas: 300 on Today, less on a narrower screen.
   static const double orbMax = 300;
+
+  /// The sphere's radius as a share of its canvas.
+  static const double _radiusShare = 0.425;
+
+  /// The widest the figure may paint, in radii; wider is scaled down.
+  static const double _figureRadii = 1.4;
 
   /// The figure, `34.3`. Also what a screen reader hears.
   final String value;
@@ -90,9 +96,6 @@ class AgeOrbHero extends StatelessWidget {
   /// The model's contributions.
   final List<BioStat> stats;
 
-  /// Whether the orb turns. Off for a withheld number.
-  final bool turning;
-
   @override
   Widget build(BuildContext context) {
     final colors = context.colors;
@@ -110,12 +113,14 @@ class AgeOrbHero extends StatelessWidget {
             const SizedBox(height: 14),
             LayoutBuilder(
               builder: (context, box) {
-                final d = (box.maxWidth * orbShare).clamp(180.0, orbMax);
+                final canvas = math.min(orbMax, box.maxWidth);
+                final figure = _figure(context, colors, canvas);
                 return Center(
-                  child: AgeOrb(
-                    diameter: d,
-                    turning: turning,
-                    child: _figure(colors, d),
+                  child: AgeSphere(
+                    canvas: canvas,
+                    withheld: paused,
+                    clearHalfWidth: figure.halfWidth,
+                    centre: figure.centre,
                   ),
                 );
               },
@@ -217,48 +222,67 @@ class AgeOrbHero extends StatelessWidget {
     ],
   );
 
-  Widget _figure(HealtheeColors colors, double diameter) => paused
-      ? Semantics(
+  /// The sphere's centre and the half width it paints, for the dots to clear.
+  ///
+  /// The number is measured at the current text scale and, when wider than
+  /// 1.4 R, scaled down to that width so a large text scale never clips.
+  ({Widget centre, double halfWidth}) _figure(
+    BuildContext context,
+    HealtheeColors colors,
+    double canvas,
+  ) {
+    if (paused) {
+      return (
+        centre: Semantics(
           label: 'Biological age estimate paused',
           child: const SizedBox.shrink(),
-        )
-      : _number(colors, diameter);
-
-  Widget _number(HealtheeColors colors, double diameter) => Semantics(
-    label: 'Biological age $value years',
-    child: ExcludeSemantics(
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: <Widget>[
-          Text(
-            value,
-            style: KeyType.value.copyWith(
-              color: colors.ink,
-              fontSize: diameter * 0.24,
-              fontWeight: FontWeight.w700,
-              letterSpacing: -1.5,
-              height: 1,
-            ),
-          ),
-          const SizedBox(height: 6),
-          Text('YEARS', style: _caps.copyWith(color: colors.ink2)),
-          if (verdict case final Verdict said) ...<Widget>[
-            const SizedBox(height: 8),
-            Text(
-              said.words,
-              style: KeyType.name.copyWith(
-                color: switch (said.tone) {
-                  VerdictTone.better => colors.fav,
-                  VerdictTone.worse => colors.unf,
-                  VerdictTone.neutral => colors.ink2,
-                },
+        ),
+        halfWidth: 0,
+      );
+    }
+    final style = TypeLadder.display.copyWith(color: colors.ink);
+    final limit = canvas * _radiusShare * _figureRadii;
+    final measured = TextPainter(
+      text: TextSpan(text: value, style: style),
+      textDirection: Directionality.of(context),
+      textScaler: MediaQuery.textScalerOf(context),
+    )..layout();
+    final wide = measured.width;
+    measured.dispose();
+    final painted = math.min(wide, limit);
+    final centre = Semantics(
+      label: 'Biological age $value years',
+      child: ExcludeSemantics(
+        child: ConstrainedBox(
+          constraints: BoxConstraints(maxWidth: limit),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: <Widget>[
+              FittedBox(
+                fit: BoxFit.scaleDown,
+                child: Text(value, style: style, maxLines: 1),
               ),
-            ),
-          ],
-        ],
+              if (verdict case final Verdict said) ...<Widget>[
+                const SizedBox(height: 8),
+                Text(
+                  said.words,
+                  textAlign: TextAlign.center,
+                  style: TypeLadder.bodyStrong.copyWith(
+                    color: switch (said.tone) {
+                      VerdictTone.better => colors.fav,
+                      VerdictTone.worse => colors.unf,
+                      VerdictTone.neutral => colors.ink2,
+                    },
+                  ),
+                ),
+              ],
+            ],
+          ),
+        ),
       ),
-    ),
-  );
+    );
+    return (centre: centre, halfWidth: painted / 2);
+  }
 
   Widget _stats(HealtheeColors colors) => IntrinsicHeight(
     child: Row(

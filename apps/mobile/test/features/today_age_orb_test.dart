@@ -2,13 +2,16 @@
 /// figure sits inside the orb, and its controls and terms are its own.
 library;
 
+import 'dart:math' as math;
+
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:healthee/data/store/local_store.dart';
 import 'package:healthee/shared/metric_info/metric_info_sheet.dart';
 import 'package:healthee/shared/v02/age_orb_hero.dart';
-import 'package:healthee/shared/v02/instruments/age_orb.dart';
 import 'package:healthee/shared/v02/instruments/age_slider.dart';
+import 'package:healthee/shared/v02/instruments/age_sphere.dart';
+import 'package:healthee/shared/v02/instruments/age_sphere_painter.dart';
 
 import '_hero_probe.dart';
 import '_today_host.dart';
@@ -36,15 +39,9 @@ void main() {
       expect(tester.takeException(), isNull, reason: 'no overflow at $width');
 
       final hero = tester.getRect(find.byType(AgeOrbHero));
-      final orb = tester.getRect(find.byType(AgeOrb));
+      final orb = tester.getRect(find.byType(AgeSphere));
       final inner = hero.width - 2 * AgeOrbHero.side;
-      expect(
-        orb.width,
-        closeTo(
-          (inner * AgeOrbHero.orbShare).clamp(180.0, AgeOrbHero.orbMax),
-          0.5,
-        ),
-      );
+      expect(orb.width, closeTo(math.min(inner, AgeOrbHero.orbMax), 0.5));
       expect(orb.center.dx, closeTo(hero.center.dx, 0.5), reason: 'centred');
       expect(orb.contains(tester.getRect(find.text('34.3')).center), isTrue);
       for (final part in <Finder>[
@@ -72,12 +69,12 @@ void main() {
     final painter = tester
         .widgetList<CustomPaint>(
           find.descendant(
-            of: find.byType(AgeOrb),
+            of: find.byType(AgeSphere),
             matching: find.byType(CustomPaint),
           ),
         )
         .map((paint) => paint.painter)
-        .whereType<OrbPainter>()
+        .whereType<AgeSpherePainter>()
         .single;
     // Decoration only: the painter is built from colours, never a value.
     expect(painter.shouldRepaint(painter), isFalse);
