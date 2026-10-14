@@ -1982,8 +1982,8 @@ FITNESS_TEST=test/features/fitness_screen_test.dart
 RECOVERY_TEST=test/features/recovery_screen_test.dart
 HISTORY_TEST=test/features/sleep_history_screen_test.dart
 BODY_SCREEN=lib/features/today/body_screen.dart
-BODY_LIMITS=lib/features/today/v02/body_limits_panels.dart
-BODY_PANELS=lib/features/today/v02/body_panels.dart
+BODY_LEVERS=lib/features/today/v02/age_lever_sheets.dart
+BODY_CALC=lib/features/today/v02/age_calculation_sheet.dart
 FITNESS_PANELS=lib/features/activity/v02/fitness_panels.dart
 RECOVERY_PANELS=lib/features/today/v02/recovery_detail_panels.dart
 SIGNAL=lib/shared/v02/signal_chart.dart
@@ -1992,9 +1992,11 @@ HISTORY_PANELS=lib/features/sleep/v02/history_panels.dart
 # The exclusion stops being an exclusion: the term is named and the server's
 # reasoning — the whole reason it cannot be priced — is dropped.
 mutate 'the excluded term loses the server’s reasoning' \
-  "$BODY_TEST" "$BODY_LIMITS" \
-  '            PanelNote(exclusions[i].message),' \
-  "            const PanelNote(''),"
+  "$BODY_TEST" "$BODY_LEVERS" \
+  '    disclosures: <Disclosure>[d],
+    disclosuresLabel: kLeverExcludedLabel,' \
+  '    disclosures: const <Disclosure>[],
+    disclosuresLabel: kLeverExcludedLabel,'
 
 # The exclusion is counted as a caveat as well, so the screen states it twice —
 # once as "not a lever" and once as a tilt on a number it is not in.
@@ -2006,9 +2008,9 @@ mutate 'the exclusion is repeated as a caveat' \
 # The equation stops being the payload's arithmetic and becomes a fixed
 # sentence, which cannot follow a model that reweights or drops a term.
 mutate 'the age equation stops reading its own terms' \
-  "$BODY_TEST" "$BODY_PANELS" \
-  '    for (final term in age.contributions) {' \
-  '    for (final term in <AgeContribution>[]) {'
+  "$BODY_TEST" "$BODY_CALC" \
+  '  for (final term in age.contributions) {' \
+  '  for (final term in <AgeContribution>[]) {'
 
 # The line every reader needs and no reader asks for: without it a published
 # model error reads as an interval computed for this owner.

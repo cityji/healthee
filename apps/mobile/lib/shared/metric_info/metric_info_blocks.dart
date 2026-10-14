@@ -15,6 +15,7 @@ import 'package:healthee/core/theme/dimensions.dart';
 import 'package:healthee/core/theme/instrument_type.dart';
 import 'package:healthee/core/theme/tokens.dart';
 import 'package:healthee/data/honesty/disclosure.dart';
+import 'package:healthee/shared/metric_info/metric_detail.dart';
 import 'package:solar_icons/solar_icons.dart';
 
 /// One labelled block: an icon, a caps label, and the body under it.
@@ -222,4 +223,25 @@ class NotCoveredNote extends StatelessWidget {
       ],
     );
   }
+}
+
+/// The sheet's one onward button: closes the sheet, then goes.
+class InfoActionButton extends StatelessWidget {
+  /// Builds the button for [action].
+  const InfoActionButton(this.action, {super.key});
+
+  /// Its words and where it goes.
+  final MetricAction action;
+
+  @override
+  Widget build(BuildContext context) => Align(
+    alignment: Alignment.centerLeft,
+    child: TextButton(
+      onPressed: () {
+        Navigator.of(context).pop();
+        action.onTap();
+      },
+      child: Text(action.label),
+    ),
+  );
 }

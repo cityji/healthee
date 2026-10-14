@@ -47,6 +47,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:healthee/core/theme/app_theme.dart';
+import 'package:healthee/core/theme/appearance_variant.dart';
 import 'package:healthee/data/history/history_repository.dart';
 import 'package:healthee/data/store/local_store.dart';
 import 'package:healthee/data/store/store_provider.dart';
@@ -55,6 +56,8 @@ import 'package:healthee/features/activity/activity_screen.dart';
 import 'package:healthee/features/diagnostics/diagnostics_screen.dart';
 import 'package:healthee/features/insights/insights_screen.dart';
 import 'package:healthee/features/sleep/sleep_screen.dart';
+import 'package:healthee/features/today/body_screen.dart';
+import 'package:healthee/features/today/v02/what_moves_it.dart';
 import 'package:healthee/features/trends/trends_period.dart';
 import 'package:healthee/features/trends/trends_screen.dart';
 
@@ -67,6 +70,11 @@ import 'render_samples.dart';
 /// A phone's width, and enough height that nothing is left unbuilt.
 const Size _renderSize = Size(390, 3400);
 const Size _tallSize = Size(390, 9000);
+
+/// The Biological age screen: a phone's width, tall enough for the whole scroll,
+/// at 3 device pixels per logical one.
+const Size _bodySize = Size(390, 2300);
+const double _bodyDpr = 3;
 
 /// Where the PNGs land. Ignored by git — this is a look, not an artefact.
 const String _outputDirectory = 'build/renders';
@@ -210,18 +218,108 @@ void main() {
       );
     });
   }
+
+  _bodyRenders(() => store);
 }
 
-/// Pumps [app] at [_renderSize] and writes `<name>.png`.
+/// The Biological age screen at dpr 3, in every accent and ground it ships in.
+void _bodyRenders(LocalStore Function() store) {
+  final grounds = <String, (Brightness, BackgroundVariant)>{
+    'light': (Brightness.light, BackgroundVariant.espresso),
+    'espresso': (Brightness.dark, BackgroundVariant.espresso),
+    'amoled': (Brightness.dark, BackgroundVariant.amoled),
+  };
+  for (final accent in <int>[0, 4]) {
+    for (final ground in grounds.entries) {
+      final theme = AppTheme.customized(
+        ground.value.$1,
+        AppearanceVariant(accent: accent, background: ground.value.$2),
+      );
+      final name =
+          'bioage-${ground.key}-${AppearanceVariant.accentNames[accent]}';
+      for (final open in <bool>[false, true]) {
+        testWidgets('render $name ${open ? 'open' : 'closed'}', (tester) async {
+          await _shoot(
+            tester,
+            '$name-${open ? 'open' : 'closed'}',
+            todayHost(
+              store(),
+              themeOverride: theme,
+              home: _pushed(BodyScreen(now: now)),
+            ),
+            size: _bodySize,
+            dpr: _bodyDpr,
+            beforeShot: open ? _openMoves : null,
+          );
+        });
+      }
+    }
+  }
+  final paused = <String, Map<String, Object?> Function(Map<String, Object?>)>{
+    'paused': pausedToday(absentTerms: [staleWeightTerm()]),
+    'sleep-withheld': pausedToday(
+      absentTerms: [noNightsTerm()],
+      keepSleep: false,
+    ),
+  };
+  for (final state in paused.entries) {
+    for (final ground in <String>['light', 'espresso']) {
+      testWidgets('render bioage ${state.key} $ground', (tester) async {
+        final (brightness, background) = grounds[ground]!;
+        await _shoot(
+          tester,
+          'bioage-${state.key}-$ground',
+          todayHost(
+            store(),
+            themeOverride: AppTheme.customized(
+              brightness,
+              AppearanceVariant(background: background),
+            ),
+            server: todayView(mutate: state.value),
+            profile: profileFixture(
+              mutate: (json) => <String, Object?>{
+                ...json,
+                'weight_age_days': 41,
+              },
+            ),
+            home: _pushed(BodyScreen(now: now)),
+          ),
+          size: _bodySize,
+          dpr: _bodyDpr,
+        );
+      });
+    }
+  }
+}
+
+/// [screen] with a route under it, so its back control is drawn.
+Widget _pushed(Widget screen) => Navigator(
+  onGenerateInitialRoutes: (navigator, initial) => <Route<void>>[
+    MaterialPageRoute<void>(builder: (_) => const SizedBox.shrink()),
+    MaterialPageRoute<void>(builder: (_) => screen),
+  ],
+);
+
+/// Opens the "What moves it" dropdown.
+Future<void> _openMoves(WidgetTester tester) async {
+  await tester.tap(find.byKey(WhatMovesIt.headerKey));
+  await tester.pump(const Duration(seconds: 1));
+}
+
+/// Pumps [app] at [size] and writes `<name>.png`, at [dpr] device pixels per
+/// logical one (1 unless a render asks for more). [beforeShot] runs once the
+/// screen has settled, for a tap that opens something before the picture.
 Future<void> _shoot(
   WidgetTester tester,
   String name,
   Widget app, {
   Size size = _renderSize,
+  double dpr = 1,
+  Future<void> Function(WidgetTester tester)? beforeShot,
 }) async {
   tester.view
-    ..physicalSize = size
-    ..devicePixelRatio = 1.0;
+    ..physicalSize = size * dpr
+    ..devicePixelRatio = dpr;
   addTearDown(tester.view.reset);
 
   await tester.pumpWidget(RepaintBoundary(key: _boundary, child: app));
@@ -230,6 +328,7 @@ Future<void> _shoot(
   for (var i = 0; i < 30; i++) {
     await tester.pump(const Duration(milliseconds: 100));
   }
+  await beforeShot?.call(tester);
 
   final boundary = tester.renderObject<RenderRepaintBoundary>(
     find.byKey(_boundary),
@@ -237,7 +336,7 @@ Future<void> _shoot(
   // Real work, so it runs on the real clock: inside the test's fake async
   // zone `toImage` never completes and the render hangs until the timeout.
   final ByteData? png = await tester.runAsync<ByteData?>(() async {
-    final ui.Image image = await boundary.toImage();
+    final ui.Image image = await boundary.toImage(pixelRatio: dpr);
     return image.toByteData(format: ui.ImageByteFormat.png);
   });
   if (png == null) {

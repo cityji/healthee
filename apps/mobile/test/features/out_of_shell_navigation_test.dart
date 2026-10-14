@@ -323,7 +323,7 @@ void main() {
 
       expect(find.byType(BodyScreen), findsOneWidget);
       expect(
-        find.byIcon(SolarIconsOutline.arrowLeft),
+        find.byIcon(SolarIconsOutline.altArrowLeft),
         findsOneWidget,
         reason: 'a restored detail screen has to offer a way off it',
       );
@@ -337,7 +337,7 @@ void main() {
       final platform = _watchPlatformCalls(tester);
       await deepLink(tester, Routes.body);
 
-      await tester.tap(find.byIcon(SolarIconsOutline.arrowLeft));
+      await tester.tap(find.byIcon(SolarIconsOutline.altArrowLeft));
       await tester.pumpAndSettle();
 
       expect(find.byType(ActivityScreen), findsOneWidget);
@@ -371,7 +371,7 @@ void main() {
       await tester.pumpAndSettle();
       expect(find.byType(BodyScreen), findsOneWidget);
 
-      await tester.tap(find.byIcon(SolarIconsOutline.arrowLeft));
+      await tester.tap(find.byIcon(SolarIconsOutline.altArrowLeft));
       await tester.pumpAndSettle();
 
       expect(find.byType(TodayScreen), findsOneWidget);
