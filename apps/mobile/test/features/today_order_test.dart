@@ -180,11 +180,12 @@ void main() {
   });
 
   group('the gaps are v02’s two rungs, not legacy’s four', () {
-    test('a panel gap is 12 and a block gap is 24, and they are different', () {
-      // `richer.css`: `.panel { margin-top: 12px }`, `.section { margin-top:
-      // 24px }`. Two rungs, and the grouping is carried by them being unequal.
+    test('a panel gap is 12 and a block gap is 32, and they are different', () {
+      // The brief's tokens: cards 12 apart (`Insets.cardGap`), sections 32
+      // apart (`Insets.section`). Two rungs, and the grouping is carried by
+      // them being unequal.
       expect(PageSpacing.panel, 12);
-      expect(PageSpacing.block, 24);
+      expect(PageSpacing.block, 32);
       expect(PageSpacing.panel, lessThan(PageSpacing.block));
     });
 

@@ -11,7 +11,6 @@ library;
 
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:healthee/core/theme/dimensions.dart';
 import 'package:healthee/core/theme/instrument_hues.dart';
 import 'package:healthee/data/models/sleep_night.dart';
 import 'package:healthee/features/sleep/sleep_windows.dart';
@@ -28,8 +27,8 @@ import '../_sleep_stubs.dart';
 import '../shared/_chart_probe.dart';
 import '_sleep_host.dart';
 
-/// A 390 px panel, less 18 px of `Panel` padding and one hairline either side.
-const double _panelInnerWidth = 390 - 2 * Panel.padding - 2 * hairline;
+/// A 390 px panel, less `Panel.padding` either side (the card has no border).
+const double _panelInnerWidth = 390 - 2 * Panel.padding;
 
 const InstrumentHues _hues = InstrumentHues.light();
 
@@ -256,9 +255,18 @@ void main() {
     );
     await tester.pumpAndSettle();
 
-    expect(find.text('20 min less than your average (1h 20m)'), findsOneWidget);
-    expect(find.text('20 min more than your average (1h 10m)'), findsOneWidget);
-    expect(find.text('About your average (3h 18m)'), findsOneWidget);
+    expect(
+      find.text('20 min less than your average (1\u00A0h 20\u00A0min)'),
+      findsOneWidget,
+    );
+    expect(
+      find.text('20 min more than your average (1\u00A0h 10\u00A0min)'),
+      findsOneWidget,
+    );
+    expect(
+      find.text('About your average (3\u00A0h 18\u00A0min)'),
+      findsOneWidget,
+    );
   });
 
   testWidgets('without averages there is no mark and no comparison', (

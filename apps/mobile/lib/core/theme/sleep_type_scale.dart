@@ -19,8 +19,9 @@ abstract final class SleepType {
   /// one size now and the name is kept for the call site that chooses.
   static final TextStyle durationNarrow = TypeLadder.display;
 
-  /// `.sleep-reading .big-duration small` — the `h` and the `m`, in the family.
-  static final TextStyle durationUnit = TypeLadder.title2;
+  /// The `h` and the `min` beside the headline figure: a unit is 13 px, set in
+  /// ink3 by the caller (the brief; the prototype set them at 22 in the family).
+  static final TextStyle durationUnit = TypeLadder.callout;
 
   /// `.sleep-device strong` — the strap's own score.
   static final TextStyle deviceScore = TypeLadder.title1;

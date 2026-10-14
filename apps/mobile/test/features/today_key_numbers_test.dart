@@ -107,7 +107,7 @@ void main() {
     // `last_sleep.duration_min` is 380 in the contract snapshot; the strap row
     // the store was seeded with is a different night.
     await pump(tester);
-    expect(_card(tester, 'Sleep').value, '6h 20m');
+    expect(_card(tester, 'Sleep').value, '6\u00A0h 20\u00A0min');
   });
 
   testWidgets('renders in BOTH themes', (tester) async {
@@ -197,6 +197,6 @@ void main() {
   testWidgets('a band whose ends round alike says "about"', (tester) async {
     // Every earlier night in the snapshot is 380 minutes.
     await pump(tester);
-    expect(find.text('usual about 6h 20m'), findsOneWidget);
+    expect(find.text('usual about 6\u00A0h 20\u00A0min'), findsOneWidget);
   });
 }

@@ -50,7 +50,7 @@ void main() {
       expect(find.text('—'), findsWidgets);
       expect(find.textContaining('Time asleep: $_notDerived'), findsOneWidget);
       // The zero a nullable double would have produced.
-      expect(find.text('0h 00m'), findsNothing);
+      expect(find.text('0\u00A0min'), findsNothing);
       expect(find.text('0'), findsNothing);
     });
 
@@ -253,7 +253,7 @@ void main() {
         expect(find.textContaining(SleepGap.noSession.message), findsOneWidget);
         // And nothing anywhere on the block is a zero standing in for it.
         expect(find.text('0'), findsNothing);
-        expect(find.text('0h 00m'), findsNothing);
+        expect(find.text('0\u00A0min'), findsNothing);
       },
     );
   });

@@ -59,10 +59,7 @@ class FlushCard extends StatelessWidget {
       clipBehavior: Clip.antiAlias,
       decoration: ShapeDecoration(
         color: colors.surface,
-        shape: hSquircle(
-          radius,
-          side: BorderSide(color: colors.line, width: hairline),
-        ),
+        shape: hSquircle(radius),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,

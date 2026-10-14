@@ -15,13 +15,6 @@ library;
 
 import 'package:healthee/core/theme/stage_colors.dart';
 
-/// Minutes → `7h 05m`. Legacy's `_hm`, without its null branch.
-String hoursMinutes(num minutes) {
-  final whole = minutes.round();
-  final rest = (whole % 60).toString().padLeft(2, '0');
-  return '${whole ~/ 60}h ${rest}m';
-}
-
 /// An instant → `11:30p`. Legacy's `_clock`.
 String clock(DateTime at) {
   final hour = at.hour % 12 == 0 ? 12 : at.hour % 12;
@@ -63,11 +56,6 @@ String normaliseStage(String? raw) {
   }
   return kUnrecognisedStage;
 }
-
-/// Nap minutes → `35m` or `1h 20m`. Legacy's `_napDur`.
-String napDuration(num minutes) => minutes < 60
-    ? '${minutes.round()}m'
-    : '${minutes ~/ 60}h ${(minutes % 60).round()}m';
 
 /// A nap's clock range → `2:30 pm–3:05 pm`. Legacy's `_napRange`.
 ///

@@ -42,7 +42,7 @@ class DetailPage extends StatelessWidget {
     this.actions = const <Widget>[],
     this.eyebrow,
     this.head,
-    this.gutter = Insets.lg,
+    this.gutter = Insets.gutter,
     super.key,
   });
 
@@ -92,7 +92,12 @@ class DetailPage extends StatelessWidget {
         body: SafeArea(
           bottom: false,
           child: ListView(
-            padding: EdgeInsets.fromLTRB(gutter, Insets.lg, gutter, Insets.xxl),
+            padding: EdgeInsets.fromLTRB(
+              gutter,
+              Insets.gutter,
+              gutter,
+              Insets.section,
+            ),
             children: <Widget>[
               if (head case final head?)
                 head(context, canLeave ? () => leaveDetail(context) : null)

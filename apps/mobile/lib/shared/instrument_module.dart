@@ -170,7 +170,7 @@ class InstrumentModule extends StatelessWidget {
       child: DecoratedBox(
         decoration: ShapeDecoration(
           color: colors.surface,
-          shape: StateCard.shapeOf(colors.line),
+          shape: StateCard.shapeOf(),
         ),
         child: ConstrainedBox(
           constraints: BoxConstraints(minHeight: minHeight),

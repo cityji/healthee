@@ -646,8 +646,10 @@ mutate 'the overnight table stops naming what it could not measure' \
 # The legacy defect itself: a dimension the server never scored drawn as a
 # PASSED check. A tick made out of nothing is worse than no tick at all.
 mutate 'an unscored sleep check renders as a pass' "$CHECKS_TEST" "$CHECKS" \
-  '      child: passed == true' \
-  '      child: passed != false'
+  '    final result = check.passed.valueOrNull;' \
+  '    final result = check.passed.valueOrNull ?? true;' \
+  '              if (result != null && check.bar != null) ...<Widget>[' \
+  '              if (check.bar != null) ...<Widget>['
 
 # CLAUDE.md's no-composite rule, at the one place it could be broken silently:
 # the payload already carries the count, so drawing it is a one-line change that
@@ -693,8 +695,8 @@ mutate 'a one-night timing chart is plotted anyway' "$CHARTS_TEST" "$TIMING" \
 # is drawn as long as the one that took most of the night — the same lie the
 # stacked strip could tell with a one-pixel sliver, in the mark that replaced it.
 mutate 'the stage bars stop encoding the share' "$CHARTS_TEST" "$SHARES" \
-  '        final fill = _minFill + share.clamp(0.0, 1.0) * (allowance - _minFill);' \
-  '        final fill = allowance;'
+  '                  width: box.maxWidth * ran / longest,' \
+  '                  width: box.maxWidth,'
 
 # ── Today: a refusal must never come back as a number ───────────────────────
 WITHHELD_TEST=test/features/today_withheld_test.dart
@@ -1568,13 +1570,13 @@ mutate 'the outcome drops its "not a proven effect" sentence' \
 # An input beside an unknown or empty balance is the silent spend the feature is
 # not allowed to have.
 mutate 'the coach composer appears with no balance behind it' \
-  "$COACH_TEST" "$COACH_SCREEN" \
+  "$COACH_TEST" lib/features/coach/coach_body.dart \
   '  return uncapped || (allowance?.hasRemaining ?? false);' \
   '  return true;'
 
 # A prompt button asks a question, so it costs one — same gate as the input.
 mutate 'the opening prompts stop being gated by the balance' \
-  "$COMPOSER_TEST" "$COACH_SCREEN" \
+  "$COMPOSER_TEST" lib/features/coach/coach_body.dart \
   '              canAsk ? ask : null),' \
   '              ask),'
 # (anchor re-cut TWICE now: once when `ask` grew a `topic:` argument, and again
@@ -2072,8 +2074,8 @@ mutate 'the sleep share is asserted rather than read' \
 # A night the strap did not record is given a duration out of thin air.
 mutate 'an unrecorded night is drawn as a measured one' \
   "$HISTORY_TEST" "$HISTORY_PANELS" \
-  "    return minutes == null ? '—' : hoursMinutes(minutes);" \
-  "    return hoursMinutes(minutes ?? 0);"
+  "    return minutes == null ? '—' : durationText(minutes);" \
+  "    return durationText(minutes ?? 0);"
 
 # The same night's session times are invented rather than left absent.
 mutate 'an unrecorded night invents its bedtime and wake' \
@@ -2328,11 +2330,9 @@ mutate 'the day is dropped on a tab switch' \
 # 60-day horizon then leaves a date in the URL the screen is not showing.
 mutate 'the route accepts a day outside the retention window' \
   "$DATE_ROUTE_TEST" "$DATE_ROUTE" \
-  '  if (requested != null &&
-      requested != selected &&
-      isViewableDay(requested, latest)) {' \
-  '  if (requested != null &&
-      requested != selected) {'
+  '      requested != honoured &&
+      isViewableDay(requested, latest);' \
+  '      requested != honoured;'
 
 # Sleep'"'"'s window stops following the reader and slices from the newest night
 # again — the seam `sleep_history_screen.dart` used to record, reopened.
@@ -2754,7 +2754,7 @@ mutate 'the fallback is shown as though it were a finding' \
 # The subject stops reaching the server, so grounding is back to whatever the
 # model infers from prose — the gap the field was added to close.
 mutate 'the topic never leaves the phone' \
-  "$TOPIC_TEST" "$COACH_SCREEN" \
+  "$TOPIC_TEST" lib/features/coach/coach_body.dart \
   '      ref.read(coachControllerProvider.notifier).ask(question, topic: topic),' \
   '      ref.read(coachControllerProvider.notifier).ask(question),'
 
@@ -3326,10 +3326,12 @@ mutate 'a too-old server is reported as an unconfigured one' \
 # Preferring the compiled-in one would quietly restore the old behaviour.
 mutate 'the compiled-in provider wins over the discovered one' \
   test/auth/discovery_test.dart lib/data/auth/identity_providers.dart \
-  'Future<AuthConfig?> resolveAuthConfig(Credentials credentials) async =>
-    await credentials.authConfig() ??' \
-  'Future<AuthConfig?> resolveAuthConfig(Credentials credentials) async =>
-    null ??'
+  '  if (stored != null) {
+    return stored;
+  }' \
+  '  if (stored != null && false) {
+    return stored;
+  }'
 
 
 # ⛔ THE UPGRADE PATH. Without it every existing install signs itself out: a phone
@@ -3447,8 +3449,8 @@ mutate 'a small age delta is given a verdict' \
 # The collapsed summary stops naming an excluded term.
 mutate 'the collapsed summary leaves a term out' "$DROPDOWN_TEST" \
   lib/features/today/v02/what_moves_it.dart \
-  "      '\${leverShortName(d.term ?? d.reason)} left out'," \
-  "      ''," 
+  "      TextSpan(text: '\${leverShortName(d.term ?? d.reason)} left out')," \
+  "      const TextSpan(text: '')," 
 
 # The choice is taken but never written.
 mutate 'the dropdown forgets its state' "$DROPDOWN_TEST" \

@@ -119,7 +119,7 @@ class VitalBars extends StatelessWidget {
             children: <Widget>[
               Row(
                 children: <Widget>[
-                  Icon(vital.icon, size: 18, color: context.family),
+                  Icon(vital.icon, size: 16, color: colors.ink2),
                   const SizedBox(width: 8),
                   Expanded(
                     child: Text(
@@ -137,9 +137,9 @@ class VitalBars extends StatelessWidget {
                           ),
                         ),
                         TextSpan(
-                          text: ' ${vital.unit}',
+                          text: '\u00A0${vital.unit}',
                           style: SleepType.vitalUnit.copyWith(
-                            color: colors.ink2,
+                            color: colors.ink3,
                           ),
                         ),
                       ],

@@ -100,7 +100,7 @@ const String kNoNightTitle = 'No night on or before this day';
 /// Why that is an answer rather than an empty screen.
 const String kNoNightBody =
     'Your nights are sent as a window, and this one begins after the day you '
-    'chose. A later night is not shown in its place — that would be a different '
+    'chose. A later night is not shown in its place, because that would be a different '
     'night under a date you did not pick.';
 
 /// Everything Sleep needs that is not on the payloads.

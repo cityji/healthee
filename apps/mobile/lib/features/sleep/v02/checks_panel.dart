@@ -49,9 +49,9 @@ import 'package:healthee/core/theme/tone.dart';
 import 'package:healthee/data/honesty/reading.dart';
 import 'package:healthee/data/models/sleep_night.dart';
 import 'package:healthee/data/models/sleep_page.dart';
-import 'package:healthee/features/sleep/sleep_format.dart';
 import 'package:healthee/features/sleep/v02/check_bar.dart';
 import 'package:healthee/features/sleep/v02/sleep_cutoffs.dart';
+import 'package:healthee/shared/format/duration.dart';
 import 'package:healthee/shared/format/iso_clock.dart';
 import 'package:healthee/shared/metric_info/metric_detail.dart';
 import 'package:healthee/shared/usual_range.dart';
@@ -129,7 +129,7 @@ class SleepChecksPanel extends StatelessWidget {
         name: 'Duration',
         reading: night.tstMin.valueOrNull == null
             ? null
-            : hoursMinutes(night.tstMin.valueOrNull!),
+            : durationText(night.tstMin.valueOrNull!),
         target: bands.durationLabel,
         passed: night.pointDuration,
         detail: bands.durationDetail(night.tstMin.valueOrNull),
@@ -139,8 +139,8 @@ class SleepChecksPanel extends StatelessWidget {
           600,
           bands.durationLowMin,
           bands.durationHighMin,
-          ('4h', '10h'),
-          '${plainNumber(bands.durationLowMin / 60)} to ${plainNumber(bands.durationHighMin / 60)}h',
+          (hoursText(4), hoursText(10)),
+          '${hoursText(bands.durationLowMin / 60)} to ${hoursText(bands.durationHighMin / 60)}',
           'Under',
           'Over',
         ),
@@ -220,7 +220,7 @@ class SleepChecksPanel extends StatelessWidget {
         infoKey: 'sleep_health',
         detail: MetricDetail(
           references: <String>[
-            for (final check in rows) '${check.name} — ${check.target}',
+            for (final check in rows) '${check.name}: ${check.target}',
           ],
           notes: notes,
           method: const <String>[kFourChecksNote],

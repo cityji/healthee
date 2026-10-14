@@ -180,8 +180,10 @@ void main() {
     });
   });
 
-  group('IconTile — 40 × 40 at radius 13, family on family-soft', () {
-    testWidgets('the box, the corner and both colours', (tester) async {
+  group('IconTile — a bare 24 px ink2 glyph, no tile (the brief)', () {
+    testWidgets('the box is the glyph, in ink2, with nothing behind it', (
+      tester,
+    ) async {
       await pumpV02(
         tester,
         const IconTile(SolarIconsOutline.wind),
@@ -189,34 +191,32 @@ void main() {
         width: null,
       );
       final rect = tester.getRect(find.byType(IconTile));
-      expect(rect.width, 40);
-      expect(rect.height, 40);
-      final decoration = decorationOf(
-        tester,
+      expect(rect.width, 24);
+      expect(rect.height, 24);
+      expect(
         find.descendant(
           of: find.byType(IconTile),
-          matching: find.byType(Container),
+          matching: find.byType(DecoratedBox),
         ),
+        findsNothing,
+        reason: 'an icon is never drawn inside a tile, circle or tint',
       );
-      expect(groundOf(decoration), kHues.oxygenSoft);
-      expect(radiusOf(decoration), 13);
-      expect(
-        tester.widget<Icon>(find.byIcon(SolarIconsOutline.wind)).color,
-        kHues.oxygen,
-      );
+      final icon = tester.widget<Icon>(find.byIcon(SolarIconsOutline.wind));
+      expect(icon.color, kColors.ink2);
+      expect(icon.size, 24);
     });
 
-    testWidgets('with no scope it takes fitness — richer.css :root', (
+    testWidgets('the family never reaches it, with or without a scope', (
       tester,
     ) async {
       await pumpV02(
         tester,
-        const IconTile(SolarIconsOutline.wind),
+        const IconTile.chrome(SolarIconsOutline.wind),
         width: null,
       );
       expect(
         tester.widget<Icon>(find.byIcon(SolarIconsOutline.wind)).color,
-        kHues.fitness,
+        kColors.ink2,
       );
     });
   });

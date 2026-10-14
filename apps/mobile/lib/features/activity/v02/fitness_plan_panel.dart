@@ -71,11 +71,7 @@ class FitnessPlanPanel extends StatelessWidget {
             const SizedBox(height: blocksGap),
             Text(
               'THIS WEEK',
-              style: TypeScale.tinyLabel.copyWith(
-                color: context.family,
-                letterSpacing: 1.1,
-                fontWeight: FontWeight.w700,
-              ),
+              style: TypeLadder.label.copyWith(color: context.colors.ink3),
             ),
             for (final block in plan.blocks) ...<Widget>[
               const SizedBox(height: blockGap),
@@ -105,7 +101,6 @@ class _Projection extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final colors = context.colors;
-    final family = context.family;
     return Row(
       crossAxisAlignment: CrossAxisAlignment.center,
       children: <Widget>[
@@ -117,13 +112,13 @@ class _Projection extends StatelessWidget {
           padding: const EdgeInsets.symmetric(horizontal: 10),
           child: Icon(
             SolarIconsOutline.arrowRight,
-            size: 18,
+            size: 16,
             color: colors.ink3,
           ),
         ),
         Text(
           plan.projected12wk!.toStringAsFixed(1),
-          style: TypeLadder.title1.copyWith(color: family),
+          style: TypeLadder.title1.copyWith(color: colors.ink),
         ),
         const Spacer(),
         Flexible(
@@ -134,10 +129,7 @@ class _Projection extends StatelessWidget {
               Text(
                 '+${plan.gain!.toStringAsFixed(1)} ml/kg/min',
                 maxLines: 1,
-                style: TypeScale.panelContext.copyWith(
-                  color: family,
-                  fontWeight: FontWeight.w700,
-                ),
+                style: TypeLadder.calloutStrong.copyWith(color: colors.ink),
               ),
               Text(
                 'in ${plan.weeks ?? 12} weeks, on this plan',
@@ -178,10 +170,7 @@ class _BlockRow extends StatelessWidget {
                 block.name,
                 maxLines: 1,
                 overflow: TextOverflow.ellipsis,
-                style: TypeScale.panelContext.copyWith(
-                  color: colors.ink,
-                  fontWeight: FontWeight.w700,
-                ),
+                style: TypeLadder.calloutStrong.copyWith(color: colors.ink),
               ),
             ),
             const SizedBox(width: 8),
@@ -190,10 +179,8 @@ class _BlockRow extends StatelessWidget {
               block.doneMin == null
                   ? 'target ${block.targetMin} min'
                   : '${block.doneMin} / ${block.targetMin} min',
-              style: TypeScale.panelNote.copyWith(
-                color: block.met ? family : colors.ink3,
-                fontWeight: block.met ? FontWeight.w700 : FontWeight.w400,
-              ),
+              style: (block.met ? TypeLadder.calloutStrong : TypeLadder.callout)
+                  .copyWith(color: block.met ? colors.ink : colors.ink3),
             ),
           ],
         ),

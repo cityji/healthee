@@ -77,16 +77,6 @@ String untilLabel(DateTime at, {required DateTime now}) {
 
 int _ceilUnits(int amount, int perUnit) => (amount + perUnit - 1) ~/ perUnit;
 
-/// A duration in minutes as `7h 20m`, or `48m` under an hour.
-///
-/// Used for sleep and workouts. Never decimal hours — "6.3 h of sleep" is a
-/// number nobody thinks in, and the minutes are what the strap measured.
-String durationLabel(int totalMinutes) {
-  final hours = totalMinutes ~/ 60;
-  final minutes = totalMinutes % 60;
-  return hours == 0 ? '${minutes}m' : '${hours}h ${minutes}m';
-}
-
 /// `6a` · `12p` · `11p` — legacy's short clock, from a real hour.
 ///
 /// Legacy hard-codes the five captions under its 24-hour heart rate and lays

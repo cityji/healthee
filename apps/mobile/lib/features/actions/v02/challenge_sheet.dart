@@ -185,7 +185,12 @@ class _ChallengeSheet extends StatelessWidget {
 /// `≥ 380 min sleep · daily` with its window — the commitment, set apart.
 class TargetStrip extends StatelessWidget {
   /// Builds the strip.
-  const TargetStrip({required this.target, this.window, this.dense = false, super.key});
+  const TargetStrip({
+    required this.target,
+    this.window,
+    this.dense = false,
+    super.key,
+  });
 
   /// The commitment, already worded by [DeckItem].
   final String target;
@@ -205,13 +210,7 @@ class TargetStrip extends StatelessWidget {
         horizontal: dense ? 9 : 12,
         vertical: dense ? 6 : 10,
       ),
-      decoration: ShapeDecoration(
-        color: colors.surface,
-        shape: hSquircle(
-          12,
-          side: BorderSide(color: colors.line, width: hairline),
-        ),
-      ),
+      decoration: ShapeDecoration(color: colors.surface, shape: hSquircle(12)),
       child: Row(
         children: <Widget>[
           Icon(SolarIconsOutline.flag, size: dense ? 13 : 15, color: family),
@@ -233,10 +232,7 @@ class TargetStrip extends StatelessWidget {
           ),
           if (window case final String run) ...<Widget>[
             const SizedBox(width: 8),
-            Text(
-              run,
-              style: TypeScale.tinyLabel.copyWith(color: colors.ink3),
-            ),
+            Text(run, style: TypeScale.tinyLabel.copyWith(color: colors.ink3)),
           ],
         ],
       ),
@@ -261,7 +257,7 @@ class _Block extends StatelessWidget {
         color: colors.surface,
         // 12 is the floor `project_app_visual_language` sets for the corner,
         // not below it — at 12 and above the app draws a superellipse.
-        shape: hSquircle(12, side: BorderSide(color: colors.line, width: hairline)),
+        shape: hSquircle(12),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,

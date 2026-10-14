@@ -54,8 +54,8 @@ import 'package:solar_icons/solar_icons.dart';
 /// KEPT ON THE CARD, both halves. The first names the instrument behind the
 /// figure; the second says a modelled number is standing next to measured ones.
 const String kMovementInstrumentNote =
-    'The strap’s own since-midnight counter, not a sum of per-minute samples — '
-    'that stream freezes on this firmware. Energy is modelled.';
+    'The strap’s own since-midnight counter, not a sum of per-minute samples, '
+    'because that stream freezes on this firmware. Energy is modelled.';
 
 /// The `×2` is arithmetic invisible in the figure above it, and "recorded
 /// separately" is a definition of the strength number rather than a lesson.
@@ -68,7 +68,7 @@ const String kIntensityNote =
 /// paints nothing, so that an absent series reads as an absence rather than a
 /// shorter card — and it is the panel's job to say what the absence is.
 const String kNoStepWeekNote =
-    'No earlier days to chart yet — the week fills in as this phone collects '
+    'No earlier days to chart yet. The week fills in as this phone collects '
     'them.';
 
 /// `Today’s movement` — the day's steps, the week behind them, what it cost.
@@ -268,9 +268,9 @@ class IntensityPanel extends StatelessWidget {
         // this app made up.
         detail: MetricDetail(
           references: <String>[
-            'Active minutes — ${mvpa.weekTarget} min/week',
+            'Active minutes: ${mvpa.weekTarget} min/week',
             if (week != null)
-              'Strength — ${week.targetLowMin}–${week.targetHighMin} min/week',
+              'Strength: ${week.targetLowMin}–${week.targetHighMin} min/week',
           ],
           notes: <String>[
             ...mvpa.researchNotes,

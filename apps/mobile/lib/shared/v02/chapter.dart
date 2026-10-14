@@ -198,8 +198,8 @@ class ChapterHeading extends StatelessWidget {
     bottom: PageSpacing.afterHeading,
   );
 
-  /// `.chapter-heading .icon { width: 18px }`, and its `gap: 8px`.
-  static const double iconSize = 18;
+  /// An inline icon beside text is 16 px (the brief), in ink2 not the family.
+  static const double iconSize = 16;
 
   /// `.chapter-heading { gap: 8px }` and the rule's own `margin-left: 8px`.
   static const double gap = 8;
@@ -207,7 +207,7 @@ class ChapterHeading extends StatelessWidget {
   /// The chapter's name.
   final String title;
 
-  /// Drawn before it, in the family colour.
+  /// Drawn before it, 16 px in ink2.
   final IconData icon;
 
   /// The family for this heading. Null inherits.
@@ -274,7 +274,7 @@ class ChapterHeading extends StatelessWidget {
           painter.dispose();
           return Row(
             children: <Widget>[
-              Icon(icon, size: iconSize, color: context.family),
+              Icon(icon, size: iconSize, color: colors.ink2),
               const SizedBox(width: gap),
               SizedBox(
                 width: wanted < room ? wanted : (room < 0 ? 0 : room),

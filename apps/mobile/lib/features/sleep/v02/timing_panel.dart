@@ -37,7 +37,6 @@ library;
 import 'package:flutter/material.dart';
 import 'package:healthee/core/theme/tokens.dart';
 import 'package:healthee/core/theme/tone.dart';
-import 'package:healthee/core/theme/tone_scope.dart';
 import 'package:healthee/core/theme/type_ladder.dart';
 import 'package:healthee/core/theme/type_scale.dart';
 import 'package:healthee/data/honesty/citations.dart';
@@ -172,19 +171,10 @@ class _BandBlock extends StatelessWidget {
 
   final SleepConsistency block;
 
-  /// The thresholds the band's own colour has always used.
-  static const double tight = 1.5;
-  static const double moderate = 2.5;
-
   @override
   Widget build(BuildContext context) {
     final colors = context.colors;
     final band = block.onsetBandH!;
-    final verdict = band <= tight
-        ? colors.fav
-        : band <= moderate
-        ? colors.unf
-        : colors.alert;
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       mainAxisSize: MainAxisSize.min,
@@ -194,7 +184,7 @@ class _BandBlock extends StatelessWidget {
           children: <Widget>[
             Text(
               '${band.toStringAsFixed(1)} h',
-              style: TypeScale.statValue.copyWith(color: verdict),
+              style: TypeScale.statValue.copyWith(color: colors.ink),
             ),
             const SizedBox(width: 10),
             Expanded(
@@ -216,7 +206,7 @@ class _BandBlock extends StatelessWidget {
                 builder: (context, sri) => Text(
                   'SRI ${sri.round()}',
                   textAlign: TextAlign.right,
-                  style: TypeScale.panelTitle.copyWith(color: context.family),
+                  style: TypeScale.panelTitle.copyWith(color: colors.ink),
                 ),
               ),
             ),
