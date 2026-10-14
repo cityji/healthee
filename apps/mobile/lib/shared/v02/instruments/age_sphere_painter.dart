@@ -24,6 +24,7 @@ import 'dart:ui' as ui;
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:healthee/core/theme/palette.dart';
 import 'package:healthee/shared/v02/instruments/age_sphere_lattice.dart';
 
 /// Edge of the square white sprite every dot is cut from, in image px.
@@ -184,7 +185,7 @@ class AgeSpherePainter extends CustomPainter {
       const Offset(kSpriteSize / 2, kSpriteSize / 2),
       kSpriteRadius,
       Paint()
-        ..color = Colors.white
+        ..color = MaskColors.white
         ..isAntiAlias = true,
     );
     final ui.Picture picture = recorder.endRecording();
