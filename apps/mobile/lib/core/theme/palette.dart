@@ -303,3 +303,10 @@ abstract final class DarkPalette {
   /// `--map-land`, `oklch(24% .016 145)` — the same ground, dark.
   static const Color mapLand = Color(0xFF1B211B);
 }
+
+/// Colours that are not part of a theme: masks a painter tints.
+abstract final class MaskColors {
+  /// Opaque white, for a sprite that `BlendMode.modulate` then tints. It is
+  /// never seen as white; the tint supplies every visible colour.
+  static const Color white = Color(0xFFFFFFFF);
+}
