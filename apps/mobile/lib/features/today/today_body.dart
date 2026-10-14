@@ -89,6 +89,9 @@ void todayBody(
       caveatCarrier: CaveatCarrier.insideCard,
       withheldBuilder: (context, disclosure) => TodayBioHeroWithheld(
         withheld: disclosure,
+        block: snapshot.bioAgeBlock,
+        vo2maxWithheld: snapshot.vo2maxWithheld,
+        onOpen: extras.onOpenBody,
         exclusions: switch (snapshot.biologicalAge) {
           Withheld<BiologicalAge>(:final exclusions) => exclusions,
           _ => const <Disclosure>[],

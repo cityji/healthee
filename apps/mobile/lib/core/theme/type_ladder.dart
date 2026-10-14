@@ -1,7 +1,7 @@
 /// **The type ladder: the only sizes the app sets text at.**
 ///
 /// Twelve steps on nine sizes. Every named style in the theme (`TypeScale`,
-/// `KeyType`, `FormType`, `SleepType`, `MeterType`, `DateType`, `BioType`,
+/// `KeyType`, `FormType`, `SleepType`, `MeterType`, `DateType`,
 /// `HType` and the Material roles in `healtheeTextTheme`) is an alias of one of
 /// these, so a size that is not on this list cannot be reached by naming a
 /// style. Each step fixes size, line height, weight and tracking together,

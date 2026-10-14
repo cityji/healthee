@@ -30,10 +30,9 @@ const String kAgeOrbTitle = 'BIOLOGICAL AGE';
 class AgeOrbHero extends StatelessWidget {
   const AgeOrbHero({
     required this.value,
-    this.figure,
     this.verdict,
     this.subtitle,
-    this.note,
+    this.below,
     this.infoKey = 'biological_age',
     this.modelLabel,
     this.extraDisclosures = const <Disclosure>[],
@@ -43,6 +42,7 @@ class AgeOrbHero extends StatelessWidget {
     this.slider,
     this.stats = const <BioStat>[],
     this.turning = true,
+    this.paused = false,
     super.key,
   });
 
@@ -56,17 +56,20 @@ class AgeOrbHero extends StatelessWidget {
   /// The figure, `34.3`. Also what a screen reader hears.
   final String value;
 
-  /// Drawn instead of [value], for a hero whose number is withheld.
-  final Widget? figure;
-
   /// Under the figure: `1.7 years younger`, coloured by which side it is.
   final Verdict? verdict;
 
   /// Under the title.
   final String? subtitle;
 
-  /// A sentence under the orb, for a hero whose number is withheld.
-  final String? note;
+  /// Drawn under the orb, for a hero whose number is withheld: the reason, in
+  /// the caller's own widget.
+  final Widget? below;
+
+  /// Whether the number is paused. The orb then holds nothing: no figure, no
+  /// `YEARS`, and a screen reader hears that the estimate is paused rather than
+  /// a number.
+  final bool paused;
 
   final String infoKey;
 
@@ -117,13 +120,9 @@ class AgeOrbHero extends StatelessWidget {
                 );
               },
             ),
-            if (note case final String line) ...<Widget>[
+            if (below case final Widget notice) ...<Widget>[
               const SizedBox(height: 14),
-              Text(
-                line,
-                textAlign: TextAlign.center,
-                style: KeyType.line.copyWith(color: colors.ink2),
-              ),
+              notice,
             ],
             if (slider case final Widget scale) ...<Widget>[
               const SizedBox(height: 18),
@@ -218,23 +217,29 @@ class AgeOrbHero extends StatelessWidget {
     ],
   );
 
-  Widget _figure(HealtheeColors colors, double diameter) => Semantics(
+  Widget _figure(HealtheeColors colors, double diameter) => paused
+      ? Semantics(
+          label: 'Biological age estimate paused',
+          child: const SizedBox.shrink(),
+        )
+      : _number(colors, diameter);
+
+  Widget _number(HealtheeColors colors, double diameter) => Semantics(
     label: 'Biological age $value years',
     child: ExcludeSemantics(
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: <Widget>[
-          figure ??
-              Text(
-                value,
-                style: KeyType.value.copyWith(
-                  color: colors.ink,
-                  fontSize: diameter * 0.24,
-                  fontWeight: FontWeight.w700,
-                  letterSpacing: -1.5,
-                  height: 1,
-                ),
-              ),
+          Text(
+            value,
+            style: KeyType.value.copyWith(
+              color: colors.ink,
+              fontSize: diameter * 0.24,
+              fontWeight: FontWeight.w700,
+              letterSpacing: -1.5,
+              height: 1,
+            ),
+          ),
           const SizedBox(height: 6),
           Text('YEARS', style: _caps.copyWith(color: colors.ink2)),
           if (verdict case final Verdict said) ...<Widget>[
