@@ -17,7 +17,7 @@
 ///
 /// ## What is real in the output and what is not
 ///
-/// The **fonts are the app's own** — [_loadBundledFonts] registers each family
+/// The **fonts are the app's own** — [loadBundledFonts] registers each family
 /// under the name `pubspec.yaml` gives it (`Figtree`, and `HealtheeSymbols` for
 /// the bundled glyph fallback), so glyph widths, overflow and the tabular-figure
 /// alignment are all genuine. It used to derive the family from the file name,
@@ -32,18 +32,12 @@
 /// has a ticker that never idles, and `pumpAndSettle` waited on it for nine
 /// minutes.
 ///
-/// The viewport is deliberately **taller than a phone** ([_renderSize]) so a
+/// The viewport is deliberately **taller than a phone** ([renderSize]) so a
 /// `ListView.builder` lays its whole list out in one pass and the PNG is the
 /// entire scroll rather than the first screenful. The width is a real phone's.
 library;
 
-import 'dart:convert';
-import 'dart:io';
-import 'dart:ui' as ui;
-
 import 'package:flutter/material.dart';
-import 'package:flutter/rendering.dart';
-import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:healthee/core/theme/app_theme.dart';
@@ -66,9 +60,9 @@ import '../_sleep_stubs.dart';
 import '../_today_stubs.dart';
 import '../features/_today_host.dart';
 import 'render_samples.dart';
+import 'render_support.dart';
+import 'render_today_cases.dart';
 
-/// A phone's width, and enough height that nothing is left unbuilt.
-const Size _renderSize = Size(390, 3400);
 const Size _tallSize = Size(390, 9000);
 
 /// The Biological age screen: a phone's width, tall enough for the whole scroll,
@@ -76,15 +70,12 @@ const Size _tallSize = Size(390, 9000);
 const Size _bodySize = Size(390, 2300);
 const double _bodyDpr = 3;
 
-/// Where the PNGs land. Ignored by git — this is a look, not an artefact.
-const String _outputDirectory = 'build/renders';
-
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
   // The owner looks at these; the debug ribbon is not part of the app.
   WidgetsApp.debugAllowBannerOverride = false;
 
-  setUpAll(_loadBundledFonts);
+  setUpAll(loadBundledFonts);
 
   late LocalStore store;
 
@@ -100,7 +91,7 @@ void main() {
     'dark': AppTheme.dark,
   }.entries) {
     testWidgets('render today — ${theme.key}', (tester) async {
-      await _shoot(
+      await shoot(
         tester,
         'today-${theme.key}',
         todayHost(
@@ -116,7 +107,7 @@ void main() {
     // so the hero draws the headline, the server's sentence, the caption and
     // the button, and no number.
     testWidgets('render today paused — ${theme.key}', (tester) async {
-      await _shoot(
+      await shoot(
         tester,
         'today-paused-${theme.key}',
         todayHost(
@@ -135,7 +126,7 @@ void main() {
     });
 
     testWidgets('render sleep — ${theme.key}', (tester) async {
-      await _shoot(
+      await shoot(
         tester,
         'sleep-${theme.key}',
         todayHost(
@@ -151,7 +142,7 @@ void main() {
     });
 
     testWidgets('render trends — ${theme.key}', (tester) async {
-      await _shoot(
+      await shoot(
         tester,
         'trends-${theme.key}',
         ProviderScope(
@@ -171,7 +162,7 @@ void main() {
     });
 
     testWidgets('render activity — ${theme.key}', (tester) async {
-      await _shoot(
+      await shoot(
         tester,
         'activity-${theme.key}',
         todayHost(
@@ -183,7 +174,7 @@ void main() {
     });
 
     testWidgets('render insights — ${theme.key}', (tester) async {
-      await _shoot(
+      await shoot(
         tester,
         'insights-${theme.key}',
         todayHost(
@@ -195,7 +186,7 @@ void main() {
     });
 
     testWidgets('render actions — ${theme.key}', (tester) async {
-      await _shoot(
+      await shoot(
         tester,
         'actions-${theme.key}',
         todayHost(
@@ -207,7 +198,7 @@ void main() {
     });
 
     testWidgets('render diagnostics — ${theme.key}', (tester) async {
-      await _shoot(
+      await shoot(
         tester,
         'diagnostics-${theme.key}',
         todayHost(
@@ -220,6 +211,7 @@ void main() {
   }
 
   _bodyRenders(() => store);
+  todayRenders(() => store);
 }
 
 /// The Biological age screen at dpr 3, in every accent and ground it ships in.
@@ -239,7 +231,7 @@ void _bodyRenders(LocalStore Function() store) {
           'bioage-${ground.key}-${AppearanceVariant.accentNames[accent]}';
       for (final open in <bool>[false, true]) {
         testWidgets('render $name ${open ? 'open' : 'closed'}', (tester) async {
-          await _shoot(
+          await shoot(
             tester,
             '$name-${open ? 'open' : 'closed'}',
             todayHost(
@@ -266,7 +258,7 @@ void _bodyRenders(LocalStore Function() store) {
     for (final ground in <String>['light', 'espresso']) {
       testWidgets('render bioage ${state.key} $ground', (tester) async {
         final (brightness, background) = grounds[ground]!;
-        await _shoot(
+        await shoot(
           tester,
           'bioage-${state.key}-$ground',
           todayHost(
@@ -304,97 +296,4 @@ Widget _pushed(Widget screen) => Navigator(
 Future<void> _openMoves(WidgetTester tester) async {
   await tester.tap(find.byKey(WhatMovesIt.headerKey));
   await tester.pump(const Duration(seconds: 1));
-}
-
-/// Pumps [app] at [size] and writes `<name>.png`, at [dpr] device pixels per
-/// logical one (1 unless a render asks for more). [beforeShot] runs once the
-/// screen has settled, for a tap that opens something before the picture.
-Future<void> _shoot(
-  WidgetTester tester,
-  String name,
-  Widget app, {
-  Size size = _renderSize,
-  double dpr = 1,
-  Future<void> Function(WidgetTester tester)? beforeShot,
-}) async {
-  tester.view
-    ..physicalSize = size * dpr
-    ..devicePixelRatio = dpr;
-  addTearDown(tester.view.reset);
-
-  await tester.pumpWidget(RepaintBoundary(key: _boundary, child: app));
-  // Charts animate on a real ticker. Pump past every reveal for a fixed time
-  // rather than settle: one screen's ticker never idles.
-  for (var i = 0; i < 30; i++) {
-    await tester.pump(const Duration(milliseconds: 100));
-  }
-  await beforeShot?.call(tester);
-
-  final boundary = tester.renderObject<RenderRepaintBoundary>(
-    find.byKey(_boundary),
-  );
-  // Real work, so it runs on the real clock: inside the test's fake async
-  // zone `toImage` never completes and the render hangs until the timeout.
-  final ByteData? png = await tester.runAsync<ByteData?>(() async {
-    final ui.Image image = await boundary.toImage(pixelRatio: dpr);
-    return image.toByteData(format: ui.ImageByteFormat.png);
-  });
-  if (png == null) {
-    fail('the render produced no bytes for $name');
-  }
-  final Directory directory = Directory(_outputDirectory);
-  if (!directory.existsSync()) {
-    directory.createSync(recursive: true);
-  }
-  File('$_outputDirectory/$name.png').writeAsBytesSync(
-    png.buffer.asUint8List(png.offsetInBytes, png.lengthInBytes),
-  );
-}
-
-const Key _boundary = Key('render-boundary');
-
-/// Registers the app's fonts with the test engine, under the names the app
-/// asks for, so widths are the real ones and icons are icons: the two bundled
-/// families `pubspec.yaml` declares, the `solar_icons` package's three (a
-/// package font is asked for as `packages/<name>/<family>`), and Material's.
-Future<void> _loadBundledFonts() async {
-  final String solar = _packageRoot('solar_icons');
-  final String flutterRoot = Platform.environment['FLUTTER_ROOT'] ?? '';
-  for (final MapEntry<String, String> face in <String, String>{
-    'Figtree': 'assets/fonts/Figtree.ttf',
-    'HealtheeSymbols': 'assets/fonts/InterFallback.ttf',
-    for (final String style in <String>['Bold', 'Broken', 'Outline'])
-      'packages/solar_icons/SolarIcons$style':
-          '$solar/fonts/SolarIcons$style.ttf',
-    'MaterialIcons':
-        '$flutterRoot/bin/cache/artifacts/material_fonts/MaterialIcons-Regular.otf',
-  }.entries) {
-    final File file = File(face.value);
-    if (!file.existsSync()) {
-      fail(
-        '${face.value} is missing — the render would measure a fallback face',
-      );
-    }
-    final FontLoader loader = FontLoader(face.key)
-      ..addFont(
-        Future<ByteData>.value(ByteData.sublistView(file.readAsBytesSync())),
-      );
-    await loader.load();
-  }
-}
-
-/// Where pub put [package], read from the resolved package config.
-String _packageRoot(String package) {
-  final Map<String, Object?> config =
-      jsonDecode(File('.dart_tool/package_config.json').readAsStringSync())
-          as Map<String, Object?>;
-  for (final Object? entry in config['packages']! as List<Object?>) {
-    final Map<String, Object?> row = entry! as Map<String, Object?>;
-    if (row['name'] == package) {
-      return Uri.parse(row['rootUri']! as String).toFilePath();
-    }
-  }
-  fail(
-    '$package is not in .dart_tool/package_config.json; run flutter pub get',
-  );
 }

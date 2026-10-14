@@ -108,7 +108,7 @@ Widget todayHost(
 /// pairing summary is pinned to a paired strap because `buildRouter` redirects an
 /// unpaired app to `/pairing` — a test of the tab shell would otherwise never see
 /// a tab.
-Widget routedApp(LocalStore store) {
+Widget routedApp(LocalStore store, {TodayView? server}) {
   // `HealtheeApp` builds its own `MaterialApp`, which installs
   // `MediaQuery.fromView` and overrides anything wrapped around it — so the
   // reduced-motion switch `todayHost` uses cannot be reached from out here.
@@ -121,7 +121,12 @@ Widget routedApp(LocalStore store) {
       .accessibilityFeaturesTestValue = const FakeAccessibilityFeatures(
     disableAnimations: true,
   );
-  return todayScoped(store, paired: true, child: const HealtheeApp());
+  return todayScoped(
+    store,
+    paired: true,
+    server: server,
+    child: const HealtheeApp(),
+  );
 }
 
 /// Seeds one ordinary day of strap measurements.

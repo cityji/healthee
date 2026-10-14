@@ -95,12 +95,12 @@ void main() {
   });
 
   testWidgets('A REVEALED CHART DOES NOT REPLAY ON RETURN', (tester) async {
-    // Tall enough that the grid's charts are actually built. The default
+    // Tall enough that the charts are actually built (the hero holds none now). The default
     // 800×600 leaves Today opening on the header, the greeting and the recovery
     // gauge, and a test that captured an empty list of reveals would pass by
     // measuring nothing.
     tester.view
-      ..physicalSize = const Size(420, 1800)
+      ..physicalSize = const Size(420, 3000)
       ..devicePixelRatio = 1.0;
     addTearDown(tester.view.reset);
     await tester.pumpWidget(routedApp(store));

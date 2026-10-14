@@ -26,7 +26,6 @@ import 'package:healthee/features/today/v02/age_calculation_sheet.dart';
 import 'package:healthee/features/today/v02/age_lever_row.dart';
 import 'package:healthee/features/today/v02/age_lever_sheets.dart';
 import 'package:healthee/features/today/v02/age_levers.dart';
-import 'package:healthee/features/today/v02/age_paused.dart';
 import 'package:healthee/features/today/v02/age_screen_parts.dart';
 import 'package:healthee/features/today/v02/what_moves_it.dart';
 import 'package:healthee/shared/reveal_once.dart';
@@ -78,11 +77,6 @@ void main() {
     );
     await tester.pumpAndSettle();
   }
-
-  Future<void> openPaused(WidgetTester tester) => open(
-    tester,
-    mutate: pausedToday(absentTerms: <Map<String, Object?>>[staleWeightTerm()]),
-  );
 
   Future<void> tapAndSettle(WidgetTester tester, Finder finder) async {
     await tester.tap(finder);
@@ -310,51 +304,6 @@ void main() {
         ),
         isNull,
       );
-    });
-  });
-
-  group('a paused estimate', () {
-    testWidgets('SAYS WHY, WITH NO NUMBER AND NO RULER', (tester) async {
-      await openPaused(tester);
-
-      expect(find.text(kAgePausedTitle), findsOneWidget);
-      expect(find.textContaining('Log a weight and it returns'), findsWidgets);
-      expect(find.text('34.3'), findsNothing);
-      expect(find.byType(AgeRuler), findsNothing);
-      expect(tester.widget<AgeSphere>(find.byType(AgeSphere)).withheld, isTrue);
-    });
-
-    testWidgets('OPENS THE DROPDOWN ON THE SLEEP ROW AND THE MISSING FITNESS', (
-      tester,
-    ) async {
-      await openPaused(tester);
-
-      expect(find.byKey(WhatMovesIt.summaryKey), findsNothing);
-      expect(find.byKey(leverRowKey('sleep duration')), findsOneWidget);
-      expect(find.text('Not counted'), findsOneWidget);
-      // The absent term is words, with no zone bar and no invented zero.
-      expect(find.byKey(leverRowKey('fitness')), findsOneWidget);
-      expect(find.text('-1.7'), findsNothing);
-    });
-
-    testWidgets('STILL NAMES WHAT IS EXCLUDED, AND THE CAVEATS REACH THE ⓘ', (
-      tester,
-    ) async {
-      await openPaused(tester);
-      expect(find.textContaining('Left out'), findsWidgets);
-
-      final detail = tester.widget<BodyDetail>(find.byType(BodyDetail));
-      expect(detail.caveats, hasLength(3));
-      await tapAndSettle(tester, find.byIcon(SolarIconsOutline.infoCircle));
-      expect(find.textContaining(_fitnessCaveat), findsOneWidget);
-    });
-
-    testWidgets('THE CALCULATION ROW HAS NO LADDER TO DRAW', (tester) async {
-      await openPaused(tester);
-      await tapAndSettle(tester, find.text(kAgeCalculationRow));
-
-      expect(find.byType(AgeWaterfall), findsNothing);
-      expect(find.textContaining(kConfidenceNote), findsOneWidget);
     });
   });
 

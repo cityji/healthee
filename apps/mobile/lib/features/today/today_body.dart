@@ -51,17 +51,6 @@ import 'package:healthee/shared/v02/context_bridge.dart';
 import 'package:healthee/shared/v02/withheld_panel.dart';
 import 'package:solar_icons/solar_icons.dart';
 
-/// The bridge under the hero: what the estimate is, and what it is not.
-///
-/// **Kept, against one instruction and with another.** It was named as prose to
-/// move behind an ⓘ; it is `H.bridge('fitness', …)` in the prototype — a
-/// designed element BETWEEN chapters, not copy on a card — and the standing rule
-/// is to match the prototype and leave judgement to charts and data. A
-/// `ContextBridge` also has no ⓘ to move into: it belongs to no metric.
-const String kAgeBridge =
-    'This estimate combines fitness and sleep contributions. Recovery describes '
-    'a different timescale: how you start today.';
-
 /// The bridge under sleep health: sleep's share of the recovery model.
 const String kSleepBridge =
     'Sleep carries the largest single share of the recovery model. The full '
@@ -99,9 +88,8 @@ void todayBody(
       ),
       builder: (context, age) => TodayBioHero(
         age: age,
-        reveals: reveals,
+        block: snapshot.bioAgeBlock,
         onOpenBody: extras.onOpenBody,
-        onOpenTerm: extras.onOpenTerm,
       ),
     ),
   );
@@ -115,15 +103,6 @@ void todayBody(
     ),
   );
   sections.add(TodayTonight(live: facts.snapshot.asOf?.isToday ?? true));
-  // No spacer: the bridge carries the gap itself so its rule can span it and
-  // reach the tiles above. See `ContextBridge.leadIn`.
-  sections.add(
-    ContextBridge.link(
-      kAgeBridge,
-      label: 'See the contributors',
-      onOpen: extras.onOpenBody,
-    ),
-  );
   if (extras.chapters case final TodayChapters chapters) {
     // Pinned: `richer.css` gives `.chapter-nav` `position: sticky; top: 0`, and
     // it is the one element on the page that has it.

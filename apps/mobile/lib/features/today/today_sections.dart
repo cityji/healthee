@@ -124,7 +124,6 @@ class TodayExtras {
     this.onOpenActions,
     this.onOpenRecovery,
     this.onOpenBody,
-    this.onOpenTerm,
     this.onOpenSleep,
     this.onOpenActivity,
     this.onOpenTrends,
@@ -176,11 +175,8 @@ class TodayExtras {
   /// Opens the recovery detail — the hero's first summary row.
   final VoidCallback? onOpenRecovery;
 
-  /// Opens the biological-age detail — the hero's eyebrow arrow.
+  /// Opens the biological-age detail — a tap anywhere on the hero.
   final VoidCallback? onOpenBody;
-
-  /// Opens one age term's own screen, by the term's name.
-  final void Function(String term)? onOpenTerm;
 
   /// Opens the sleep tab — the hero's second summary row.
   final VoidCallback? onOpenSleep;

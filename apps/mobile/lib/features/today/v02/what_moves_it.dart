@@ -33,20 +33,49 @@ const double kWhatMovesItChevron = 24;
 const double kWhatMovesItGap = Insets.cardGap;
 
 /// The collapsed summary: every term the block names, in payload order.
-String whatMovesItSummary(BioAgeBlock block) {
-  final parts = <String>[
-    for (final c in block.contributions)
-      if (c.deltaYears case final double delta)
-        '${leverShortName(c.term)} ${signedYears(delta)}'
-      else
-        '${leverShortName(c.term)} not counted',
-    for (final d in block.absentTerms)
-      '${leverShortName(d.term ?? d.reason)} not counted',
-    for (final d in block.exclusions)
-      '${leverShortName(d.term ?? d.reason)} left out',
-  ];
-  return parts.join(' · ');
+String whatMovesItSummary(BioAgeBlock block) => _terms(
+  block,
+  counted: (name, delta) => '$name ${signedYears(delta)}',
+  notCounted: (name) => '$name not counted',
+  leftOut: (name) => '$name left out',
+).join(' · ');
+
+/// Today's one line under the sphere: `Fitness −1.7 years · Sleep 0.0 years ·
+/// Regularity left out`. The same terms as [whatMovesItSummary], with the unit
+/// on each figure. [spoken] words it for a screen reader instead, with `minus`
+/// for the sign and lower-case names: `fitness minus 1.7 years, sleep 0.0
+/// years`.
+String ageBreakdownLine(BioAgeBlock block, {bool spoken = false}) {
+  String name(String text) => spoken ? text.toLowerCase() : text;
+  final parts = _terms(
+    block,
+    counted: (term, delta) => spoken
+        ? '${name(term)} ${spokenYears(delta)}'
+        : '$term ${signedYears(delta)} years',
+    notCounted: (term) => '${name(term)} not counted',
+    leftOut: (term) => '${name(term)} left out',
+  );
+  final line = parts.join(spoken ? ', ' : ' · ');
+  return spoken && line.isNotEmpty
+      ? line[0].toUpperCase() + line.substring(1)
+      : line;
 }
+
+List<String> _terms(
+  BioAgeBlock block, {
+  required String Function(String name, double delta) counted,
+  required String Function(String name) notCounted,
+  required String Function(String name) leftOut,
+}) => <String>[
+  for (final c in block.contributions)
+    if (c.deltaYears case final double delta)
+      counted(leverShortName(c.term), delta)
+    else
+      notCounted(leverShortName(c.term)),
+  for (final d in block.absentTerms)
+    notCounted(leverShortName(d.term ?? d.reason)),
+  for (final d in block.exclusions) leftOut(leverShortName(d.term ?? d.reason)),
+];
 
 /// The dropdown.
 class WhatMovesIt extends ConsumerStatefulWidget {
@@ -55,6 +84,7 @@ class WhatMovesIt extends ConsumerStatefulWidget {
     required this.reveals,
     required this.openByDefault,
     this.onOpenLever,
+    this.reasonsShownAbove = false,
     super.key,
   });
 
@@ -75,6 +105,9 @@ class WhatMovesIt extends ConsumerStatefulWidget {
 
   /// Called with a lever's term when its row is tapped.
   final void Function(String term)? onOpenLever;
+
+  /// See [AgeLeverCard.reasonsShownAbove].
+  final bool reasonsShownAbove;
 
   @override
   ConsumerState<WhatMovesIt> createState() => _WhatMovesItState();
@@ -179,6 +212,7 @@ class _WhatMovesItState extends ConsumerState<WhatMovesIt> {
                       block: widget.block,
                       reveals: widget.reveals,
                       onOpenLever: widget.onOpenLever,
+                      reasonsShownAbove: widget.reasonsShownAbove,
                     ),
                   )
                 : const SizedBox.shrink(),

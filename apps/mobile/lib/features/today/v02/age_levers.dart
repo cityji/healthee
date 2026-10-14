@@ -30,6 +30,7 @@ class AgeLeverCard extends StatelessWidget {
     required this.block,
     required this.reveals,
     this.onOpenLever,
+    this.reasonsShownAbove = false,
     super.key,
   });
 
@@ -45,6 +46,11 @@ class AgeLeverCard extends StatelessWidget {
   /// Called with a lever's term when its row is tapped.
   final void Function(String term)? onOpenLever;
 
+  /// Whether the screen already says, above this card, why the withheld
+  /// levers are not counted. Each such row then says only `Not counted` and
+  /// where the reason is, rather than the server's sentence a second time.
+  final bool reasonsShownAbove;
+
   @override
   Widget build(BuildContext context) {
     final colors = context.colors;
@@ -55,7 +61,8 @@ class AgeLeverCard extends StatelessWidget {
         AgeAbsentRow(
           term: d.term ?? d.reason,
           absence: LeverAbsence.notCounted,
-          message: d.message,
+          message: reasonsShownAbove ? null : d.message,
+          note: reasonsShownAbove ? kReasonAbove : null,
           onOpen: onOpenLever,
         ),
       for (final d in block.exclusions)
