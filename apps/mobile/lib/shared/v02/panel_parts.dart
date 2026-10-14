@@ -202,7 +202,7 @@ class PanelValue extends StatelessWidget {
           Text(
             unit,
             style: (compact ? TypeScale.panelUnitCompact : TypeScale.panelUnit)
-                .copyWith(color: colors.ink2),
+                .copyWith(color: colors.ink3),
           ),
         ],
       ],
@@ -318,7 +318,7 @@ class StatRow extends StatelessWidget {
                 const SizedBox(width: unitGap),
                 Text(
                   unit,
-                  style: TypeScale.statUnit.copyWith(color: colors.ink2),
+                  style: TypeScale.statUnit.copyWith(color: colors.ink3),
                 ),
               ],
             ],
@@ -381,8 +381,8 @@ class ProgressTrack extends StatelessWidget {
 /// computed — so the wrong reading was indistinguishable from the right one.
 /// The label costs one line and removes the ambiguity entirely.
 ///
-/// Set in the family, not the accent: it describes a group of readings, and on
-/// a toned panel the family is what every other mark in that group already is.
+/// Set in ink3: the brief reserves family hues for data marks, so a label names
+/// its group in the quietest text colour rather than tinting itself.
 class WindowLabel extends StatelessWidget {
   /// Names the window.
   const WindowLabel(this.text, {super.key});
@@ -394,6 +394,6 @@ class WindowLabel extends StatelessWidget {
   @override
   Widget build(BuildContext context) => Text(
     text.toUpperCase(),
-    style: TypeLadder.label.copyWith(color: context.family),
+    style: TypeLadder.label.copyWith(color: context.colors.ink3),
   );
 }

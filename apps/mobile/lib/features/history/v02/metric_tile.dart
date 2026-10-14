@@ -39,7 +39,6 @@
 library;
 
 import 'package:flutter/material.dart';
-import 'package:healthee/core/theme/dimensions.dart';
 import 'package:healthee/core/theme/shapes.dart';
 import 'package:healthee/core/theme/tokens.dart';
 import 'package:healthee/core/theme/tone_scope.dart';
@@ -230,10 +229,7 @@ class _Face extends StatelessWidget {
       padding: const EdgeInsets.all(MetricTile.padding),
       decoration: ShapeDecoration(
         color: colors.surface,
-        shape: hSquircle(
-          MetricTile.radius,
-          side: BorderSide(color: colors.line, width: hairline),
-        ),
+        shape: hSquircle(MetricTile.radius),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,

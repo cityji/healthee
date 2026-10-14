@@ -207,7 +207,7 @@ class _SectionList extends StatelessWidget {
   /// under it is hidden, and it takes its own side padding instead.
   List<Widget> _slivers(BuildContext context) {
     final slivers = <Widget>[
-      const SliverToBoxAdapter(child: SizedBox(height: Insets.lg)),
+      const SliverToBoxAdapter(child: SizedBox(height: Insets.gutter)),
     ];
     var run = <PageSection>[];
 
@@ -219,7 +219,7 @@ class _SectionList extends StatelessWidget {
       run = <PageSection>[];
       slivers.add(
         SliverPadding(
-          padding: const EdgeInsets.symmetric(horizontal: Insets.lg),
+          padding: const EdgeInsets.symmetric(horizontal: Insets.gutter),
           sliver: SliverList.builder(
             itemCount: items.length,
             itemBuilder: (context, index) => Padding(
@@ -255,7 +255,7 @@ class _SectionList extends StatelessWidget {
               extent: extent(context) + section.gap,
               background: context.colors.bg,
               child: Padding(
-                padding: const EdgeInsets.symmetric(horizontal: Insets.lg),
+                padding: const EdgeInsets.symmetric(horizontal: Insets.gutter),
                 child: section.child,
               ),
             ),

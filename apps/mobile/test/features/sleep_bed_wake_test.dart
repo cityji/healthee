@@ -64,7 +64,7 @@ void main() {
       sleepPanelHost(BedWakeWeekPanel(nights: week, reveals: RevealRegistry())),
     );
     await tester.pumpAndSettle();
-    expect(find.text('1h 45m'), findsOneWidget);
+    expect(find.text('1\u00A0h 45\u00A0min'), findsOneWidget);
     expect(find.text(kBedWakeLine), findsOneWidget);
   });
 }

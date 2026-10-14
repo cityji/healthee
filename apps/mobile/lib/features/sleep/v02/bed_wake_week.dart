@@ -19,6 +19,7 @@ import 'package:healthee/core/theme/tone_scope.dart';
 import 'package:healthee/core/theme/type_scale_keys.dart';
 import 'package:healthee/data/models/sleep_night.dart';
 import 'package:healthee/features/sleep/sleep_format.dart';
+import 'package:healthee/shared/format/duration.dart';
 import 'package:healthee/shared/reveal_once.dart';
 import 'package:healthee/shared/v02/panel.dart';
 import 'package:healthee/shared/v02/panel_head.dart';
@@ -93,7 +94,7 @@ class BedWakeWeekPanel extends StatelessWidget {
         mainAxisSize: MainAxisSize.min,
         children: <Widget>[
           PanelValue(
-            spread == null ? '—' : hoursMinutes((spread * 60).round()),
+            spread == null ? '—' : durationText((spread * 60).round()),
             context_: 'between your earliest and latest bedtime',
           ),
           RevealOnce(

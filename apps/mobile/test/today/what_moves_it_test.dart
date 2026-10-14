@@ -64,11 +64,31 @@ void main() {
     expect(find.text('What moves it'), findsOneWidget);
     expect(find.text('Each reading, turned into years'), findsOneWidget);
     expect(
-      tester.widget<Text>(find.byKey(WhatMovesIt.summaryKey)).data,
+      tester
+          .widget<Text>(find.byKey(WhatMovesIt.summaryKey))
+          .textSpan!
+          .toPlainText(),
       'Fitness −1.7 · Sleep 0.0 · Regularity left out',
     );
     expect(_foldHeight(tester), 0);
     expect(find.byType(AgeLeverCard), findsNothing);
+  });
+
+  test('the breakdown span reads as the line and tightens the sign', () {
+    const style = TextStyle(fontSize: 13);
+    final span = ageBreakdownSpan(_block(), style);
+    expect(span.toPlainText(), ageBreakdownLine(_block()));
+    final signs = <TextSpan>[];
+    span.visitChildren((child) {
+      if (child is TextSpan && child.text == '\u2212') {
+        signs.add(child);
+      }
+      return true;
+    });
+    expect(signs, isNotEmpty);
+    for (final sign in signs) {
+      expect(sign.style!.letterSpacing, closeTo(-0.14 * 13, 1e-9));
+    }
   });
 
   test('the summary names withheld terms as not counted', () {

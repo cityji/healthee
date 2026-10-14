@@ -13,6 +13,7 @@ library;
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:healthee/core/theme/dimensions.dart';
 import 'package:healthee/core/theme/tone.dart';
 import 'package:healthee/data/history/history_metric.dart';
 import 'package:healthee/data/history/history_repository.dart';
@@ -113,13 +114,13 @@ class _TrendsScreenState extends ConsumerState<TrendsScreen> {
           selected: _period,
           onSelect: (p) => setState(() => _period = p),
         ),
-        const SizedBox(height: 12),
+        const SizedBox(height: Insets.cardGap),
         const PanelNote(TrendsScreen.legend),
         for (final spec in kTrendSpecs) ...<Widget>[
-          const SizedBox(height: 12),
+          const SizedBox(height: Insets.cardGap),
           _card(spec, end),
         ],
-        const SizedBox(height: 24),
+        const SizedBox(height: Insets.section),
         const DataFooter(),
       ],
     );

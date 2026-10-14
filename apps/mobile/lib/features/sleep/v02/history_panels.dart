@@ -43,6 +43,7 @@ import 'package:healthee/features/sleep/sleep_format.dart';
 import 'package:healthee/shared/charts/h_stacked_sleep.dart';
 import 'package:healthee/shared/charts/v02/chart_curve.dart';
 import 'package:healthee/shared/charts/v02/v02_line_chart.dart';
+import 'package:healthee/shared/format/duration.dart';
 import 'package:healthee/shared/instrument/h_tap.dart';
 import 'package:healthee/shared/metric_info/metric_detail.dart';
 import 'package:healthee/shared/reveal_once.dart';
@@ -254,7 +255,7 @@ class NightRow extends StatelessWidget {
   /// `6h 20m`, or an em dash when nothing was measured.
   static String duration(SleepNight night) {
     final minutes = night.tstMin.valueOrNull;
-    return minutes == null ? '—' : hoursMinutes(minutes);
+    return minutes == null ? '—' : durationText(minutes);
   }
 
   @override

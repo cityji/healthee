@@ -18,6 +18,7 @@ import 'package:healthee/core/theme/tokens.dart';
 import 'package:healthee/core/theme/type_ladder.dart';
 import 'package:healthee/data/models/sleep_history.dart';
 import 'package:healthee/shared/charts/chart_primitives.dart';
+import 'package:healthee/shared/format/duration.dart';
 
 /// A week of nights, stacked deep → light → REM → awake.
 class HStackedSleep extends StatelessWidget {
@@ -176,7 +177,7 @@ class _StackedPainter extends CustomPainter {
       for (var x = _leftPad; x < size.width; x += 6) {
         canvas.drawLine(Offset(x, y), Offset(x + 3, y), grid);
       }
-      final label = chartLabel('${hour}h', labelStyle);
+      final label = chartLabel(hoursText(hour), labelStyle);
       label.paint(
         canvas,
         Offset(_leftPad - label.width - 6, y - label.height / 2),

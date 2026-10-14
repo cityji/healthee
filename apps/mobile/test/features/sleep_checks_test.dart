@@ -148,6 +148,30 @@ void main() {
     });
   });
 
+  group('an unscored check is never drawn as a pass', () {
+    testWidgets('a check the server did not score draws no verdict', (
+      tester,
+    ) async {
+      await loadSleepFont();
+      Future<int> chips(SleepChecksPanel panel) async {
+        await tester.pumpWidget(sleepPanelHost(panel));
+        await tester.pumpAndSettle();
+        return find.byType(VerdictChip).evaluate().length;
+      }
+
+      final scored = await chips(_panel());
+      final night = sleepPageWithout(<String>['point_duration']).nights.first;
+      final unscored = await chips(
+        SleepChecksPanel(
+          night: night,
+          cutoffs: sleepPageFixture().cutoffs,
+          notes: const <String>[],
+        ),
+      );
+      expect(unscored, scored - 1);
+    });
+  });
+
   group('the timing row shows a clock, not a timestamp', () {
     test('MUTATION — the raw ISO instant does not reach the row', () {
       // `midpoint_local` arrives as `2026-07-31T02:45:00+05:30` and a row that

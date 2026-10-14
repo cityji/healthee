@@ -30,6 +30,7 @@ import 'package:healthee/core/theme/tokens.dart';
 import 'package:healthee/core/theme/tone_scope.dart';
 import 'package:healthee/core/theme/type_ladder.dart';
 import 'package:healthee/shared/charts/chart_primitives.dart';
+import 'package:healthee/shared/format/duration.dart';
 
 /// Nightly sleep totals against a need line.
 class HDebtBars extends StatefulWidget {
@@ -201,7 +202,7 @@ class _DebtPainter extends CustomPainter {
       }
       final y = yAt(hour.toDouble());
       canvas.drawLine(Offset(_leftPad, y), Offset(size.width, y), grid);
-      final label = chartLabel('${hour}h', labelStyle);
+      final label = chartLabel(hoursText(hour), labelStyle);
       label.paint(
         canvas,
         Offset(_leftPad - label.width - 5, y - label.height / 2),
@@ -285,8 +286,8 @@ class _DebtPainter extends CustomPainter {
     drawChartTooltip(
       canvas,
       size,
-      '$label  ${hoursMinutes(slept)}'
-      '${short > 0 ? '  ·  ${hoursMinutes(short)} short' : ''}',
+      '$label  ${durationText(slept)}'
+      '${short > 0 ? '  ·  ${durationText(short)} short' : ''}',
       anchorX: centre,
       background: colors.surface,
       border: colors.line,

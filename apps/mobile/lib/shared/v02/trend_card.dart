@@ -15,6 +15,7 @@ library;
 import 'package:flutter/material.dart';
 import 'package:healthee/core/theme/tokens.dart';
 import 'package:healthee/core/theme/tone.dart';
+import 'package:healthee/core/theme/type_ladder.dart';
 import 'package:healthee/core/theme/type_scale_keys.dart';
 import 'package:healthee/shared/charts/v02/trend_dots.dart';
 import 'package:healthee/shared/reveal_once.dart';
@@ -203,7 +204,7 @@ class TrendCard extends StatelessWidget {
         children: <InlineSpan>[
           TextSpan(
             text: '$inside of $measured $readings',
-            style: TextStyle(fontWeight: FontWeight.w700, color: colors.ink),
+            style: TypeLadder.calloutStrong.copyWith(color: colors.ink),
           ),
           // A no-break space before the unit, so a wrap never strands `%.`.
           TextSpan(

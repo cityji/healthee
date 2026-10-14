@@ -61,6 +61,48 @@ String ageBreakdownLine(BioAgeBlock block, {bool spoken = false}) {
       : line;
 }
 
+/// [whatMovesItSummary] as a span, so each signed figure goes through
+/// [signedYearsSpan] and its sign is tightened against the digits (a plain
+/// string leaves a visible gap after U+2212 at small sizes). [style] must carry
+/// a `fontSize`. `toPlainText` is exactly [whatMovesItSummary].
+TextSpan whatMovesItSummarySpan(BioAgeBlock block, TextStyle style) =>
+    _termsSpan(block, style, units: false);
+
+/// [ageBreakdownLine] as a span, tightened the same way, for a surface that
+/// can draw rich text (today's hero takes a `String`, so it adopts this when
+/// its owner moves it onto spans). `toPlainText` is exactly the line.
+TextSpan ageBreakdownSpan(BioAgeBlock block, TextStyle style) =>
+    _termsSpan(block, style, units: true);
+
+TextSpan _termsSpan(BioAgeBlock block, TextStyle style, {required bool units}) {
+  final terms = <InlineSpan>[
+    for (final c in block.contributions)
+      if (c.deltaYears case final double delta)
+        TextSpan(
+          children: <InlineSpan>[
+            TextSpan(text: '${leverShortName(c.term)} '),
+            signedYearsSpan(delta, style),
+            if (units) const TextSpan(text: ' years'),
+          ],
+        )
+      else
+        TextSpan(text: '${leverShortName(c.term)} not counted'),
+    for (final d in block.absentTerms)
+      TextSpan(text: '${leverShortName(d.term ?? d.reason)} not counted'),
+    for (final d in block.exclusions)
+      TextSpan(text: '${leverShortName(d.term ?? d.reason)} left out'),
+  ];
+  return TextSpan(
+    style: style,
+    children: <InlineSpan>[
+      for (var i = 0; i < terms.length; i++) ...<InlineSpan>[
+        if (i > 0) const TextSpan(text: ' · '),
+        terms[i],
+      ],
+    ],
+  );
+}
+
 List<String> _terms(
   BioAgeBlock block, {
   required String Function(String name, double delta) counted,
@@ -135,7 +177,10 @@ class _WhatMovesItState extends ConsumerState<WhatMovesIt> {
     final colors = context.colors;
     final reduced = MediaQuery.disableAnimationsOf(context);
     final duration = reduced ? Duration.zero : HMotion.base;
-    final summary = open ? null : whatMovesItSummary(widget.block);
+    final summaryStyle = TypeLadder.callout.copyWith(color: colors.ink2);
+    final summary = open
+        ? null
+        : whatMovesItSummarySpan(widget.block, summaryStyle);
     final header = ConstrainedBox(
       constraints: const BoxConstraints(minHeight: kWhatMovesItMinHeight),
       child: Row(
@@ -158,12 +203,8 @@ class _WhatMovesItState extends ConsumerState<WhatMovesIt> {
                       'Each reading, turned into years',
                       style: TypeLadder.caption.copyWith(color: colors.ink3),
                     ),
-                    if (summary != null && summary.isNotEmpty)
-                      Text(
-                        summary,
-                        key: WhatMovesIt.summaryKey,
-                        style: TypeLadder.callout.copyWith(color: colors.ink2),
-                      ),
+                    if (summary != null && summary.children!.isNotEmpty)
+                      Text.rich(summary, key: WhatMovesIt.summaryKey),
                   ],
                 ),
               ],

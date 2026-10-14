@@ -70,6 +70,9 @@ const Size _tallSize = Size(390, 9000);
 const Size _bodySize = Size(390, 2300);
 const double _bodyDpr = 3;
 
+/// The list screens (Today, Sleep, Activity, Trends), at a real phone's density.
+const double _listDpr = 3;
+
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
   // The owner looks at these; the debug ribbon is not part of the app.
@@ -100,6 +103,7 @@ void main() {
           history: sampleHistory(),
           sleep: sleepWithSampleNight(),
         ),
+        dpr: _listDpr,
       );
     });
 
@@ -138,6 +142,7 @@ void main() {
           sleep: sleepWithSampleNight(),
         ),
         size: _tallSize,
+        dpr: _listDpr,
       );
     });
 
@@ -158,6 +163,7 @@ void main() {
           child: MaterialApp(theme: theme.value, home: const TrendsScreen()),
         ),
         size: const Size(390, 4200),
+        dpr: _listDpr,
       );
     });
 
@@ -170,6 +176,7 @@ void main() {
           themeOverride: theme.value,
           home: const ActivityScreen(),
         ),
+        dpr: _listDpr,
       );
     });
 

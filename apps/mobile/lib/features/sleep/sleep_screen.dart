@@ -174,9 +174,9 @@ class SleepList extends StatelessWidget {
 
   /// The same gutter Today and Activity use.
   static const EdgeInsets padding = EdgeInsets.fromLTRB(
-    Insets.lg,
-    Insets.lg,
-    Insets.lg,
+    Insets.gutter,
+    Insets.gutter,
+    Insets.gutter,
     120,
   );
 

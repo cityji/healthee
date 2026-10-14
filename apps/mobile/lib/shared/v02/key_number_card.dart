@@ -21,6 +21,7 @@ import 'package:healthee/core/theme/shapes.dart';
 import 'package:healthee/core/theme/tokens.dart';
 import 'package:healthee/core/theme/tone.dart';
 import 'package:healthee/core/theme/tone_scope.dart';
+import 'package:healthee/core/theme/type_ladder.dart';
 import 'package:healthee/core/theme/type_scale_keys.dart';
 import 'package:healthee/shared/instrument/h_tap.dart';
 import 'package:solar_icons/solar_icons.dart';
@@ -67,12 +68,12 @@ class KeyNumberCard extends StatelessWidget {
     super.key,
   });
 
-  /// `.p-key { padding: 16px 16px 14px; border-radius: 22px }`.
-  static const EdgeInsets padding = EdgeInsets.fromLTRB(16, 16, 16, 14);
-  static const double radius = 22;
+  /// The brief's card: padding 20, radius 20, no border.
+  static const EdgeInsets padding = EdgeInsets.all(Insets.card);
+  static const double radius = Radii.card;
 
-  /// `.p-key-name .icon { width: 18px }`, its gap 7.
-  static const double iconSize = 18;
+  /// An inline icon beside text is 16; the gap is 7.
+  static const double iconSize = 16;
   static const double iconGap = 7;
 
   /// `.p-key-value { margin: 8px 0 12px }`.
@@ -124,10 +125,7 @@ class KeyNumberCard extends StatelessWidget {
           child: DecoratedBox(
             decoration: ShapeDecoration(
               color: colors.surface,
-              shape: hSquircle(
-                radius,
-                side: BorderSide(color: colors.line, width: hairline),
-              ),
+              shape: hSquircle(radius),
             ),
             child: Padding(
               padding: padding,
@@ -162,13 +160,12 @@ class KeyNumberCard extends StatelessWidget {
   ].join('. ');
 
   Widget _top(BuildContext context, HealtheeColors colors) {
-    final family = context.family;
     return Row(
       children: <Widget>[
-        Icon(icon, size: iconSize, color: family),
+        Icon(icon, size: iconSize, color: colors.ink2),
         const SizedBox(width: iconGap),
         Expanded(
-          child: Text(name, style: KeyType.name.copyWith(color: family)),
+          child: Text(name, style: KeyType.name.copyWith(color: colors.ink)),
         ),
         if (verdict case final Verdict said) VerdictChip(said),
         if (onOpen != null) ...<Widget>[
@@ -189,7 +186,7 @@ class KeyNumberCard extends StatelessWidget {
         if (unit case final String small)
           TextSpan(
             text: small,
-            style: KeyType.unit.copyWith(color: colors.ink2),
+            style: KeyType.unit.copyWith(color: colors.ink3),
           ),
       ],
     ),
@@ -205,9 +202,7 @@ class KeyNumberCard extends StatelessWidget {
         if (lead case final String bold)
           TextSpan(
             text: line == null ? bold : '$bold ',
-            style: const TextStyle(
-              fontWeight: FontWeight.w700,
-            ).copyWith(color: colors.ink),
+            style: TypeLadder.calloutStrong.copyWith(color: colors.ink),
           ),
         ?(line == null ? null : TextSpan(text: line)),
       ],

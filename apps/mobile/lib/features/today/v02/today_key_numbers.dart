@@ -34,6 +34,7 @@ import 'package:healthee/data/sleep_repository.dart';
 import 'package:healthee/features/today/steps_plateau.dart';
 import 'package:healthee/features/today/today_facts.dart';
 import 'package:healthee/features/today/today_labels.dart';
+import 'package:healthee/shared/format/duration.dart';
 import 'package:healthee/shared/states/current_account_value.dart';
 import 'package:healthee/shared/usual_range.dart';
 import 'package:healthee/shared/v02/key_number_card.dart';
@@ -193,7 +194,7 @@ class TodayKeyNumbers extends ConsumerWidget {
       tone: Tone.sleep,
       icon: SolarIconsOutline.moonSleep,
       name: 'Sleep',
-      value: hoursMinutes(minutes),
+      value: durationText(minutes),
       // More sleep than usual is not scored better: long sleep is its own
       // question, so above the band is said in neutral ink.
       verdict: _verdict(side, worse: UsualSide.below),
@@ -202,20 +203,20 @@ class TodayKeyNumbers extends ConsumerWidget {
         min: kSleepTrackMin.toDouble(),
         max: kSleepTrackMax.toDouble(),
         band: band,
-        startLabel: '4h',
-        endLabel: '9h',
-        usualLabel: _usual(band, hoursMinutes),
+        startLabel: hoursText(4),
+        endLabel: hoursText(9),
+        usualLabel: _usual(band, durationText),
         pendingLabel: kLearningUsual,
         semanticLabel: _spokenBand(
-          'Asleep ${hoursMinutes(minutes)}',
+          'Asleep ${durationText(minutes)}',
           band,
-          hoursMinutes,
+          durationText,
         ),
       ),
       lead: _needLead(minutes, need),
       line: need == null || need <= 0 || minutes == need
           ? null
-          : '${minutes < need ? 'of' : 'over'} your ${hoursMinutes(need)} need.',
+          : '${minutes < need ? 'of' : 'over'} your ${durationText(need)} need.',
       onOpen: onOpenSleep,
     );
   }
@@ -225,9 +226,9 @@ class TodayKeyNumbers extends ConsumerWidget {
       return null;
     }
     if (minutes == need) {
-      return 'Exactly your ${hoursMinutes(need)} need.';
+      return 'Exactly your ${durationText(need)} need.';
     }
-    final gap = hoursMinutes((need - minutes).abs());
+    final gap = durationText((need - minutes).abs());
     return minutes < need ? '$gap short' : gap;
   }
 

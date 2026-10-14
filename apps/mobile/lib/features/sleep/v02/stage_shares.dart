@@ -24,7 +24,7 @@ import 'package:healthee/core/theme/instrument_hues.dart';
 import 'package:healthee/core/theme/sleep_type_scale.dart';
 import 'package:healthee/core/theme/stage_colors.dart';
 import 'package:healthee/core/theme/tokens.dart';
-import 'package:healthee/shared/charts/chart_primitives.dart';
+import 'package:healthee/shared/format/duration.dart';
 
 /// The four rows, in the order the night is read: awake at the top, deep last.
 const List<String> kShareOrder = <String>['awake', 'rem', 'light', 'deep'];
@@ -126,7 +126,7 @@ class StageShares extends StatelessWidget {
               ),
             ),
             Text(
-              hoursMinutes(ran),
+              durationText(ran),
               style: SleepType.shareDuration.copyWith(color: colors.ink),
             ),
             const SizedBox(width: 8),
@@ -183,7 +183,7 @@ class StageShares extends StatelessWidget {
         if (average != null) ...<Widget>[
           const SizedBox(height: innerGap),
           Text(
-            '${_against(ran, average)} (${hoursMinutes(average)})',
+            '${_against(ran, average)} (${durationText(average)})',
             style: SleepType.tableCell.copyWith(color: colors.ink2),
           ),
         ],

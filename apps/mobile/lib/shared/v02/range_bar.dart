@@ -131,7 +131,7 @@ class RangeBar extends StatelessWidget {
     final middle = band == null ? pendingLabel : usualLabel;
     final middleStyle = band == null
         ? endStyle
-        : KeyType.rangeUsual.copyWith(color: family);
+        : KeyType.rangeUsual.copyWith(color: colors.ink2);
     final centre = band == null
         ? width / 2
         : (xOf(band!.low, width) + xOf(band!.high, width)) / 2;
