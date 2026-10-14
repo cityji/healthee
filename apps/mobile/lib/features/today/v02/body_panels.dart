@@ -30,6 +30,7 @@ import 'package:flutter/material.dart';
 import 'package:healthee/core/theme/tone.dart';
 import 'package:healthee/data/models/biological_age.dart';
 import 'package:healthee/data/models/vo2max.dart';
+import 'package:healthee/shared/format/age_lever_format.dart';
 import 'package:healthee/shared/format/metric_names.dart';
 import 'package:healthee/shared/metric_info/metric_detail.dart';
 import 'package:healthee/shared/reveal_once.dart';
@@ -65,11 +66,6 @@ String ageTermName(String term) {
   return words.isEmpty ? term : words[0].toUpperCase() + words.substring(1);
 }
 
-/// `−1.7 years`, `+0.4 years`, `0.0 years` — a real minus sign either way.
-String ageYears(double delta) => delta == 0
-    ? '0.0 years'
-    : '${delta < 0 ? '−' : '+'}${delta.abs().toStringAsFixed(1)} years';
-
 /// `From your age to this estimate` — the ladder, and the arithmetic in words.
 class AgeLadderPanel extends StatelessWidget {
   /// [chronologicalAge] is non-null by construction; the screen gates on it.
@@ -97,7 +93,9 @@ class AgeLadderPanel extends StatelessWidget {
   /// Built from the same numbers the ladder is drawn from, so the sentence and
   /// the picture cannot disagree.
   static String equation(BiologicalAge age, double chronologicalAge) {
-    final parts = StringBuffer('${_plain(chronologicalAge)} chronological years');
+    final parts = StringBuffer(
+      '${_plain(chronologicalAge)} chronological years',
+    );
     for (final term in age.contributions) {
       if (term.deltaYears case final double delta) {
         parts.write(
@@ -186,7 +184,8 @@ class FitnessTermPanel extends StatelessWidget {
   /// on a health screen is a log line where an instrument's name belongs.
   static String? instrument(AgeContribution term) {
     final lines = <String>[
-      if (term.method case final String method) 'Read by ${methodLabel(method)}',
+      if (term.method case final String method)
+        'Read by ${methodLabel(method)}',
       if (term.value case final double value)
         'VO₂max estimate ${value.toStringAsFixed(1)}',
     ];
@@ -212,7 +211,7 @@ class FitnessTermPanel extends StatelessWidget {
         mainAxisSize: MainAxisSize.min,
         children: <Widget>[
           PanelValue(
-            delta == null ? '—' : ageYears(delta).replaceAll(' years', ''),
+            delta == null ? '—' : signedYears(delta),
             unit: 'years',
             context_: instrument(term),
           ),
@@ -295,14 +294,17 @@ class SleepTermPanel extends StatelessWidget {
         mainAxisSize: MainAxisSize.min,
         children: <Widget>[
           PanelValue(
-            delta == null ? '—' : ageYears(delta).replaceAll(' years', ''),
+            delta == null ? '—' : signedYears(delta),
             unit: 'years',
             context_: measured(term),
           ),
           ComparisonBars(bars(term)),
           const PanelNote(kSleepTermNote),
           if (onOpenSleep case final VoidCallback open)
-            _TermLink(label: 'See your complete sleep picture', onPressed: open),
+            _TermLink(
+              label: 'See your complete sleep picture',
+              onPressed: open,
+            ),
         ],
       ),
     );

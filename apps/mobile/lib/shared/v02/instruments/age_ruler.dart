@@ -14,6 +14,8 @@ import 'dart:math' as math;
 import 'package:flutter/material.dart';
 import 'package:healthee/core/theme/tokens.dart';
 import 'package:healthee/core/theme/type_ladder.dart';
+import 'package:healthee/shared/format/age_lever_format.dart';
+import 'package:healthee/shared/v02/key_number_card.dart';
 
 /// Years either side of the actual age on the base scale.
 const double kAgeRulerSpan = 8;
@@ -56,9 +58,6 @@ const double kAgeRulerTickAlphaLight = 0.24;
 
 /// Tick ink opacity on a dark theme.
 const double kAgeRulerTickAlphaDark = 0.22;
-
-/// A difference under this many years reads as "about your age".
-const double kAgeRulerAboutYears = 0.5;
 
 /// The clear space a label keeps from its neighbours, logical px.
 const double kAgeRulerLabelClearance = 8;
@@ -108,9 +107,11 @@ class AgeRuler extends StatelessWidget {
     final colors = context.colors;
     final dark = Theme.of(context).brightness == Brightness.dark;
     final delta = estimate - actual;
-    final verdict = delta.abs() < kAgeRulerAboutYears
-        ? colors.ink2
-        : (delta < 0 ? colors.fav : colors.unf);
+    final verdict = switch (verdictForDelta(delta)) {
+      VerdictTone.better => colors.fav,
+      VerdictTone.worse => colors.unf,
+      VerdictTone.neutral => colors.ink2,
+    };
     final plot = SizedBox(
       height: height,
       width: double.infinity,

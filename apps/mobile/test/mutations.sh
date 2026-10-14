@@ -3391,6 +3391,56 @@ mutate 'a program quotes its first rung as the commitment' \
   "        '\${program.rungs.first.target.round()} steps'"
 
 
+# ── the lever card and the "What moves it" dropdown ─────────────────────────
+# These guard the same two claims the old waterfall and body panels did, on the
+# code that replaces them: a term the model did not count is never drawn as one
+# it did, and an exclusion keeps the server's reasoning.
+LEVER_TEST=test/today/age_levers_test.dart
+DROPDOWN_TEST=test/today/what_moves_it_test.dart
+LEVER_ROW=lib/features/today/v02/age_lever_row.dart
+LEVER_CARD=lib/features/today/v02/age_levers.dart
+LEVER_FORMAT=lib/shared/format/age_lever_format.dart
+
+# A term that was not counted says "0.0" in its right column instead of
+# "Not counted": one says "we could not price this", the other "we priced it and
+# it was nothing". The same lie the stub bar told on the old waterfall.
+mutate 'an excluded lever is drawn as a computed zero' "$LEVER_TEST" "$LEVER_ROW" \
+  '                absence.words,
+                textAlign: TextAlign.right,' \
+  "                '0.0',
+                textAlign: TextAlign.right,"
+
+# The excluded lever keeps its name and loses the server's reasoning.
+mutate 'the excluded lever loses the server’s reasoning' "$LEVER_TEST" "$LEVER_CARD" \
+  '          message: firstSentence(d.message),' \
+  "          message: '',"
+
+# The sleep lever is read at the measured value rather than the value the hazard
+# curve was actually read at: a number the model did not use.
+mutate 'the sleep lever shows the measured value, not compared-as' \
+  "$LEVER_TEST test/shared/age_lever_format_test.dart" "$LEVER_FORMAT" \
+  'value: _one(c.comparedAs ?? c.value), unit: '"'"'h'"'"'' \
+  'value: _one(c.value), unit: '"'"'h'"'"''
+
+# A 0.4 year gap reads as "younger": the shared verdict stops having a dead band.
+mutate 'a small age delta is given a verdict' \
+  test/shared/age_lever_format_test.dart "$LEVER_FORMAT" \
+  '  if (delta <= -kAgeVerdictYears) {' \
+  '  if (delta < 0) {'
+
+# The collapsed summary stops naming an excluded term.
+mutate 'the collapsed summary leaves a term out' "$DROPDOWN_TEST" \
+  lib/features/today/v02/what_moves_it.dart \
+  "      '\${leverShortName(d.term ?? d.reason)} left out'," \
+  "      ''," 
+
+# The choice is taken but never written.
+mutate 'the dropdown forgets its state' "$DROPDOWN_TEST" \
+  lib/core/what_moves_it_preference.dart \
+  '        .then((_) => storage.write(kWhatMovesItKey, open.toString()))' \
+  '        .then((_) => Future<void>.value())'
+
+
 echo
 echo "caught $PASS, survived $FAIL"
 [ "$SKIPPED" -eq 0 ] || echo "SKIPPED $SKIPPED — this was a FILTERED run, not the gate"
