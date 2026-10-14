@@ -208,8 +208,8 @@ class FitnessDetail extends StatelessWidget {
           // `H.bridge('fitness', …, 'body', 'Age contributions')` — the
           // sentence ends in the link, which is where the years it names are
           // worked out.
-          ContextBridge.link(
-            ageBridge(years),
+          ContextBridge.richLink(
+            (style) => ageBridgeSpan(years, style),
             label: 'Age contributions',
             onOpen: () => unawaited(context.push(Routes.body)),
           ),

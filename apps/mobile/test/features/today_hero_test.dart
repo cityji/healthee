@@ -156,6 +156,27 @@ void main() {
       expect(find.text('34.3'), findsOneWidget);
       expect(find.text('1.7 years younger'), findsOneWidget);
       expect(find.textContaining('Fitness −1.7 years'), findsOneWidget);
+      // The sign is its own span, pulled in against the digits (a plain string
+      // leaves a gap after U+2212).
+      final line = tester.widget<Text>(
+        find.descendant(
+          of: find.byType(AgeOrbHero),
+          matching: find.textContaining('Fitness −1.7 years'),
+        ),
+      );
+      final signs = <TextSpan>[];
+      line.textSpan!.visitChildren((span) {
+        if (span is TextSpan && span.text == '−') {
+          signs.add(span);
+        }
+        return true;
+      });
+      expect(signs, isNotEmpty);
+      expect(
+        signs.first.style!.letterSpacing,
+        lessThan(0),
+        reason: 'the minus is tightened, not left at the font default',
+      );
       // The model line is ALWAYS reachable: an estimate that does not say what
       // made it is the failure the whole tier system exists to stop. It moved
       // off the card into the eyebrow's ⓘ, so this opens the ⓘ and reads it

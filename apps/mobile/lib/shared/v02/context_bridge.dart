@@ -58,7 +58,24 @@ class ContextBridge extends StatelessWidget {
     super.key,
   }) : child = onOpen == null
            ? _BridgeText(text: text)
-           : _BridgeLink(text: text, label: label, onOpen: onOpen);
+           : _BridgeLink(
+               sentence: (_) => TextSpan(text: text),
+               label: label,
+               onOpen: onOpen,
+             );
+
+  /// [ContextBridge.link] for a sentence that needs rich text, such as a signed
+  /// figure whose sign is tightened. [build] gets the bridge's own style (ink
+  /// and `fontSize` included) and returns the sentence as a span.
+  ContextBridge.richLink(
+    InlineSpan Function(TextStyle style) build, {
+    required String label,
+    VoidCallback? onOpen,
+    this.leadIn = PageSpacing.block,
+    super.key,
+  }) : child = onOpen == null
+           ? _BridgeSentence(sentence: build)
+           : _BridgeLink(sentence: build, label: label, onOpen: onOpen);
 
   /// Blank height above the sentence that the RULE still covers.
   ///
@@ -141,7 +158,7 @@ class ContextBridge extends StatelessWidget {
 /// The sentence with its trailing link, as one wrapping paragraph.
 class _BridgeLink extends StatelessWidget {
   const _BridgeLink({
-    required this.text,
+    required this.sentence,
     required this.label,
     required this.onOpen,
   });
@@ -149,19 +166,21 @@ class _BridgeLink extends StatelessWidget {
   /// `H.icon('arrow','small')` — the glyph the prototype ends the link with.
   static const double arrowSize = 12;
 
-  final String text;
+  /// The sentence, given the bridge's own style.
+  final InlineSpan Function(TextStyle style) sentence;
   final String label;
   final VoidCallback onOpen;
 
   @override
   Widget build(BuildContext context) {
     final colors = context.colors;
-    final style = TypeScale.bridge;
+    final style = TypeScale.bridge.copyWith(color: colors.ink2);
     return Text.rich(
       TextSpan(
-        style: style.copyWith(color: colors.ink2),
+        style: style,
         children: <InlineSpan>[
-          TextSpan(text: '$text '),
+          sentence(style),
+          const TextSpan(text: ' '),
           WidgetSpan(
             alignment: PlaceholderAlignment.middle,
             child: Semantics(
@@ -196,6 +215,18 @@ class _BridgeLink extends StatelessWidget {
         ],
       ),
     );
+  }
+}
+
+class _BridgeSentence extends StatelessWidget {
+  const _BridgeSentence({required this.sentence});
+
+  final InlineSpan Function(TextStyle style) sentence;
+
+  @override
+  Widget build(BuildContext context) {
+    final style = TypeScale.bridge.copyWith(color: context.colors.ink2);
+    return Text.rich(TextSpan(style: style, children: [sentence(style)]));
   }
 }
 
