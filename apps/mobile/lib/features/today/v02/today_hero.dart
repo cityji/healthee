@@ -21,6 +21,7 @@ library;
 
 import 'package:flutter/material.dart';
 import 'package:healthee/data/models/biological_age.dart';
+import 'package:healthee/shared/format/age_lever_format.dart';
 import 'package:healthee/shared/reveal_once.dart';
 import 'package:healthee/shared/v02/age_orb_hero.dart';
 import 'package:healthee/shared/v02/bio_stats.dart';
@@ -101,7 +102,7 @@ class TodayBioHero extends StatelessWidget {
           if (term.deltaYears case final double delta)
             BioStat(
               _termName(term.term),
-              _years(delta),
+              '${signedYears(delta)} years',
               onOpen: onOpenTerm == null ? null : () => onOpenTerm!(term.term),
             ),
       ],
@@ -127,15 +128,6 @@ class TodayBioHero extends StatelessWidget {
   static String _figure(double value) => value == value.roundToDouble()
       ? value.round().toString()
       : value.toStringAsFixed(1);
-
-  /// `−1.7 years` — a real minus sign, and a `+` only when there is one.
-  static String _years(double delta) {
-    final magnitude = delta.abs().toStringAsFixed(1);
-    if (delta == 0) {
-      return '0.0 years';
-    }
-    return '${delta < 0 ? '−' : '+'}$magnitude years';
-  }
 
   /// `fitness` → `Fitness`; `sleep_regularity` → `Sleep regularity`.
   ///
