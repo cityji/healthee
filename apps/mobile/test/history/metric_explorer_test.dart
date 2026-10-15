@@ -133,7 +133,8 @@ void main() {
       // The tile that refused draws no figure beside the sentence.
       final tile = tester.widget<MetricTile>(
         find.byWidgetPredicate(
-          (widget) => widget is MetricTile && widget.entry.metric == 'weight_kg',
+          (widget) =>
+              widget is MetricTile && widget.entry.metric == 'weight_kg',
         ),
       );
       expect(tile.entry.value, isNull);
@@ -163,14 +164,12 @@ void main() {
       expect(band.width, closeTo(face.width, 0.5));
       expect(band.top, closeTo(face.top, 0.5));
 
-      // The other three edges are the ordinary rule, not the family.
+      // The brief removed the card border: the tile has no edge at all, so the
+      // family is the top rule and nothing else.
       final container = tester.widget<Container>(
         find.descendant(of: tile, matching: find.byType(Container)).first,
       );
-      // One `BorderSide` for all four edges, so "the family is only the top
-      // rule" is a claim about a rule drawn OVER a uniform edge, not about an
-      // edge that is family-coloured on one side.
-      expect(edgeOf(container.decoration!)!.color, kColors.line);
+      expect(edgeOf(container.decoration!), isNull);
     });
 
     testWidgets('the two columns are equal at every phone width', (

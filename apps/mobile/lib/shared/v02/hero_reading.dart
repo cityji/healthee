@@ -60,7 +60,7 @@ class HeroReading extends StatelessWidget {
                 if (unit case final String unit)
                   TextSpan(
                     text: unit,
-                    style: TypeScale.heroUnit.copyWith(color: colors.ink2),
+                    style: TypeScale.heroUnit.copyWith(color: colors.ink3),
                   ),
               ],
             ),

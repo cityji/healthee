@@ -16,6 +16,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:healthee/data/store/local_store.dart';
 import 'package:healthee/features/coach/widgets/coach_fab.dart';
+import 'package:healthee/features/today/v02/today_header.dart';
 import 'package:healthee/shared/app_tab_bar.dart';
 
 import '_today_host.dart';
@@ -58,10 +59,21 @@ void main() {
     );
   });
 
-  testWidgets('THE COACH FAB IS ON TODAY AND NOWHERE ELSE', (tester) async {
+  testWidgets('THE COACH BUTTON IS IN TODAY’S HEADER AND NOWHERE ELSE', (
+    tester,
+  ) async {
     await tester.pumpWidget(routedApp(store));
     await tester.pumpAndSettle();
     expect(find.byType(CoachFab), findsOneWidget, reason: 'Today has it');
+    // In the header, not floating over the content.
+    expect(
+      find.descendant(
+        of: find.byType(TodayHeader),
+        matching: find.byType(CoachFab),
+      ),
+      findsOneWidget,
+    );
+    expect(find.byType(FloatingActionButton), findsNothing);
 
     for (final tab in <String>['Sleep', 'Activity', 'Insights', 'Actions']) {
       await tapTab(tester, tab);

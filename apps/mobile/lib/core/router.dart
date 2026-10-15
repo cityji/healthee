@@ -76,6 +76,7 @@ import 'package:healthee/features/insights/v02/finding_detail_screen.dart';
 import 'package:healthee/features/sleep/sleep_history_screen.dart';
 import 'package:healthee/features/today/body_screen.dart';
 import 'package:healthee/features/today/recovery_screen.dart';
+import 'package:healthee/features/trends/trends_screen.dart';
 import 'package:healthee/features/workouts/workout_detail_screen.dart';
 import 'package:healthee/features/workouts/workout_history_screen.dart';
 import 'package:healthee/shared/app_shell.dart';
@@ -209,6 +210,10 @@ GoRouter buildRouter(WidgetRef ref) {
       GoRoute(
         path: Routes.recovery,
         builder: (context, state) => const RecoveryScreen(),
+      ),
+      GoRoute(
+        path: Routes.trends,
+        builder: (context, state) => const TrendsScreen(),
       ),
       GoRoute(
         path: Routes.sleepHistory,

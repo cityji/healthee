@@ -51,17 +51,19 @@ class HSkeleton extends StatelessWidget {
   Widget build(BuildContext context) {
     final colors = context.colors;
     return Container(
-      width: width,
-      height: height,
-      decoration: BoxDecoration(
-        color: colors.surface2,
-        borderRadius: BorderRadius.circular(radius),
-      ),
-    ).animate(onPlay: (controller) => controller.repeat()).shimmer(
-      duration: _period,
-      delay: _delay,
-      color: Color.lerp(colors.surface2, colors.ink3, _highlightMix),
-    );
+          width: width,
+          height: height,
+          decoration: BoxDecoration(
+            color: colors.surface2,
+            borderRadius: BorderRadius.circular(radius),
+          ),
+        )
+        .animate(onPlay: (controller) => controller.repeat())
+        .shimmer(
+          duration: _period,
+          delay: _delay,
+          color: Color.lerp(colors.surface2, colors.ink3, _highlightMix),
+        );
   }
 }
 
@@ -86,7 +88,7 @@ class SkeletonCard extends StatelessWidget {
     return DecoratedBox(
       decoration: ShapeDecoration(
         color: colors.surface,
-        shape: StateCard.shapeOf(colors.line),
+        shape: StateCard.shapeOf(),
       ),
       child: Padding(padding: padding, child: child),
     );

@@ -96,6 +96,7 @@ class InsightsExtras {
     this.onOpenJournal,
     this.onOpenCoach,
     this.onOpenSleepHistory,
+    this.onOpenTrends,
     this.onOpenFitness,
   });
 
@@ -119,6 +120,9 @@ class InsightsExtras {
 
   /// Opens the sleep history — every night in the window.
   final VoidCallback? onOpenSleepHistory;
+
+  /// Opens `Your trends`.
+  final VoidCallback? onOpenTrends;
 
   /// Opens the fitness detail — VO₂max and its instrument.
   final VoidCallback? onOpenFitness;
@@ -164,7 +168,9 @@ List<PageSection> insightsSections(ScreenData data, InsightsExtras extras) {
     );
   if (past) {
     sections
-      ..add(const PastDayNotice(title: kInsightsPastTitle, body: kPastDayReason))
+      ..add(
+        const PastDayNotice(title: kInsightsPastTitle, body: kPastDayReason),
+      )
       ..gap(PageSpacing.panel);
     // `screens.insights`'s own words: *"explore the measurements available up
     // to this day"*. The correlations are refused above and stay refused; what
@@ -251,9 +257,7 @@ List<PageSection> insightsSections(ScreenData data, InsightsExtras extras) {
 /// make the grid, one draws full width, none draws nothing. A grid with one live
 /// half is a card beside a hole.
 void _entries(SectionList sections, double? age, List<Finding> findings) {
-  final Finding? pattern = findings
-      .where(FindingEntryCard.canDraw)
-      .firstOrNull;
+  final Finding? pattern = findings.where(FindingEntryCard.canDraw).firstOrNull;
   final cards = <Widget>[
     if (pattern != null) FindingEntryCard(finding: pattern),
     if (age != null) AgeEntryCard(years: age),
@@ -291,6 +295,13 @@ void _changedTogether(
   sections.add(
     FlushCard(
       rows: <Widget>[
+        V02ListRow(
+          icon: SolarIconsOutline.chartSquare,
+          title: 'Your trends',
+          detail: 'A week, a month or six months against the period before',
+          tone: Tone.fitness,
+          onOpen: extras.onOpenTrends,
+        ),
         V02ListRow(
           icon: SolarIconsOutline.flag,
           title: 'Challenge outcomes',

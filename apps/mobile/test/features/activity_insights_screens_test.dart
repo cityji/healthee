@@ -14,6 +14,7 @@
 ///     finding is still reachable and still behind a disclosure.
 library;
 
+import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:healthee/data/store/local_store.dart';
 import 'package:healthee/features/activity/activity_screen.dart';
@@ -72,6 +73,19 @@ void main() {
         findsOneWidget,
       );
       expect(find.textContaining('not a change in actual age'), findsOneWidget);
+      // The sign is its own span, tightened against the digits.
+      final bridge = tester.widget<Text>(
+        find.textContaining('contributes −1.7 years'),
+      );
+      final signs = <TextSpan>[];
+      bridge.textSpan!.visitChildren((span) {
+        if (span is TextSpan && span.text == '−') {
+          signs.add(span);
+        }
+        return true;
+      });
+      expect(signs, hasLength(1));
+      expect(signs.single.style!.letterSpacing, lessThan(0));
       expect(
         find.text('34.3'),
         findsNothing,

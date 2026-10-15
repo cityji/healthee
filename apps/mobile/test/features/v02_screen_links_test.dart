@@ -67,47 +67,24 @@ void main() {
   });
 
   group('from Today', () {
-    testWidgets('THE RECOVERY SUMMARY ROW OPENS RECOVERY', (tester) async {
+    testWidgets('THE RECOVERY KEY NUMBER OPENS RECOVERY', (tester) async {
       _tallPhone(tester);
       await tester.pumpWidget(routedApp(store));
       await tester.pumpAndSettle();
 
-      await _open(tester, find.bySemanticsLabel(RegExp(r'^Recovery · ')));
+      await _open(tester, find.bySemanticsLabel(RegExp(r'^Recovery\. ')));
       expect(find.byType(RecoveryScreen), findsOneWidget);
     });
 
-    testWidgets('THE HERO’S ARROW OPENS THE CALCULATION', (tester) async {
+    testWidgets('THE HERO OPENS THE BIOLOGICAL AGE SCREEN', (tester) async {
       _tallPhone(tester);
       await tester.pumpWidget(routedApp(store));
       await tester.pumpAndSettle();
 
       await _open(
         tester,
-        find.bySemanticsLabel('Understand your biological age'),
+        find.bySemanticsLabel(RegExp(r'^Biological age 34\.3 years')),
       );
-      expect(find.byType(BodyScreen), findsOneWidget);
-    });
-
-    testWidgets('the fitness contribution row opens fitness', (tester) async {
-      _tallPhone(tester);
-      await tester.pumpWidget(routedApp(store));
-      await tester.pumpAndSettle();
-
-      await _open(
-        tester,
-        find.bySemanticsLabel(RegExp('^Fitness contribution')),
-      );
-      expect(find.byType(FitnessScreen), findsOneWidget);
-    });
-
-    testWidgets('the bridge under the hero opens the contributors', (
-      tester,
-    ) async {
-      _tallPhone(tester);
-      await tester.pumpWidget(routedApp(store));
-      await tester.pumpAndSettle();
-
-      await _open(tester, find.text('See the contributors'));
       expect(find.byType(BodyScreen), findsOneWidget);
     });
   });

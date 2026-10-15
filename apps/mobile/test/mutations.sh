@@ -381,43 +381,23 @@ mutate "the prototype's chapter order is swapped" "$ORDER_TEST" "$BODY" \
   '  todayDaySections(sections, facts, data, extras);
   _nightChapter(sections, facts, reveals, extras);'
 
-# The bridge under the hero moves above it. It still reads as a sentence about
-# the estimate, the chapters are untouched, and nothing looks wrong — the
-# connective line has simply stopped connecting the two things it names.
-mutate 'the context bridge is drawn before the hero' "$ORDER_TEST" "$BODY" \
+# The key numbers move above the hero. Every card still draws and the page
+# still scrolls; the estimate the owner reads first is now the third thing on
+# the screen.
+mutate 'the key numbers are drawn above the hero' "$ORDER_TEST" "$BODY" \
+  '  sections.addBleed(
+    ReadingView<BiologicalAge>(' \
   '  sections.add(
-    TodaySummaryTiles(
+    TodayKeyNumbers(
       facts: facts,
       onOpenRecovery: extras.onOpenRecovery,
       onOpenSleep: extras.onOpenSleep,
       onOpenActivity: extras.onOpenActivity,
+      onOpenTrends: extras.onOpenTrends,
     ),
   );
-  // No spacer: the bridge carries the gap itself so its rule can span it and
-  // reach the tiles above. See `ContextBridge.leadIn`.
-  sections.add(
-    ContextBridge.link(
-      kAgeBridge,
-      label: '"'"'See the contributors'"'"',
-      onOpen: extras.onOpenBody,
-    ),
-  );' \
-  '  sections.add(
-    ContextBridge.link(
-      kAgeBridge,
-      label: '"'"'See the contributors'"'"',
-      onOpen: extras.onOpenBody,
-    ),
-  );
-  sections.add(
-    TodaySummaryTiles(
-      facts: facts,
-      onOpenRecovery: extras.onOpenRecovery,
-      onOpenSleep: extras.onOpenSleep,
-      onOpenActivity: extras.onOpenActivity,
-    ),
-  );
-  sections.gap(PageSpacing.block);'
+  sections.addBleed(
+    ReadingView<BiologicalAge>('
 
 # A section quietly dropped. Legacy draws the week whenever it has two nights;
 # a card that stops appearing is the failure mode a rendered-scroll test cannot
@@ -666,8 +646,10 @@ mutate 'the overnight table stops naming what it could not measure' \
 # The legacy defect itself: a dimension the server never scored drawn as a
 # PASSED check. A tick made out of nothing is worse than no tick at all.
 mutate 'an unscored sleep check renders as a pass' "$CHECKS_TEST" "$CHECKS" \
-  '      child: passed == true' \
-  '      child: passed != false'
+  '    final result = check.passed.valueOrNull;' \
+  '    final result = check.passed.valueOrNull ?? true;' \
+  '              if (result != null && check.bar != null) ...<Widget>[' \
+  '              if (check.bar != null) ...<Widget>['
 
 # CLAUDE.md's no-composite rule, at the one place it could be broken silently:
 # the payload already carries the count, so drawing it is a one-line change that
@@ -713,8 +695,8 @@ mutate 'a one-night timing chart is plotted anyway' "$CHARTS_TEST" "$TIMING" \
 # is drawn as long as the one that took most of the night — the same lie the
 # stacked strip could tell with a one-pixel sliver, in the mark that replaced it.
 mutate 'the stage bars stop encoding the share' "$CHARTS_TEST" "$SHARES" \
-  '        final fill = _minFill + share.clamp(0.0, 1.0) * (allowance - _minFill);' \
-  '        final fill = allowance;'
+  '                  width: box.maxWidth * ran / longest,' \
+  '                  width: box.maxWidth,'
 
 # ── Today: a refusal must never come back as a number ───────────────────────
 WITHHELD_TEST=test/features/today_withheld_test.dart
@@ -1092,12 +1074,8 @@ mutate 'the linked lanes stop leaving air between them' "$V02_COLUMNS" "$V02_LIN
   'const double _laneGap = 0;'
 
 # ── the v02 hero instruments ────────────────────────────────────────────────
-HALO=lib/shared/v02/instruments/bio_halo.dart
-FIELD=lib/shared/v02/instruments/halo_field.dart
 WATERFALL=lib/shared/v02/instruments/age_waterfall.dart
-RULER=lib/shared/v02/instruments/age_scale.dart
 RAIL=lib/shared/v02/instruments/vo2max_rail.dart
-HALO_TEST=test/shared/instruments/halo_motion_test.dart
 AGE_TEST=test/shared/instruments/age_instruments_test.dart
 FITNESS_TEST=test/shared/instruments/fitness_instruments_test.dart
 
@@ -1117,37 +1095,6 @@ mutate 'the waterfall snaps its ladder onto the estimate' "$AGE_TEST" "$WATERFAL
   '    final anchor = column.from == null ? bottom : y(column.from!);' \
   '    final anchor = column.from == null ? bottom : y(column.to ?? running);'
 
-# A value off the 28-44 ruler clamped to the end instead of drawing nothing.
-mutate 'the age ruler clamps an off-scale estimate' "$AGE_TEST" "$RULER" \
-  '    if (onScale(estimate, low: kAgeScaleLow, high: kAgeScaleHigh)) {' \
-  '    if (estimate.isFinite) {'
-
-# The three ways the halo must stop, broken one at a time: a halo that pauses
-# two ways out of three still burns the battery the third way.
-mutate 'the halo keeps animating in the background' "$HALO_TEST" "$HALO" \
-  '    _foreground = state == AppLifecycleState.resumed;' \
-  '    _foreground = true;'
-
-mutate 'the halo ignores the system reduced-motion setting' "$HALO_TEST" "$HALO" \
-  '    _reducedMotion = MediaQuery.maybeDisableAnimationsOf(context) ?? false;' \
-  '    _reducedMotion = false;'
-
-mutate 'the halo keeps animating offscreen' "$HALO_TEST" "$HALO" \
-  '    if (!_onScreen()) {
-      _ticker.stop();
-      return;
-    }
-' \
-  ''
-
-# The still centre stops being enforced, so particles drift across the figure.
-mutate 'particles are allowed into the still centre' "$HALO_TEST" "$FIELD" \
-  '    if ((at - centre).distance < stillRadius) {
-      return null;
-    }
-' \
-  ''
-
 # The extent renamed. A wording mutation on purpose: the sentence is the honesty
 # half of the instrument, and it is as breakable as the geometry.
 mutate 'the error magnitude is called a confidence interval' "$FITNESS_TEST" "$RAIL" \
@@ -1156,8 +1103,7 @@ mutate 'the error magnitude is called a confidence interval' "$FITNESS_TEST" "$R
 
 # ── the v02 Today: what a panel may not stop saying ─────────────────────────
 PANEL=lib/shared/v02/panel.dart
-HERO=lib/shared/v02/bio_hero.dart
-HERO_PARTS=lib/shared/v02/bio_hero_parts.dart
+HERO=lib/shared/v02/age_orb_hero.dart
 MINI=lib/features/today/v02/mini_trend_panel.dart
 FITNESS=lib/features/today/v02/longer_panels.dart
 HERO_TEST=test/features/today_hero_test.dart
@@ -1174,10 +1120,12 @@ mutate 'the v02 panel drops the caveats it was handed' "$V02_CAVEAT_TEST" "$PANE
 
 # The same, in the hero. It is not a `Panel`, so it needs its own block and its
 # own mutation: the biological-age block carries FOUR disclosures on the
-# committed payload and is the card the owner reported.
-mutate 'the hero drops the caveats it was handed' "$V02_CAVEAT_TEST" "$HERO" \
-  '        caveats: disclosed,' \
-  '        caveats: const <Disclosure>[],'
+# committed payload and is the card the owner reported. The orb hero merges the
+# scope's caveats into its ⓘ; drop them there and the four go with them.
+mutate 'the hero drops the caveats it was handed' \
+  test/features/today_caveat_surface_test.dart "$HERO" \
+  '    final disclosed = <Disclosure>[...?scope?.caveats, ...extraDisclosures];' \
+  '    final disclosed = <Disclosure>[...extraDisclosures];'
 
 # A half-width panel blanking on a refusal. It keeps its title, its slot and its
 # chart void, and stops saying why the number is missing — which reads as a
@@ -1212,21 +1160,48 @@ mutate "the method essay is printed on the card again" \
 # step goal, so any fraction here is this app inventing the owner's target and
 # then reporting progress against it.
 mutate 'the movement tile invents a step target' "$HERO_TEST" \
-  lib/features/today/v02/today_hero.dart \
-  '      fraction: plateau == null ? null : steps / plateau,' \
-  '      fraction: steps / 10000,'
+  lib/features/today/v02/today_key_numbers.dart \
+  '      lead: plateau == null || count >= plateau' \
+  '      lead: count >= (plateau ?? 10000)'
 
-# The halo placed outside the scroll it watches. It still animates, it still
-# looks right on the first screen, and it never pauses again.
-mutate 'the hero art is dropped from the card' "$HERO_TEST" \
-  lib/features/today/v02/today_hero.dart \
-  '      art: const BioHalo(),' \
-  '      art: null,'
+# ── Today's biological age: on the page, one door, each fact once ───────────
+AGE_ORB_TEST=test/features/today_age_orb_test.dart
+HERO_SRC=lib/features/today/v02/today_hero.dart
+LEVERS_SRC=lib/features/today/v02/age_levers.dart
+SUMMARY_SRC=lib/features/today/v02/what_moves_it.dart
+
+# The hero is a picture again: nothing opens when it is tapped, and the only way
+# into the breakdown is a row further down the page.
+mutate 'the Today hero stops being a door' "$AGE_ORB_TEST" "$BODY" \
+  '        block: snapshot.bioAgeBlock,
+        onOpenBody: extras.onOpenBody,
+      ),' \
+  '        block: snapshot.bioAgeBlock,
+      ),'
+
+# A term the model never prices is left off the line under the sphere, so the
+# estimate reads as if fitness and sleep were the whole of it.
+mutate 'the hero breakdown forgets what was left out' "$AGE_ORB_TEST" "$SUMMARY_SRC" \
+  '  for (final d in block.exclusions) leftOut(leverShortName(d.term ?? d.reason)),' \
+  ''
+
+# The server's two-line disclaimer under the sphere, wrapping the face.
+mutate 'the hero caption prints a disclaimer too long for one line' \
+  "$AGE_ORB_TEST" "$HERO_SRC" \
+  'said.isNotEmpty && said.length <= kAgeCaptionMaxChars' \
+  'said.isNotEmpty'
+
+# The paused screen says the server's sentence twice: once in the notice and
+# once more in the lever row under it.
+mutate 'the paused lever row repeats the notice sentence' \
+  test/features/body_screen_paused_test.dart "$LEVERS_SRC" \
+  '          message: reasonsShownAbove ? null : d.message,' \
+  '          message: d.message,'
 
 # ── the v02 Today fixes (withheld hero · provenance off the cards) ───────────
 ENVELOPE=lib/data/honesty/envelope.dart
 WITHHELD_HERO=lib/features/today/v02/today_hero_withheld.dart
-HERO_PARTS=lib/shared/v02/bio_hero_parts.dart
+AGE_PAUSED=lib/features/today/v02/age_paused.dart
 SHEET=lib/shared/metric_info/metric_info_sheet.dart
 NIGHT=lib/features/today/v02/night_panels.dart
 RECOVERY=lib/features/today/v02/recovery_panel.dart
@@ -1251,41 +1226,34 @@ mutate 'the composite withheld block is unreadable again' \
   '    return null;'
 
 # The essay back on the card's face, by the shortest route there is.
-mutate 'the withheld hero prints the server prose inline' \
+mutate 'the withheld hero prints the exclusion essay inline' \
   "$WITHHELD_HERO_TEST" "$WITHHELD_HERO" \
-  '      kWithheldPointer,
-      if (left.isNotEmpty)' \
-  '      withheld.message,
-      for (final term in withheld.terms) term.message,
-      for (final exclusion in exclusions) exclusion.message,
-      kWithheldPointer,
-      if (left.isNotEmpty)'
+  "    return 'Left out of this number: \$list.';" \
+  "    return exclusions.map((e) => e.message).join(' ');"
 
-# A marker placed for a value that does not exist — the held figure fed to the
-# ruler, which is exactly the stale-as-current step this design forbids.
-mutate 'a held value is drawn on the age ruler' \
+# A number back inside the paused orb. A paused estimate shows no figure and no
+# older figure standing in for it.
+mutate 'the paused orb draws a figure again' \
   "$WITHHELD_HERO_TEST" "$WITHHELD_HERO" \
-  "import 'package:healthee/shared/v02/bio_hero.dart';" \
-  "import 'package:healthee/shared/v02/bio_hero.dart';
-import 'package:healthee/shared/v02/instruments/age_scale.dart';" \
-  '      figure: BioWithheldFigure(' \
-  '      instrument: held == null
-          ? null
-          : AgeScale(estimate: held.value, chronologicalAge: 36),
-      figure: BioWithheldFigure('
+  '      paused: true,' \
+  '      paused: false,'
 
-# The date blanked. A held figure with no date IS the stale-as-current bug.
-mutate 'the last-known date is blanked' \
-  "$WITHHELD_HERO_TEST" "$HERO_PARTS" \
-  "          '\$asOfPrefix\${plainDay(day)}'," \
-  "          ''," 
+# The button that fixes the pause opens the profile with nothing focused, so the
+# owner lands on a form and has to find the field.
+mutate 'the paused age button loses its field' \
+  test/features/age_paused_test.dart "$AGE_PAUSED" \
+  'context.push(profileLocation(focus: pause.action))' \
+  'context.push(profileLocation())'
 
-# The refused hero collapsed back into a panel — the small dashed box the owner
+# The refused hero collapsed back into a panel, the small dashed box the owner
 # read as the card being missing.
 mutate 'the refused hero collapses into a panel' \
   "$WITHHELD_HERO_TEST" "$BODY" \
   '      withheldBuilder: (context, disclosure) => TodayBioHeroWithheld(
         withheld: disclosure,
+        block: snapshot.bioAgeBlock,
+        vo2maxWithheld: snapshot.vo2maxWithheld,
+        onOpen: extras.onOpenBody,
         exclusions: switch (snapshot.biologicalAge) {
           Withheld<BiologicalAge>(:final exclusions) => exclusions,
           _ => const <Disclosure>[],
@@ -1343,8 +1311,6 @@ BODY_SRC=lib/features/today/today_body.dart
 REVEAL=lib/shared/reveal_once.dart
 PINNED_TEST=test/features/chapter_nav_pinned_test.dart
 REVEAL_TEST=test/shared/reveal_once_test.dart
-HALO=lib/shared/v02/instruments/halo_painter.dart
-HALO_TEST=test/shared/instruments/halo_ink_test.dart
 PARTS=lib/shared/v02/panel_parts.dart
 PARTS_TEST=test/shared/panel_value_width_test.dart
 VIEW_DATE=lib/data/store/view_date.dart
@@ -1376,16 +1342,6 @@ mutate 'a chart replays its reveal on scroll-back' \
     _seen.add(id);
     return true;
   }'
-
-# The glint back to a brightness event: `--halo-warm` resolved and then not used.
-mutate 'the halo glint stops being warm' "$HALO_TEST" "$HALO" \
-  '      glint: colors.haloWarm,' \
-  '      glint: colors.bioInk,'
-
-# `--halo-warm` transcribed one digit wrong. Renders; is not the prototype.
-mutate 'the halo warm is transcribed wrong' "$HALO_TEST" "$PALETTE" \
-  '  static const Color haloWarm = Color(0xFFFED16B);' \
-  '  static const Color haloWarm = Color(0xFFFED16C);'
 
 # `.panel-summary` back to two equal halves, which clips every long figure on
 # every phone width and looks fine on the 800 px test surface.
@@ -1426,75 +1382,6 @@ mutate 'the measured half stops following the selection' \
   "$DATE_TEST" "$DEVICE_REPO" \
   '  return store.strapReader.day(ref.watch(viewDateProvider));' \
   '  return store.strapReader.day(ref.watch(todayProvider));'
-
-HERO=lib/shared/v02/bio_hero.dart
-HERO_PARTS=lib/shared/v02/bio_hero_parts.dart
-GEOMETRY_TEST=test/features/today_hero_geometry_test.dart
-FIELD_TEST=test/features/today_hero_field_test.dart
-
-# ── the hero's geometry ─────────────────────────────────────────────────────
-# THE DEFECT ITSELF: the field stops being a background layer and becomes a
-# sized child of the stack, so the card is as tall as the FIELD and the
-# contributions and the model label go off the bottom of the screen.
-mutate 'the field drives the card height' "$GEOMETRY_TEST" "$HERO_PARTS" \
-  '  return Positioned.fill(
-    // The constraints here are the card'"'"'s finished size' \
-  '  return SizedBox.fromSize(
-    size: const Size(300, 900),
-    // The constraints here are the card'"'"'s finished size'
-
-# The clip goes soft: `overflow: clip` over a 28px radius becomes a square
-# corner, and the field paints into the four corners the card does not have.
-mutate 'the card stops clipping to its rounded corner' "$FIELD_TEST" "$HERO" \
-  '      clipBehavior: Clip.antiAlias,' \
-  '      clipBehavior: Clip.none,'
-
-# The hole goes back to the middle of the CARD: the densest part of the field
-# crosses the figure, and the still centre lands on the sentence and the ruler.
-mutate 'the still centre leaves the figure' "$FIELD_TEST" "$HERO_PARTS" \
-  '        stillCentre: centred
-            ? bioStillCentre(constraints.biggest)
-            : Alignment.center,' \
-  '        stillCentre: Alignment.center,'
-
-# `motion.css` resets `.age-value { margin: 0 }`; richer.css'"'"'s 20 comes back
-# and the square no longer starts directly under the eyebrow.
-mutate 'the centred display takes the inline layout gap' \
-  "$GEOMETRY_TEST" "$HERO" \
-  '    if (!centred) const SizedBox(height: valueGap),' \
-  '    const SizedBox(height: valueGap),'
-
-# The two margins stop being told apart: the divider'"'"'s own 16 is replaced by
-# the collapsed 18, which is only right when the caption abuts the rule.
-mutate 'the divider gap is always the collapsed one' "$GEOMETRY_TEST" "$HERO" \
-  '        height: caption != null && instrument == null ? ruleGap : dividerGap,' \
-  '        height: ruleGap,'
-
-# The eyebrow row stops being the control'"'"'s 32: the still centre'"'"'s arithmetic
-# is then wrong by the difference, and the square moves up.
-mutate 'the eyebrow row loses its pinned extent' "$GEOMETRY_TEST" "$HERO" \
-  '        minHeight: centred ? eyebrowExtent : 0,' \
-  '        minHeight: 0,'
-
-# The rim's dust handed the stream heads' glow — one line, and 1,120 grains
-# become solid balls six times too wide. This IS the defect the owner reported.
-SCALE_TEST=test/shared/instruments/halo_scale_test.dart
-mutate 'the rim dust wears the stream glow' \
-  "$SCALE_TEST" lib/shared/v02/instruments/halo_painter.dart \
-  '    dust.forEach(
-      (dot) => canvas.drawPoints(
-        ui.PointMode.points,
-        dot.at,
-        _dot(
-          glint: dot.glint,
-          width: dot.extent,' \
-  '    dust.forEach(
-      (dot) => canvas.drawPoints(
-        ui.PointMode.points,
-        dot.at,
-        _dot(
-          glint: dot.glint,
-          width: dot.extent * 6,'
 
 # ── Activity and Insights, rebuilt to v02 ──────────────────────────────────
 ACT_SECTIONS=lib/features/activity/activity_sections.dart
@@ -1683,13 +1570,13 @@ mutate 'the outcome drops its "not a proven effect" sentence' \
 # An input beside an unknown or empty balance is the silent spend the feature is
 # not allowed to have.
 mutate 'the coach composer appears with no balance behind it' \
-  "$COACH_TEST" "$COACH_SCREEN" \
+  "$COACH_TEST" lib/features/coach/coach_body.dart \
   '  return uncapped || (allowance?.hasRemaining ?? false);' \
   '  return true;'
 
 # A prompt button asks a question, so it costs one — same gate as the input.
 mutate 'the opening prompts stop being gated by the balance' \
-  "$COMPOSER_TEST" "$COACH_SCREEN" \
+  "$COMPOSER_TEST" lib/features/coach/coach_body.dart \
   '              canAsk ? ask : null),' \
   '              ask),'
 # (anchor re-cut TWICE now: once when `ask` grew a `topic:` argument, and again
@@ -2111,8 +1998,8 @@ FITNESS_TEST=test/features/fitness_screen_test.dart
 RECOVERY_TEST=test/features/recovery_screen_test.dart
 HISTORY_TEST=test/features/sleep_history_screen_test.dart
 BODY_SCREEN=lib/features/today/body_screen.dart
-BODY_LIMITS=lib/features/today/v02/body_limits_panels.dart
-BODY_PANELS=lib/features/today/v02/body_panels.dart
+BODY_LEVERS=lib/features/today/v02/age_lever_sheets.dart
+BODY_CALC=lib/features/today/v02/age_calculation_sheet.dart
 FITNESS_PANELS=lib/features/activity/v02/fitness_panels.dart
 RECOVERY_PANELS=lib/features/today/v02/recovery_detail_panels.dart
 SIGNAL=lib/shared/v02/signal_chart.dart
@@ -2121,9 +2008,11 @@ HISTORY_PANELS=lib/features/sleep/v02/history_panels.dart
 # The exclusion stops being an exclusion: the term is named and the server's
 # reasoning — the whole reason it cannot be priced — is dropped.
 mutate 'the excluded term loses the server’s reasoning' \
-  "$BODY_TEST" "$BODY_LIMITS" \
-  '            PanelNote(exclusions[i].message),' \
-  "            const PanelNote(''),"
+  "$BODY_TEST" "$BODY_LEVERS" \
+  '    disclosures: <Disclosure>[d],
+    disclosuresLabel: kLeverExcludedLabel,' \
+  '    disclosures: const <Disclosure>[],
+    disclosuresLabel: kLeverExcludedLabel,'
 
 # The exclusion is counted as a caveat as well, so the screen states it twice —
 # once as "not a lever" and once as a tilt on a number it is not in.
@@ -2135,9 +2024,9 @@ mutate 'the exclusion is repeated as a caveat' \
 # The equation stops being the payload's arithmetic and becomes a fixed
 # sentence, which cannot follow a model that reweights or drops a term.
 mutate 'the age equation stops reading its own terms' \
-  "$BODY_TEST" "$BODY_PANELS" \
-  '    for (final term in age.contributions) {' \
-  '    for (final term in <AgeContribution>[]) {'
+  "$BODY_TEST" "$BODY_CALC" \
+  '  for (final term in age.contributions) {' \
+  '  for (final term in <AgeContribution>[]) {'
 
 # The line every reader needs and no reader asks for: without it a published
 # model error reads as an interval computed for this owner.
@@ -2185,8 +2074,8 @@ mutate 'the sleep share is asserted rather than read' \
 # A night the strap did not record is given a duration out of thin air.
 mutate 'an unrecorded night is drawn as a measured one' \
   "$HISTORY_TEST" "$HISTORY_PANELS" \
-  "    return minutes == null ? '—' : hoursMinutes(minutes);" \
-  "    return hoursMinutes(minutes ?? 0);"
+  "    return minutes == null ? '—' : durationText(minutes);" \
+  "    return durationText(minutes ?? 0);"
 
 # The same night's session times are invented rather than left absent.
 mutate 'an unrecorded night invents its bedtime and wake' \
@@ -2441,11 +2330,9 @@ mutate 'the day is dropped on a tab switch' \
 # 60-day horizon then leaves a date in the URL the screen is not showing.
 mutate 'the route accepts a day outside the retention window' \
   "$DATE_ROUTE_TEST" "$DATE_ROUTE" \
-  '  if (requested != null &&
-      requested != selected &&
-      isViewableDay(requested, latest)) {' \
-  '  if (requested != null &&
-      requested != selected) {'
+  '      requested != honoured &&
+      isViewableDay(requested, latest);' \
+  '      requested != honoured;'
 
 # Sleep'"'"'s window stops following the reader and slices from the newest night
 # again — the seam `sleep_history_screen.dart` used to record, reopened.
@@ -2602,7 +2489,7 @@ mutate 'a scatter is drawn from too few pairs to be a shape' \
 # point again and a reading of 50 could be an ordinary night or a remarkable one.
 mutate 'the baseline loses the spread it is only meaningful with' \
   "$H_GOLDEN_TEST test/features/today_screen_test.dart" "$H_TODAY_BODY" \
-  "  final spread = sd == null ? '' : ' ± \${sd.round()}';" \
+  "  final spread = sd == null ? '' : '\\u00a0±\\u00a0\${sd.round()}';" \
   "  final spread = '';"
 
 # ── the recorded track, and the basemap under it ────────────────────────────
@@ -2867,7 +2754,7 @@ mutate 'the fallback is shown as though it were a finding' \
 # The subject stops reaching the server, so grounding is back to whatever the
 # model infers from prose — the gap the field was added to close.
 mutate 'the topic never leaves the phone' \
-  "$TOPIC_TEST" "$COACH_SCREEN" \
+  "$TOPIC_TEST" lib/features/coach/coach_body.dart \
   '      ref.read(coachControllerProvider.notifier).ask(question, topic: topic),' \
   '      ref.read(coachControllerProvider.notifier).ask(question),'
 
@@ -3439,10 +3326,12 @@ mutate 'a too-old server is reported as an unconfigured one' \
 # Preferring the compiled-in one would quietly restore the old behaviour.
 mutate 'the compiled-in provider wins over the discovered one' \
   test/auth/discovery_test.dart lib/data/auth/identity_providers.dart \
-  'Future<AuthConfig?> resolveAuthConfig(Credentials credentials) async =>
-    await credentials.authConfig() ??' \
-  'Future<AuthConfig?> resolveAuthConfig(Credentials credentials) async =>
-    null ??'
+  '  if (stored != null) {
+    return stored;
+  }' \
+  '  if (stored != null && false) {
+    return stored;
+  }'
 
 
 # ⛔ THE UPGRADE PATH. Without it every existing install signs itself out: a phone
@@ -3518,6 +3407,56 @@ mutate 'a program quotes its first rung as the commitment' \
   lib/features/actions/v02/deck_item.dart \
   "        '\${program.rungs.length} rungs, one at a time'" \
   "        '\${program.rungs.first.target.round()} steps'"
+
+
+# ── the lever card and the "What moves it" dropdown ─────────────────────────
+# These guard the same two claims the old waterfall and body panels did, on the
+# code that replaces them: a term the model did not count is never drawn as one
+# it did, and an exclusion keeps the server's reasoning.
+LEVER_TEST=test/today/age_levers_test.dart
+DROPDOWN_TEST=test/today/what_moves_it_test.dart
+LEVER_ROW=lib/features/today/v02/age_lever_row.dart
+LEVER_CARD=lib/features/today/v02/age_levers.dart
+LEVER_FORMAT=lib/shared/format/age_lever_format.dart
+
+# A term that was not counted says "0.0" in its right column instead of
+# "Not counted": one says "we could not price this", the other "we priced it and
+# it was nothing". The same lie the stub bar told on the old waterfall.
+mutate 'an excluded lever is drawn as a computed zero' "$LEVER_TEST" "$LEVER_ROW" \
+  '                absence.words,
+                textAlign: TextAlign.right,' \
+  "                '0.0',
+                textAlign: TextAlign.right,"
+
+# The excluded lever keeps its name and loses the server's reasoning.
+mutate 'the excluded lever loses the server’s reasoning' "$LEVER_TEST" "$LEVER_CARD" \
+  '          message: firstSentence(d.message),' \
+  "          message: '',"
+
+# The sleep lever is read at the measured value rather than the value the hazard
+# curve was actually read at: a number the model did not use.
+mutate 'the sleep lever shows the measured value, not compared-as' \
+  "$LEVER_TEST test/shared/age_lever_format_test.dart" "$LEVER_FORMAT" \
+  'value: _one(c.comparedAs ?? c.value), unit: '"'"'h'"'"'' \
+  'value: _one(c.value), unit: '"'"'h'"'"''
+
+# A 0.4 year gap reads as "younger": the shared verdict stops having a dead band.
+mutate 'a small age delta is given a verdict' \
+  test/shared/age_lever_format_test.dart "$LEVER_FORMAT" \
+  '  if (delta <= -kAgeVerdictYears) {' \
+  '  if (delta < 0) {'
+
+# The collapsed summary stops naming an excluded term.
+mutate 'the collapsed summary leaves a term out' "$DROPDOWN_TEST" \
+  lib/features/today/v02/what_moves_it.dart \
+  "      TextSpan(text: '\${leverShortName(d.term ?? d.reason)} left out')," \
+  "      const TextSpan(text: '')," 
+
+# The choice is taken but never written.
+mutate 'the dropdown forgets its state' "$DROPDOWN_TEST" \
+  lib/core/what_moves_it_preference.dart \
+  '        .then((_) => storage.write(kWhatMovesItKey, open.toString()))' \
+  '        .then((_) => Future<void>.value())'
 
 
 echo

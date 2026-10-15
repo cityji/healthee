@@ -11,6 +11,8 @@
 /// the paths are wanted — `core/parent_tabs.dart` does.
 library;
 
+import 'package:healthee/core/profile_field.dart';
+
 /// Every route's path, in one place. Screens reference these, never string
 /// literals — Standards section 3 bans the string-literal habit for user
 /// constants and the reasoning is the same here: a typo'd path fails at
@@ -79,6 +81,9 @@ abstract final class Routes {
   /// The recovery model, opened up: its weights, its factors, and each signal
   /// against the owner's own baseline.
   static const String recovery = '/recovery';
+
+  /// `Your trends`: the main readings over a week, a month or six months.
+  static const String trends = '/trends';
 
   /// Every night in the window, and the way into one of them.
   static const String sleepHistory = '/sleep-history';
@@ -197,6 +202,30 @@ String? coachTopicOf(Uri uri) {
   return subject.isEmpty ? null : subject;
 }
 
+/// The query parameter the profile's focused field rides in.
+const String kFocusParameter = 'focus';
+
+/// The profile's location, opened on [focus] when there is one.
+///
+/// `/profile?focus=weight`. The same pattern as [coachLocation]: one builder,
+/// so a caller cannot spell the field a way [profileFocusOf] does not read.
+String profileLocation({ProfileField? focus}) => focus == null
+    ? Routes.profile
+    : '${Routes.profile}?$kFocusParameter=${focus.name}';
+
+/// [profileLocation] read back: the field named in [uri], or null for the
+/// plain profile. An unknown name is no field, the same answer a link that
+/// carried none gets, rather than a guess at which field was meant.
+ProfileField? profileFocusOf(Uri uri) {
+  final String? raw = uri.queryParameters[kFocusParameter];
+  for (final ProfileField field in ProfileField.values) {
+    if (field.name == raw) {
+      return field;
+    }
+  }
+  return null;
+}
+
 /// The query parameter the selected day rides in — `?date=2026-07-29`.
 ///
 /// The prototype's own name for it (`history-data.js`), kept so a URL read off
@@ -222,6 +251,7 @@ const Set<String> kDateAwareRoutes = <String>{
   Routes.fitness,
   Routes.history,
   Routes.sleepHistory,
+  Routes.trends,
   Routes.workouts,
   Routes.journal,
   Routes.recommendations,

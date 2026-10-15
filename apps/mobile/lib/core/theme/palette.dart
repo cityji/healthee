@@ -215,25 +215,6 @@ abstract final class LightPalette {
   /// `--shadow-color` — the one shadow v02 casts, under a pressed segment.
   static const Color shadow = Color(0x121E1F34);
 
-  /// `--bio-background` — the biological-age hero's own surface.
-  static const Color bioBackground = Color(0xFFD5ECD9);
-
-  /// `--bio-ink` — everything written on [bioBackground].
-  static const Color bioInk = Color(0xFF0E2516);
-
-  /// `--bio-glow` — the hero's halo.
-  static const Color bioGlow = Color(0xFF5AC480);
-
-  /// `--bio-line` — the hero's contour art and its divider.
-  static const Color bioLine = Color(0xFF328B54);
-
-  /// `--halo-warm` — the amber one particle in eleven is drawn in.
-  ///
-  /// `motion.css`: `oklch(88% .13 86)`. **The same value in both themes**,
-  /// because the prototype declares it once, outside either theme block, on a
-  /// halo surface that is dark in both. See [DarkPalette.haloWarm].
-  static const Color haloWarm = Color(0xFFFED16B);
-
   /// `--map-land`, `oklch(95% .018 145)` — see `features/gps/route_map.dart`.
   static const Color mapLand = Color(0xFFE7F2E7);
 }
@@ -319,32 +300,13 @@ abstract final class DarkPalette {
   /// `--shadow-color`.
   static const Color shadow = Color(0x33000001);
 
-  /// `--bio-background`.
-  static const Color bioBackground = Color(0xFF132419);
-
-  /// `--bio-ink`.
-  static const Color bioInk = Color(0xFFEEF8F0);
-
-  /// `--bio-glow`.
-  static const Color bioGlow = Color(0xFF2D8C53);
-
-  /// `--bio-line`.
-  static const Color bioLine = Color(0xFF57AE74);
-
-  /// `--halo-warm` — **the same amber as [LightPalette.haloWarm]**, and that is
-  /// the port rather than an oversight.
-  ///
-  /// The rest of this palette is authored per theme because it sits on a page
-  /// whose ground flips. The halo does not: `motion.css` forces its own dark
-  /// surface in both themes and declares `--halo-warm` once, beside
-  /// `--halo-core` and `--halo-mist`. A second value here would be inventing a
-  /// theme the prototype does not have.
-  ///
-  /// It is deliberately **not** [DarkFamilies.movement], the product's other
-  /// amber: the halo glint is the prototype's decoration, and borrowing an
-  /// identity hue would put "steps" inside the biological-age card.
-  static const Color haloWarm = Color(0xFFFED16B);
-
   /// `--map-land`, `oklch(24% .016 145)` — the same ground, dark.
   static const Color mapLand = Color(0xFF1B211B);
+}
+
+/// Colours that are not part of a theme: masks a painter tints.
+abstract final class MaskColors {
+  /// Opaque white, for a sprite that `BlendMode.modulate` then tints. It is
+  /// never seen as white; the tint supplies every visible colour.
+  static const Color white = Color(0xFFFFFFFF);
 }
