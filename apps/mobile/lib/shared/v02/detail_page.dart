@@ -43,6 +43,7 @@ class DetailPage extends StatelessWidget {
     this.eyebrow,
     this.head,
     this.gutter = Insets.gutter,
+    this.largeTitle = false,
     super.key,
   });
 
@@ -62,6 +63,9 @@ class DetailPage extends StatelessWidget {
 
   /// The page's side padding.
   final double gutter;
+
+  /// Sets the title at Title1. See [DetailHead.large].
+  final bool largeTitle;
 
   /// Controls on the screen itself, at the head's trailing edge. Empty by
   /// default, so every existing screen renders exactly as it did.
@@ -107,6 +111,7 @@ class DetailPage extends StatelessWidget {
                   eyebrow: eyebrow,
                   onBack: canLeave ? () => leaveDetail(context) : null,
                   actions: actions,
+                  large: largeTitle,
                 ),
               ...children,
             ],
