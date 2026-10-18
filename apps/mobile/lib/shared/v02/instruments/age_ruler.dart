@@ -109,7 +109,7 @@ class AgeRuler extends StatelessWidget {
     final delta = estimate - actual;
     final verdict = switch (verdictForDelta(delta)) {
       VerdictTone.better => colors.fav,
-      VerdictTone.worse => colors.unf,
+      VerdictTone.worse => colors.alert,
       VerdictTone.neutral => colors.ink2,
     };
     final plot = SizedBox(

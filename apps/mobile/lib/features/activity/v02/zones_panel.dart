@@ -184,7 +184,7 @@ class _ZoneRow extends StatelessWidget {
               Text(
                 band,
                 maxLines: 1,
-                style: TypeScale.panelNote.copyWith(color: colors.ink3),
+                style: TypeScale.panelNote.copyWith(color: colors.ink2),
               ),
             ],
           ),
@@ -227,7 +227,7 @@ class _ZoneRow extends StatelessWidget {
             textAlign: TextAlign.right,
             maxLines: 1,
             style: (minutes > 0 ? TypeLadder.calloutStrong : TypeLadder.callout)
-                .copyWith(color: minutes > 0 ? colors.ink : colors.ink3),
+                .copyWith(color: minutes > 0 ? colors.ink : colors.ink2),
           ),
         ),
       ],

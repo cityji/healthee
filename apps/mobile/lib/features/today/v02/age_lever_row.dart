@@ -96,7 +96,7 @@ class AgeLeverRow extends StatelessWidget {
     final bar = isFitness || isSleep;
     final ink = switch (verdictForDelta(delta)) {
       VerdictTone.better => colors.fav,
-      VerdictTone.worse => colors.unf,
+      VerdictTone.worse => colors.alert,
       VerdictTone.neutral => colors.ink2,
     };
     final years = Text.rich(
@@ -109,7 +109,7 @@ class AgeLeverRow extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.end,
         children: <Widget>[
           years,
-          Text('years', style: TypeLadder.callout.copyWith(color: colors.ink3)),
+          Text('years', style: TypeLadder.callout.copyWith(color: colors.ink2)),
         ],
       ),
     );
@@ -144,7 +144,7 @@ class AgeLeverRow extends StatelessWidget {
         main,
         if (caption != null) ...<Widget>[
           const SizedBox(height: kLeverLineGap),
-          Text(caption, style: TypeLadder.caption.copyWith(color: colors.ink3)),
+          Text(caption, style: TypeLadder.caption.copyWith(color: colors.ink2)),
         ],
       ],
     );
@@ -274,7 +274,7 @@ class AgeAbsentRow extends StatelessWidget {
                   ? const SizedBox.shrink()
                   : Text(
                       aside,
-                      style: TypeLadder.caption.copyWith(color: colors.ink3),
+                      style: TypeLadder.caption.copyWith(color: colors.ink2),
                     ),
             ),
             const SizedBox(width: Insets.sm),
@@ -283,7 +283,7 @@ class AgeAbsentRow extends StatelessWidget {
               child: Text(
                 absence.words,
                 textAlign: TextAlign.right,
-                style: TypeLadder.caption.copyWith(color: colors.ink3),
+                style: TypeLadder.caption.copyWith(color: colors.ink2),
               ),
             ),
           ],
@@ -330,7 +330,7 @@ class _RowFrame extends StatelessWidget {
                 Icon(
                   SolarIconsOutline.altArrowRight,
                   size: kLeverChevron,
-                  color: colors.ink3,
+                  color: colors.ink2,
                 ),
             ],
           ),

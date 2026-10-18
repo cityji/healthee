@@ -88,7 +88,7 @@ class WithheldCard extends StatelessWidget {
           Text(disclosure.message, style: text.bodyLarge),
           if (_lastSeen(disclosure) case final String seen) ...[
             const SizedBox(height: Insets.sm),
-            Text(seen, style: text.labelSmall?.copyWith(color: colors.ink3)),
+            Text(seen, style: text.labelSmall?.copyWith(color: colors.ink2)),
           ],
           if (onExplain case final VoidCallback explain) ...[
             const SizedBox(height: Insets.md),

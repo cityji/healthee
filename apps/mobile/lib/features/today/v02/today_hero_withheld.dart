@@ -86,7 +86,7 @@ class TodayBioHeroWithheld extends StatelessWidget {
             Text(
               left,
               textAlign: TextAlign.center,
-              style: TypeLadder.caption.copyWith(color: colors.ink3),
+              style: TypeLadder.caption.copyWith(color: colors.ink2),
             ),
           ],
         ],

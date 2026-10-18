@@ -137,7 +137,7 @@ class AgeCalculationCard extends StatelessWidget {
                   Icon(
                     SolarIconsOutline.altArrowRight,
                     size: kAgeRowChevron,
-                    color: colors.ink3,
+                    color: colors.ink2,
                   ),
                 ],
               ),

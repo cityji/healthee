@@ -3,7 +3,7 @@
 /// **Ported from** `healthee-legacy/app/lib/ui/skeletons.dart` (`HSkeleton`,
 /// `_card`, `_tile`, `_row2`, `_richCard`). Every width, height and radius below
 /// is legacy's. The shimmer is legacy's too: 1300 ms, 250 ms of delay, and a
-/// highlight of the fill lerped 22% toward [HealtheeColors.ink3].
+/// highlight of the fill lerped 22% toward [HealtheeColors.ink2].
 ///
 /// ## The one substitution, and it is a colour that does not exist here
 ///
@@ -62,7 +62,7 @@ class HSkeleton extends StatelessWidget {
         .shimmer(
           duration: _period,
           delay: _delay,
-          color: Color.lerp(colors.surface2, colors.ink3, _highlightMix),
+          color: Color.lerp(colors.surface2, colors.ink2, _highlightMix),
         );
   }
 }

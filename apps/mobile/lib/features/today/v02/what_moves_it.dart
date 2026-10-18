@@ -200,7 +200,7 @@ class _WhatMovesItState extends ConsumerState<WhatMovesIt> {
                   children: <Widget>[
                     Text(
                       'Each reading, turned into years',
-                      style: TypeLadder.caption.copyWith(color: colors.ink3),
+                      style: TypeLadder.caption.copyWith(color: colors.ink2),
                     ),
                     if (summary != null && summary.children!.isNotEmpty)
                       Text.rich(summary, key: WhatMovesIt.summaryKey),

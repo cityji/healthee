@@ -186,7 +186,7 @@ void main() {
       expect(_styleOf(tester, '7:50').fontSize, 28);
       expect(_styleOf(tester, 'hrs').fontSize, 12);
       expect(_styleOf(tester, 'hrs').fontWeight, FontWeight.w400);
-      expect(_styleOf(tester, 'hrs').color, _light.ink3);
+      expect(_styleOf(tester, 'hrs').color, _light.ink2);
     });
 
     testWidgets('a module that opens PRESSES, it does not ripple', (

@@ -204,7 +204,7 @@ class _EventRow extends StatelessWidget {
                   const SizedBox(width: 8),
                   Text(
                     shortDate(event.day),
-                    style: TypeScale.tinyLabel.copyWith(color: colors.ink3),
+                    style: TypeScale.tinyLabel.copyWith(color: colors.ink2),
                   ),
                   if (_detail case final MetricDetail detail
                       when detail.isNotEmpty)
@@ -238,7 +238,7 @@ class _EventRow extends StatelessWidget {
                           : 'median ${decimalLabel(median)}',
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
-                      style: TypeScale.tinyLabel.copyWith(color: colors.ink3),
+                      style: TypeScale.tinyLabel.copyWith(color: colors.ink2),
                     ),
                   ),
                 ],

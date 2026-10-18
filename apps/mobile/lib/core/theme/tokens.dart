@@ -61,6 +61,7 @@ class HealtheeColors extends ThemeExtension<HealtheeColors> {
     required this.alert,
     required this.alertSoft,
     required this.hole,
+    required this.band,
     required this.overlay,
     required this.shadow,
     required this.mapLand,
@@ -92,6 +93,7 @@ class HealtheeColors extends ThemeExtension<HealtheeColors> {
       alert = LightPalette.alert,
       alertSoft = LightPalette.alertSoft,
       hole = LightPalette.hole,
+      band = LightPalette.band,
       overlay = LightPalette.overlay,
       shadow = LightPalette.shadow,
       mapLand = LightPalette.mapLand;
@@ -122,6 +124,7 @@ class HealtheeColors extends ThemeExtension<HealtheeColors> {
       alert = DarkPalette.alert,
       alertSoft = DarkPalette.alertSoft,
       hole = DarkPalette.hole,
+      band = DarkPalette.band,
       overlay = DarkPalette.overlay,
       shadow = DarkPalette.shadow,
       mapLand = DarkPalette.mapLand;
@@ -218,6 +221,10 @@ class HealtheeColors extends ThemeExtension<HealtheeColors> {
   /// light, 5% white in dark — because the point is the shape, not the colour.
   final Color hole;
 
+  /// The personal usual-range band drawn behind a trend (`white 7%` dark,
+  /// `black 5%` light). The 30-day middle of the owner's own readings.
+  final Color band;
+
   /// The scrim behind a modal sheet. `--overlay`; already translucent.
   final Color overlay;
 
@@ -238,7 +245,8 @@ class HealtheeColors extends ThemeExtension<HealtheeColors> {
     Color? line, Color? line2, Color? rule, Color? grid, Color? reference,
     Color? accent, Color? accent2, Color? accentSoft, Color? onAccent,
     Color? fav, Color? favSoft, Color? unf, Color? unfSoft,
-    Color? alert, Color? alertSoft, Color? hole, Color? overlay, Color? shadow,
+    Color? alert, Color? alertSoft, Color? hole, Color? band, Color? overlay,
+    Color? shadow,
     Color? mapLand,
   }) {
     // dart format on
@@ -267,6 +275,7 @@ class HealtheeColors extends ThemeExtension<HealtheeColors> {
       alert: alert ?? this.alert,
       alertSoft: alertSoft ?? this.alertSoft,
       hole: hole ?? this.hole,
+      band: band ?? this.band,
       overlay: overlay ?? this.overlay,
       shadow: shadow ?? this.shadow,
       mapLand: mapLand ?? this.mapLand,
@@ -303,6 +312,7 @@ class HealtheeColors extends ThemeExtension<HealtheeColors> {
       alert: Color.lerp(alert, other.alert, t)!,
       alertSoft: Color.lerp(alertSoft, other.alertSoft, t)!,
       hole: Color.lerp(hole, other.hole, t)!,
+      band: Color.lerp(band, other.band, t)!,
       overlay: Color.lerp(overlay, other.overlay, t)!,
       shadow: Color.lerp(shadow, other.shadow, t)!,
       mapLand: Color.lerp(mapLand, other.mapLand, t)!,
@@ -319,7 +329,7 @@ class HealtheeColors extends ThemeExtension<HealtheeColors> {
     line, line2, rule, grid, reference,
     accent, accent2, accentSoft, onAccent,
     fav, favSoft, unf, unfSoft,
-    alert, alertSoft, hole, overlay, shadow,
+    alert, alertSoft, hole, band, overlay, shadow,
     mapLand,
   ];
   // dart format on

@@ -205,7 +205,7 @@ class DayPill extends StatelessWidget {
             Icon(
               SolarIconsOutline.altArrowDown,
               size: caretSize,
-              color: colors.ink3,
+              color: colors.ink2,
             ),
           ],
         ),
@@ -280,7 +280,7 @@ class OwnerMark extends StatelessWidget {
             // one element beside it that is still free to carry a state — and
             // it is `fav` only when the classification found nothing to say.
             style: TypeScale.deviceStrip.copyWith(
-              color: healthy ? colors.fav : colors.ink3,
+              color: healthy ? colors.fav : colors.ink2,
             ),
           ),
           const SizedBox(width: chargeGap),

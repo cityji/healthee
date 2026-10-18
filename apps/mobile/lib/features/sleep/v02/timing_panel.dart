@@ -201,7 +201,7 @@ class _BandBlock extends StatelessWidget {
                 withheldBuilder: (context, disclosure) => Text(
                   'SRI —',
                   textAlign: TextAlign.right,
-                  style: TypeScale.statUnit.copyWith(color: colors.ink3),
+                  style: TypeScale.statUnit.copyWith(color: colors.ink2),
                 ),
                 builder: (context, sri) => Text(
                   'SRI ${sri.round()}',
@@ -218,7 +218,7 @@ class _BandBlock extends StatelessWidget {
             Flexible(
               child: Text(
                 _times(block),
-                style: TypeScale.tinyLabel.copyWith(color: colors.ink3),
+                style: TypeScale.tinyLabel.copyWith(color: colors.ink2),
               ),
             ),
             if (block.late) ...<Widget>[

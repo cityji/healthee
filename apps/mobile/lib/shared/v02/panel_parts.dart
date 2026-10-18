@@ -202,7 +202,7 @@ class PanelValue extends StatelessWidget {
           Text(
             unit,
             style: (compact ? TypeScale.panelUnitCompact : TypeScale.panelUnit)
-                .copyWith(color: colors.ink3),
+                .copyWith(color: colors.ink2),
           ),
         ],
       ],
@@ -318,7 +318,7 @@ class StatRow extends StatelessWidget {
                 const SizedBox(width: unitGap),
                 Text(
                   unit,
-                  style: TypeScale.statUnit.copyWith(color: colors.ink3),
+                  style: TypeScale.statUnit.copyWith(color: colors.ink2),
                 ),
               ],
             ],
@@ -394,6 +394,6 @@ class WindowLabel extends StatelessWidget {
   @override
   Widget build(BuildContext context) => Text(
     text.toUpperCase(),
-    style: TypeLadder.label.copyWith(color: context.colors.ink3),
+    style: TypeLadder.label.copyWith(color: context.colors.ink2),
   );
 }

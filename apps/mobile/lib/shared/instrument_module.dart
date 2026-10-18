@@ -210,7 +210,7 @@ class InstrumentModule extends StatelessWidget {
 
 /// Legacy's `HEyebrow` — uppercase, tracked, quiet.
 ///
-/// The ladder's label step (`HType.label`), in [HealtheeColors.ink3]. Legacy's
+/// The ladder's label step (`HType.label`), in [HealtheeColors.ink2]. Legacy's
 /// 9 px at 0.12 em and weight 400 snapped to that step with the type ladder.
 ///
 /// The caps are **visual only**: the [Semantics] label carries the text as
@@ -223,7 +223,7 @@ class ModuleLabel extends StatelessWidget {
   /// The label, in any case — this widget uppercases it.
   final String text;
 
-  /// Overrides [HealtheeColors.ink3].
+  /// Overrides [HealtheeColors.ink2].
   final Color? color;
 
   @override
@@ -236,7 +236,7 @@ class ModuleLabel extends StatelessWidget {
           text.toUpperCase(),
           maxLines: 1,
           overflow: TextOverflow.ellipsis,
-          style: HType.label(color ?? colors.ink3),
+          style: HType.label(color ?? colors.ink2),
         ),
       ),
     );
@@ -293,7 +293,7 @@ class ModuleValue extends StatelessWidget {
           Text(
             symbol,
             style: HType.number(
-              colors.ink3,
+              colors.ink2,
               size: _unitSize,
               weight: FontWeight.w400,
             ),
@@ -336,7 +336,7 @@ class ModuleFoot extends StatelessWidget {
             // wording, which is the one category of change the port allows.
             maxLines: 2,
             overflow: TextOverflow.ellipsis,
-            style: HType.label(colors.ink3),
+            style: HType.label(colors.ink2),
           ),
         ),
       ),

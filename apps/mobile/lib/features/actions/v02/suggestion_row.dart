@@ -92,7 +92,7 @@ class _SuggestionRowState extends State<SuggestionRow> {
                                 maxLines: 1,
                                 overflow: TextOverflow.ellipsis,
                                 style: TypeScale.tinyLabel.copyWith(
-                                  color: colors.ink3,
+                                  color: colors.ink2,
                                   letterSpacing: 0.9,
                                 ),
                               ),
@@ -112,7 +112,7 @@ class _SuggestionRowState extends State<SuggestionRow> {
                       child: Icon(
                         SolarIconsOutline.infoCircle,
                         size: 16,
-                        color: colors.ink3,
+                        color: colors.ink2,
                       ),
                     ),
                   ],
@@ -165,7 +165,7 @@ class _SuggestionRowState extends State<SuggestionRow> {
                   const SizedBox(height: 6),
                   Text(
                     line,
-                    style: TypeScale.tinyLabel.copyWith(color: colors.ink3),
+                    style: TypeScale.tinyLabel.copyWith(color: colors.ink2),
                   ),
                 ],
                 const SizedBox(height: 11),

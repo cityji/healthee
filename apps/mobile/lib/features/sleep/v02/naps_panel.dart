@@ -201,7 +201,7 @@ class _NapHead extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final colors = context.colors;
-    final style = TypeLadder.label.copyWith(color: colors.ink3);
+    final style = TypeLadder.label.copyWith(color: colors.ink2);
     return Padding(
       padding: const EdgeInsets.only(bottom: NapsPanel.cellPad),
       child: Row(

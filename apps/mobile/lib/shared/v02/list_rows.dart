@@ -162,7 +162,7 @@ class V02ListRow extends StatelessWidget {
               Icon(
                 SolarIconsOutline.altArrowRight,
                 size: chevronSize,
-                color: colors.ink3,
+                color: colors.ink2,
               ),
             ],
           ],

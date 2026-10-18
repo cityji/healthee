@@ -130,14 +130,14 @@ class _BirthdayFieldState extends State<BirthdayField> {
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
                     style: FormType.fieldInput.copyWith(
-                      color: value == null ? colors.ink3 : colors.ink,
+                      color: value == null ? colors.ink2 : colors.ink,
                     ),
                   ),
                 ),
                 Icon(
                   SolarIconsOutline.calendarMark,
                   size: 18,
-                  color: colors.ink3,
+                  color: colors.ink2,
                 ),
               ],
             ),

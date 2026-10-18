@@ -156,7 +156,7 @@ abstract final class FieldBox {
     return InputDecoration(
       isDense: true,
       hintText: hintText,
-      hintStyle: FormType.fieldInput.copyWith(color: colors.ink3),
+      hintStyle: FormType.fieldInput.copyWith(color: colors.ink2),
       suffixIcon: suffixIcon,
       filled: true,
       fillColor: invalid ? colors.alertSoft : colors.surface,
@@ -323,12 +323,12 @@ class HSelect<T> extends StatelessWidget {
               maxLines: 2,
               overflow: TextOverflow.ellipsis,
               style: FormType.fieldInput.copyWith(
-                color: chosen == null ? colors.ink3 : colors.ink,
+                color: chosen == null ? colors.ink2 : colors.ink,
               ),
             ),
           ),
           const SizedBox(width: 8),
-          Icon(SolarIconsOutline.altArrowDown, color: colors.ink3),
+          Icon(SolarIconsOutline.altArrowDown, color: colors.ink2),
         ],
       ),
     );

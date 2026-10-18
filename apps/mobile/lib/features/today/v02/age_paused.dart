@@ -106,7 +106,7 @@ class AgePausedNotice extends ConsumerWidget {
           Text(
             staleWeightCaption(days),
             textAlign: TextAlign.center,
-            style: TypeLadder.caption.copyWith(color: colors.ink3),
+            style: TypeLadder.caption.copyWith(color: colors.ink2),
           ),
         ],
         if (label != null) ...<Widget>[

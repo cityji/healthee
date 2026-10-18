@@ -86,7 +86,7 @@ class InsightsSection extends StatelessWidget {
         children: [
           Padding(
             padding: const EdgeInsets.symmetric(vertical: 4),
-            child: Text(nothingYet, style: HType.sans(colors.ink3, size: 13.5)),
+            child: Text(nothingYet, style: HType.sans(colors.ink2, size: 13.5)),
           ),
         ],
       );
@@ -194,7 +194,7 @@ class _Subjects extends StatelessWidget {
         child: Icon(
           SolarIconsOutline.arrowRight,
           size: 11,
-          color: context.colors.ink3,
+          color: context.colors.ink2,
         ),
       ),
       Flexible(child: _Chip(pair.last)),

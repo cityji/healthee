@@ -80,7 +80,7 @@ class WithheldPanel extends StatelessWidget {
                   '—',
                   // `.withheld-value > span`: the prototype's 44 px is the
                   // ladder's metric step, the size the refused number had.
-                  style: TypeScale.panelValue.copyWith(color: colors.ink3),
+                  style: TypeScale.panelValue.copyWith(color: colors.ink2),
                 ),
                 const SizedBox(width: gap),
                 Expanded(

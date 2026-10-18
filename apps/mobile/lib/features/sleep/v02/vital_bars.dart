@@ -133,13 +133,13 @@ class VitalBars extends StatelessWidget {
                         TextSpan(
                           text: reading,
                           style: SleepType.checkValue.copyWith(
-                            color: value == null ? colors.ink3 : colors.ink,
+                            color: value == null ? colors.ink2 : colors.ink,
                           ),
                         ),
                         TextSpan(
                           text: '\u00A0${vital.unit}',
                           style: SleepType.vitalUnit.copyWith(
-                            color: colors.ink3,
+                            color: colors.ink2,
                           ),
                         ),
                       ],

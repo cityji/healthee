@@ -71,7 +71,7 @@ class FitnessPlanPanel extends StatelessWidget {
             const SizedBox(height: blocksGap),
             Text(
               'THIS WEEK',
-              style: TypeLadder.label.copyWith(color: context.colors.ink3),
+              style: TypeLadder.label.copyWith(color: context.colors.ink2),
             ),
             for (final block in plan.blocks) ...<Widget>[
               const SizedBox(height: blockGap),
@@ -113,7 +113,7 @@ class _Projection extends StatelessWidget {
           child: Icon(
             SolarIconsOutline.arrowRight,
             size: 16,
-            color: colors.ink3,
+            color: colors.ink2,
           ),
         ),
         Text(
@@ -135,7 +135,7 @@ class _Projection extends StatelessWidget {
                 'in ${plan.weeks ?? 12} weeks, on this plan',
                 maxLines: 2,
                 textAlign: TextAlign.right,
-                style: TypeScale.panelNote.copyWith(color: colors.ink3),
+                style: TypeScale.panelNote.copyWith(color: colors.ink2),
               ),
             ],
           ),
@@ -180,7 +180,7 @@ class _BlockRow extends StatelessWidget {
                   ? 'target ${block.targetMin} min'
                   : '${block.doneMin} / ${block.targetMin} min',
               style: (block.met ? TypeLadder.calloutStrong : TypeLadder.callout)
-                  .copyWith(color: block.met ? colors.ink : colors.ink3),
+                  .copyWith(color: block.met ? colors.ink : colors.ink2),
             ),
           ],
         ),

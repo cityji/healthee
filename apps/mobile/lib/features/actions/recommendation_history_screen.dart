@@ -213,7 +213,7 @@ class _Entry extends ConsumerWidget {
             const SizedBox(height: Insets.sm),
             Text(
               raised,
-              style: TypeScale.tinyLabel.copyWith(color: colors.ink3),
+              style: TypeScale.tinyLabel.copyWith(color: colors.ink2),
             ),
           ],
           // The dated card's own ⓘ. Drawn whenever there is something behind
@@ -300,7 +300,7 @@ class _Paging extends StatelessWidget {
                 ),
                 Text(
                   'Page ${page + 1}',
-                  style: TypeScale.tinyLabel.copyWith(color: colors.ink3),
+                  style: TypeScale.tinyLabel.copyWith(color: colors.ink2),
                 ),
                 TextLink(
                   label: 'Next',

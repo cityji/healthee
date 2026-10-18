@@ -177,7 +177,7 @@ void main() {
       await tester.pumpAndSettle();
       expect(
         tester.widget<Text>(find.text('71%')).style!.color,
-        _light.ink3,
+        _light.ink2,
         reason: 'nothing has classified a link, so nothing may read healthy',
       );
 

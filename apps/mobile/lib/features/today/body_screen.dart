@@ -216,7 +216,7 @@ class BodyDetail extends StatelessWidget {
         const SizedBox(height: Insets.xs),
         Text(
           ageUpdatedLine(snapshot.asOf?.derivedAt, now ?? DateTime.now()),
-          style: TypeLadder.callout.copyWith(color: colors.ink3),
+          style: TypeLadder.callout.copyWith(color: colors.ink2),
         ),
         const SizedBox(height: Insets.md),
         _Sphere(age: age, reveals: reveals),
@@ -269,7 +269,7 @@ class BodyDetail extends StatelessWidget {
         const SizedBox(height: Insets.cardGap),
         Text(
           kAgeFootnote,
-          style: TypeLadder.caption.copyWith(color: colors.ink3),
+          style: TypeLadder.caption.copyWith(color: colors.ink2),
         ),
         const SizedBox(height: Insets.section),
         const DataFooter(),

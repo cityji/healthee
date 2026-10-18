@@ -141,7 +141,7 @@ class MetricInfoDot extends StatelessWidget {
   /// **Not a hue a call site chose**, which is the rule this would otherwise
   /// break: it is one of the theme's own inks, picked by a card that sets its
   /// text a step louder or quieter than the page default (the age hero passes
-  /// `ink2`). Null, everywhere else, resolves [HealtheeColors.ink3] as before.
+  /// `ink2`). Null, everywhere else, resolves [HealtheeColors.ink2] as before.
   final Color? ink;
 
   /// Legacy's `Icon(..., size: 16)`.
@@ -183,7 +183,7 @@ class MetricInfoDot extends StatelessWidget {
             child: Icon(
               SolarIconsOutline.infoCircle,
               size: _size,
-              color: ink ?? colors.ink3,
+              color: ink ?? colors.ink2,
             ),
           ),
         ),
@@ -312,7 +312,7 @@ class _MetricInfoSheet extends StatelessWidget {
                 icon: SolarIconsOutline.documentText,
                 label: 'WHAT IT IS',
                 body: explainer.what,
-                accent: colors.ink3,
+                accent: colors.ink2,
               ),
               const SizedBox(height: 16),
               InfoBlock(
@@ -346,7 +346,7 @@ class _MetricInfoSheet extends StatelessWidget {
                 icon: SolarIconsOutline.documentText,
                 label: kMethodBlockLabel,
                 lines: detail.method,
-                accent: colors.ink3,
+                accent: colors.ink2,
               ),
               const SizedBox(height: 16),
             ],
@@ -354,7 +354,7 @@ class _MetricInfoSheet extends StatelessWidget {
               DisclosureBlock(
                 label: detail.disclosuresLabel ?? kDisclosureBlockLabel,
                 disclosures: detail.disclosures,
-                accent: colors.ink3,
+                accent: colors.ink2,
               ),
               const SizedBox(height: 16),
             ],

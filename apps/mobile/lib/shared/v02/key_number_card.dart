@@ -8,8 +8,8 @@
 /// ## The verdict's colour
 ///
 /// Neutral unless the reading is on the side that is worse for the owner, which
-/// draws in [HealtheeColors.unf] (`APP_DESIGN.md`: no traffic lights; amber
-/// only where a reading sits on the worse side). The better side draws in
+/// draws in [HealtheeColors.alert] (the colour kit's *worse*; inside the
+/// usual range stays neutral). The better side draws in
 /// [HealtheeColors.fav], the token the recovery ladder already uses for "better
 /// than your own normal". A card that has no verdict to give (a day still in
 /// progress, a band still learning) draws a neutral chip with its own words.
@@ -170,7 +170,7 @@ class KeyNumberCard extends StatelessWidget {
         if (verdict case final Verdict said) VerdictChip(said),
         if (onOpen != null) ...<Widget>[
           const SizedBox(width: 8),
-          Icon(SolarIconsOutline.altArrowRight, size: 14, color: colors.ink3),
+          Icon(SolarIconsOutline.altArrowRight, size: 14, color: colors.ink2),
         ],
       ],
     );
@@ -186,7 +186,7 @@ class KeyNumberCard extends StatelessWidget {
         if (unit case final String small)
           TextSpan(
             text: small,
-            style: KeyType.unit.copyWith(color: colors.ink3),
+            style: KeyType.unit.copyWith(color: colors.ink2),
           ),
       ],
     ),
@@ -229,7 +229,7 @@ class VerdictChip extends StatelessWidget {
   Widget build(BuildContext context) {
     final colors = context.colors;
     final (ink, ground) = switch (verdict.tone) {
-      VerdictTone.worse => (colors.unf, colors.unfSoft),
+      VerdictTone.worse => (colors.alert, colors.alertSoft),
       VerdictTone.better => (colors.fav, colors.favSoft),
       VerdictTone.neutral => (colors.ink, colors.surface2),
     };

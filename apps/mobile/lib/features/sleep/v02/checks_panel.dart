@@ -301,7 +301,7 @@ class _CheckRow extends StatelessWidget {
               Text(
                 check.reading ?? '—',
                 style: SleepType.checkValue.copyWith(
-                  color: check.reading == null ? colors.ink3 : colors.ink,
+                  color: check.reading == null ? colors.ink2 : colors.ink,
                 ),
               ),
             ],

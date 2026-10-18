@@ -160,7 +160,7 @@ class SignalChart extends StatelessWidget {
                         1 => TextAlign.center,
                         _ => TextAlign.end,
                       },
-                      style: MeterType.signalKey.copyWith(color: colors.ink3),
+                      style: MeterType.signalKey.copyWith(color: colors.ink2),
                     ),
                   ),
               ],

@@ -154,15 +154,15 @@ void main() {
       expect(lit.length, 8);
     });
 
-    testWidgets('older is unf', (tester) async {
+    testWidgets('older is alert', (tester) async {
       final ticks = _ticks(await _paint(tester, estimate: 38.1), 64);
-      final lit = ticks.where((t) => _colourOf(t) == _dark.unf.toARGB32());
+      final lit = ticks.where((t) => _colourOf(t) == _dark.alert.toARGB32());
       // 36 (index 32) to 38 (index 40), 38.1 rounds to the 38 tick.
       expect(lit.length, 9);
       expect(ticks.any((t) => _colourOf(t) == _dark.fav.toARGB32()), isFalse);
     });
 
-    testWidgets('within half a year is ink2, neither fav nor unf', (
+    testWidgets('within half a year is ink2, neither fav nor alert', (
       tester,
     ) async {
       final ticks = _ticks(await _paint(tester, estimate: 36.3), 64);
@@ -171,6 +171,7 @@ void main() {
       expect(lit.length, 2);
       expect(ticks.any((t) => _colourOf(t) == _dark.fav.toARGB32()), isFalse);
       expect(ticks.any((t) => _colourOf(t) == _dark.unf.toARGB32()), isFalse);
+      expect(ticks.any((t) => _colourOf(t) == _dark.alert.toARGB32()), isFalse);
     });
 
     testWidgets('the grey ticks do not move or change with progress', (

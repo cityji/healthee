@@ -274,7 +274,7 @@ class HTimeline extends StatelessWidget {
                             style: FormType.timelineNode.copyWith(
                               color: steps[i].active
                                   ? colors.accent
-                                  : colors.ink3,
+                                  : colors.ink2,
                             ),
                           ),
                         ),

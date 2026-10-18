@@ -307,12 +307,12 @@ class _Asleep extends StatelessWidget {
           fit: BoxFit.scaleDown,
           alignment: Alignment.centerLeft,
           child: minutes == null
-              ? Text('—', style: figure.copyWith(color: colors.ink3))
+              ? Text('—', style: figure.copyWith(color: colors.ink2))
               : Text.rich(
                   _spans(
                     minutes,
                     figure.copyWith(color: colors.ink),
-                    colors.ink3,
+                    colors.ink2,
                   ),
                   maxLines: 1,
                 ),
@@ -357,7 +357,7 @@ class _DeviceScore extends StatelessWidget {
         Text(
           score == null ? '—' : score.round().toString(),
           style: SleepType.deviceScore.copyWith(
-            color: score == null ? colors.ink3 : colors.ink,
+            color: score == null ? colors.ink2 : colors.ink,
           ),
         ),
         Text(

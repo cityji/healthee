@@ -257,7 +257,7 @@ class _Face extends StatelessWidget {
                 const SizedBox(width: MetricTile.unitGap),
                 Text(
                   entry.unit,
-                  style: TypeScale.tinyLabel.copyWith(color: colors.ink3),
+                  style: TypeScale.tinyLabel.copyWith(color: colors.ink2),
                 ),
               ],
             ],

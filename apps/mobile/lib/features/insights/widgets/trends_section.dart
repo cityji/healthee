@@ -281,7 +281,7 @@ class _ChangeNote extends StatelessWidget {
     // uses, which is visibly not a claim.
     final Color? verdict = switch (trend.verdict) {
       TrendVerdict.favourable => colors.fav,
-      TrendVerdict.unfavourable => colors.unf,
+      TrendVerdict.unfavourable => colors.alert,
       TrendVerdict.none => null,
     };
     final sign = trend.delta > 0

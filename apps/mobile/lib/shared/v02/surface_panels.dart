@@ -305,7 +305,7 @@ class FocusCard extends StatelessWidget {
                     child: Text(
                       label,
                       style: TypeScale.focusEyebrow.copyWith(
-                        color: colors.ink3,
+                        color: colors.ink2,
                       ),
                     ),
                   )

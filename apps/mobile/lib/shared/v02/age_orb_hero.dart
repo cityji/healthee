@@ -85,7 +85,7 @@ const double _figureRadii = 1.4;
                 style: TypeLadder.bodyStrong.copyWith(
                   color: switch (said.tone) {
                     VerdictTone.better => colors.fav,
-                    VerdictTone.worse => colors.unf,
+                    VerdictTone.worse => colors.alert,
                     VerdictTone.neutral => colors.ink2,
                   },
                 ),
@@ -250,7 +250,7 @@ class AgeOrbHero extends StatelessWidget {
         Text(
           line,
           textAlign: TextAlign.center,
-          style: TypeLadder.caption.copyWith(color: colors.ink3),
+          style: TypeLadder.caption.copyWith(color: colors.ink2),
         ),
       ],
     ],
@@ -270,7 +270,7 @@ class AgeOrbHero extends StatelessWidget {
       ),
       MetricInfoDot(
         infoKey,
-        ink: colors.ink3,
+        ink: colors.ink2,
         detail: MetricDetail(
           source: modelLabel,
           disclosures: disclosed,

@@ -63,9 +63,9 @@ Widget _row(MetricTrend trend) => MaterialApp(
 );
 
 /// The verdict colours, read from the same theme the widget is rendered in.
-({Color fav, Color unf}) _verdicts() {
+({Color fav, Color unf, Color alert}) _verdicts() {
   final colors = AppTheme.light.extension<HealtheeColors>()!;
-  return (fav: colors.fav, unf: colors.unf);
+  return (fav: colors.fav, unf: colors.unf, alert: colors.alert);
 }
 
 void main() {
@@ -138,13 +138,13 @@ void main() {
   });
 
   group('a trend row spends colour only where it has a claim', () {
-    testWidgets('a polarity -1 metric RISING renders unf', (tester) async {
+    testWidgets('a polarity -1 metric RISING renders alert', (tester) async {
       await tester.pumpWidget(_row(_trend('rhr_daily', 4)));
       await tester.pumpAndSettle();
 
       expect(
         _textColours(tester, find.byType(TrendPanel)),
-        contains(_verdicts().unf),
+        contains(_verdicts().alert),
       );
     });
 
@@ -158,7 +158,7 @@ void main() {
       );
     });
 
-    testWidgets('a polarity +1 metric rising renders fav, falling unf', (
+    testWidgets('a polarity +1 metric rising renders fav, falling alert', (
       tester,
     ) async {
       await tester.pumpWidget(_row(_trend('hrv_sleep_avg', 4)));
@@ -172,7 +172,7 @@ void main() {
       await tester.pumpAndSettle();
       expect(
         _textColours(tester, find.byType(TrendPanel)),
-        contains(_verdicts().unf),
+        contains(_verdicts().alert),
       );
     });
 
@@ -198,9 +198,10 @@ void main() {
         );
         expect(
           drawn,
-          isNot(contains(_verdicts().unf)),
+          isNot(contains(_verdicts().alert)),
           reason: 'and it is not bad news either',
         );
+        expect(drawn, isNot(contains(_verdicts().unf)));
       }
     });
 
@@ -214,6 +215,7 @@ void main() {
 
       final drawn = _textColours(tester, find.byType(TrendPanel));
       expect(drawn, isNot(contains(_verdicts().fav)));
+      expect(drawn, isNot(contains(_verdicts().alert)));
       expect(drawn, isNot(contains(_verdicts().unf)));
     });
   });

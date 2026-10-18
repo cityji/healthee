@@ -136,7 +136,7 @@ class _ChallengeSheet extends StatelessWidget {
               Text(
                 hard,
                 style: TypeScale.tinyLabel.copyWith(
-                  color: colors.ink3,
+                  color: colors.ink2,
                   letterSpacing: 1,
                 ),
               ),
@@ -232,7 +232,7 @@ class TargetStrip extends StatelessWidget {
           ),
           if (window case final String run) ...<Widget>[
             const SizedBox(width: 8),
-            Text(run, style: TypeScale.tinyLabel.copyWith(color: colors.ink3)),
+            Text(run, style: TypeScale.tinyLabel.copyWith(color: colors.ink2)),
           ],
         ],
       ),
@@ -268,7 +268,7 @@ class _Block extends StatelessWidget {
               Text(
                 label,
                 style: TypeScale.tinyLabel.copyWith(
-                  color: colors.ink3,
+                  color: colors.ink2,
                   letterSpacing: 1.1,
                 ),
               ),

@@ -132,7 +132,7 @@ class LoadingState extends StatelessWidget {
             height: 16,
             child: CircularProgressIndicator(
               strokeWidth: 2,
-              color: colors.ink3,
+              color: colors.ink2,
             ),
           ),
           const SizedBox(width: Insets.md),
@@ -188,7 +188,7 @@ class ErrorState extends StatelessWidget {
             const SizedBox(height: Insets.sm),
             Text(
               detailText,
-              style: text.bodySmall?.copyWith(color: colors.ink3),
+              style: text.bodySmall?.copyWith(color: colors.ink2),
             ),
           ],
           const SizedBox(height: Insets.md),
@@ -233,7 +233,7 @@ class EmptyState extends StatelessWidget {
         children: [
           Text(message, style: text.titleSmall),
           const SizedBox(height: Insets.sm),
-          Text(hint, style: text.bodySmall?.copyWith(color: colors.ink3)),
+          Text(hint, style: text.bodySmall?.copyWith(color: colors.ink2)),
         ],
       ),
     );

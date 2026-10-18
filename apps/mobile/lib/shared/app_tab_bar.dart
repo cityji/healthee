@@ -99,7 +99,7 @@ class _TabItem extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final colors = context.colors;
-    final tint = active ? colors.accent : colors.ink3;
+    final tint = active ? colors.accent : colors.ink2;
     return Semantics(
       button: true,
       selected: active,

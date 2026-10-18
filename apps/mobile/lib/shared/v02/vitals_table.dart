@@ -243,12 +243,12 @@ class VitalRow extends StatelessWidget {
                         ? '—'
                         : value.toStringAsFixed(vital.digits),
                     style: SleepType.vitalValue.copyWith(
-                      color: value == null ? colors.ink3 : colors.ink,
+                      color: value == null ? colors.ink2 : colors.ink,
                     ),
                   ),
                   TextSpan(
                     text: '\u00A0${vital.unit}',
-                    style: SleepType.vitalUnit.copyWith(color: colors.ink3),
+                    style: SleepType.vitalUnit.copyWith(color: colors.ink2),
                   ),
                 ],
               ),

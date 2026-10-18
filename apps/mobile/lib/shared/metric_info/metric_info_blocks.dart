@@ -160,7 +160,7 @@ class DisclosureBlock extends StatelessWidget {
         for (final disclosure in disclosures) ...<Widget>[
           const SizedBox(height: 9),
           if (disclosure.term case final String term) ...<Widget>[
-            Text(term.toUpperCase(), style: HType.label(colors.ink3)),
+            Text(term.toUpperCase(), style: HType.label(colors.ink2)),
             const SizedBox(height: 5),
           ],
           Text(disclosure.message, style: HType.sans(colors.ink, size: 14.5)),
@@ -170,7 +170,7 @@ class DisclosureBlock extends StatelessWidget {
           for (final term in disclosure.terms) ...<Widget>[
             const SizedBox(height: 9),
             if (term.term case final String name) ...<Widget>[
-              Text(name.toUpperCase(), style: HType.label(colors.ink3)),
+              Text(name.toUpperCase(), style: HType.label(colors.ink2)),
               const SizedBox(height: 5),
             ],
             Text(term.message, style: HType.sans(colors.ink, size: 14.5)),
@@ -210,14 +210,14 @@ class NotCoveredNote extends StatelessWidget {
           child: Icon(
             SolarIconsOutline.infoCircle,
             size: 13,
-            color: colors.ink3,
+            color: colors.ink2,
           ),
         ),
         const SizedBox(width: Insets.sm),
         Expanded(
           child: Text(
             'Not covered by those sources: $text',
-            style: HType.sans(colors.ink3, size: 11.5),
+            style: HType.sans(colors.ink2, size: 11.5),
           ),
         ),
       ],

@@ -185,7 +185,7 @@ class _BedWakePainter extends CustomPainter {
       final cx = slot * (i + 0.5);
       _text(canvas, n.day, Offset(cx, size.height - 6));
       if (n.bed == null || n.wake == null) {
-        _text(canvas, 'no data', Offset(cx, bottom - 6), ink: colors.ink3);
+        _text(canvas, 'no data', Offset(cx, bottom - 6), ink: colors.ink2);
         continue;
       }
       final wake = n.bed! + (n.wake! - n.bed!) * progress.clamp(0, 1);
