@@ -4,19 +4,28 @@
 /// together is Strain blue, moving opposite is Activity orange**, and neither
 /// is good or bad. A strong negative is not an alarm; it is a direction.
 /// `r` runs −1 to +1 and a bar's length is its magnitude.
+///
+/// A bar that is NOT a correlation, the biological-age years for one, passes a
+/// [DivergingBar.state]: both sides then take that state's colour (the verdict
+/// the number earned) instead of the together and opposite hues.
 library;
 
 import 'package:flutter/material.dart';
 import 'package:healthee/core/theme/instrument_hues.dart';
 import 'package:healthee/core/theme/tokens.dart';
+import 'package:healthee/shared/v02/reading_state.dart';
 
 /// The bar.
 class DivergingBar extends StatelessWidget {
   /// [r] is the correlation, clamped to −1 to +1.
-  const DivergingBar({required this.r, this.height = 6, super.key});
+  const DivergingBar({required this.r, this.height = 6, this.state, super.key});
 
-  /// The coefficient.
+  /// The coefficient, or any value already scaled to −1 to +1.
   final double r;
+
+  /// The verdict colour for a bar that is not a correlation; null draws the
+  /// together and opposite hues.
+  final ReadingState? state;
 
   /// Track thickness.
   final double height;
@@ -24,6 +33,7 @@ class DivergingBar extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final hues = context.hues;
+    final verdict = state?.dotIn(context.colors);
     return SizedBox(
       height: height + 6,
       width: double.infinity,
@@ -31,8 +41,8 @@ class DivergingBar extends StatelessWidget {
         painter: DivergingBarPainter(
           r: r.clamp(-1.0, 1.0),
           thickness: height,
-          together: hues.strain,
-          opposite: hues.movement,
+          together: verdict ?? hues.strain,
+          opposite: verdict ?? hues.movement,
           colors: context.colors,
         ),
       ),

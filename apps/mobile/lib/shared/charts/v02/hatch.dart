@@ -7,6 +7,7 @@
 library;
 
 import 'package:flutter/material.dart';
+import 'package:healthee/core/theme/tokens.dart';
 
 /// Fills [rect] (clipped to [radius]) with diagonal lines in [ink].
 void paintHatch(
@@ -31,4 +32,43 @@ void paintHatch(
     );
   }
   canvas.restore();
+}
+
+/// A full-width hatched strip: the empty state of a bar that has no reading.
+class HatchStrip extends StatelessWidget {
+  /// A strip [height] tall.
+  const HatchStrip({this.height = 6, super.key});
+
+  /// Strip thickness.
+  final double height;
+
+  @override
+  Widget build(BuildContext context) => ExcludeSemantics(
+    child: SizedBox(
+      height: height + 6,
+      width: double.infinity,
+      child: CustomPaint(
+        painter: _HatchStripPainter(context.colors.ink3, height),
+      ),
+    ),
+  );
+}
+
+class _HatchStripPainter extends CustomPainter {
+  const _HatchStripPainter(this.ink, this.thickness);
+
+  final Color ink;
+  final double thickness;
+
+  @override
+  void paint(Canvas canvas, Size size) => paintHatch(
+    canvas,
+    Rect.fromLTWH(0, (size.height - thickness) / 2, size.width, thickness),
+    ink: ink,
+    radius: thickness / 2,
+  );
+
+  @override
+  bool shouldRepaint(_HatchStripPainter old) =>
+      old.ink != ink || old.thickness != thickness;
 }

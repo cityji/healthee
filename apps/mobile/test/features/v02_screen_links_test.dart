@@ -110,7 +110,7 @@ void main() {
       expect(find.byType(RecoveryScreen), findsOneWidget);
     });
 
-    testWidgets('INSIGHTS’ SECOND RELATIONSHIP CARD OPENS THE AGE MODEL', (
+    testWidgets('INSIGHTS’ FITNESS → AGE TILE OPENS THE AGE MODEL', (
       tester,
     ) async {
       _tallPhone(tester);
@@ -118,8 +118,7 @@ void main() {
       await tester.pumpAndSettle();
       await tapTab(tester, 'Insights');
 
-      // The card is the target; its word is in the semantics now.
-      await _open(tester, find.byType(AgeEntryCard));
+      await _open(tester, find.byType(AgeHeroTile));
       expect(find.byType(BodyScreen), findsOneWidget);
     });
 

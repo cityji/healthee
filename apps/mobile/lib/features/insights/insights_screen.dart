@@ -21,16 +21,14 @@ library;
 import 'dart:async';
 
 import 'package:flutter/material.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:healthee/core/router.dart';
-import 'package:healthee/data/insights/notable_event.dart';
 import 'package:healthee/features/insights/insights_sections.dart';
 import 'package:healthee/shared/history_link.dart';
 import 'package:healthee/shared/instrument_screen.dart';
 
 /// The Insights tab.
-class InsightsScreen extends ConsumerWidget {
+class InsightsScreen extends StatelessWidget {
   /// [now] is injected by tests so the freshness labels are deterministic.
   const InsightsScreen({this.now, super.key});
 
@@ -38,10 +36,9 @@ class InsightsScreen extends ConsumerWidget {
   final DateTime? now;
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  Widget build(BuildContext context) {
     return InstrumentScreen(
       now: now,
-      onRefreshed: () => ref.invalidate(notableEventsProvider),
       sections: (ScreenData data) => insightsSections(
         data,
         InsightsExtras(

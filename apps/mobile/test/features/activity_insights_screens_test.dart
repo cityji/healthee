@@ -19,7 +19,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:healthee/data/store/local_store.dart';
 import 'package:healthee/features/activity/activity_screen.dart';
 import 'package:healthee/features/insights/insights_screen.dart';
-import 'package:healthee/shared/findings_section.dart';
+import 'package:healthee/features/insights/v02/moved_together.dart';
 
 import '_citation_probe.dart';
 import '_today_host.dart';
@@ -123,29 +123,25 @@ void main() {
   });
 
   group('Insights', () {
-    testWidgets('a finding says single-subject, and never says "caused"', (
+    testWidgets('a finding says observed, and never says "caused"', (
       tester,
     ) async {
       await tester.pumpWidget(todayHost(store, home: const InsightsScreen()));
       await tester.pumpAndSettle();
-      await reveal(tester, find.text('In your own data'));
+      await reveal(tester, find.text(kObservedFootnote));
 
       expect(
-        find.textContaining(
-          'They say what moved together, never what caused what.',
-        ),
+        find.text('Observed in your history, not cause and effect.'),
         findsOneWidget,
         reason: 'the framing is on the surface, where it cannot be collapsed',
       );
       expect(
-        find.textContaining('Single-subject and observational'),
-        findsOneWidget,
-      );
-      expect(
-        find.textContaining('moved opposite to'),
+        find.text('Move opposite · moderate'),
         findsOneWidget,
         reason: 'the direction is stated, and it is not a causal verb',
       );
+      expect(find.textContaining('caused by'), findsNothing);
+      expect(find.textContaining('because'), findsNothing);
     });
 
     testWidgets('THE STATISTIC IS BEHIND THE ⓘ, NOT ON THE SURFACE', (
@@ -166,8 +162,8 @@ void main() {
       // read the next headline. The ⓘ is where every other surface in this app
       // keeps its method, and that dot was already beside the row carrying the
       // sources.
-      await reveal(tester, find.byType(FindingsSection));
-      final dot = dotIn(find.byType(FindingsSection)).first;
+      await reveal(tester, find.byType(MovedTogetherCard));
+      final dot = dotIn(find.byType(MovedTogetherCard)).first;
       await tester.ensureVisible(dot);
       await tester.pumpAndSettle();
       await tester.tap(dot);
