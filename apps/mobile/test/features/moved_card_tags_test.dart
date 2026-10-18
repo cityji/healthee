@@ -89,7 +89,7 @@ void main() {
         MovementPanel.title: Tone.movement,
         IntensityPanel.title: Tone.movement,
         TrainingLoadPanel.title: Tone.load,
-        FitnessSourcePanel.title: Tone.fitness,
+        FitnessSourcePanel.title: Tone.heart,
       };
       for (final entry in cases.entries) {
         expect(
@@ -126,20 +126,21 @@ void main() {
       );
     });
 
-    test('HEART AND BODY NUMBERS ARE TWO DOMAINS, and cardio load is strain', () {
-      // The colour system gives each body system its own hue: VO₂max is Heart,
-      // biological age is Body, and cardio load is Strain, split from heart.
-      expect(hueFor(_hues, 'vo2max_estimate'), _hues.heart);
-      expect(hueFor(_hues, 'biological_age'), _hues.fitness);
-      expect(hueFor(_hues, 'cardio_load'), _hues.strain);
-      // NOT asserted: `toneForMetric('vo2max_estimate')`. lib's
-      // `shared/v02/metric_tone.dart` still says fitness while `metric_hue.dart`
-      // says heart (reported as a lib bug: two tables, two tones).
-      expect(toneForMetric('biological_age'), Tone.fitness);
-      expect(toneForMetric('cardio_load'), Tone.load);
-      expect(_hues.heart, isNot(_hues.fitness));
-      expect(_hues.strain, isNot(_hues.heart));
-    });
+    test(
+      'HEART AND BODY NUMBERS ARE TWO DOMAINS, and cardio load is strain',
+      () {
+        // The colour system gives each body system its own hue: VO₂max is Heart,
+        // biological age is Body, and cardio load is Strain, split from heart.
+        expect(hueFor(_hues, 'vo2max_estimate'), _hues.heart);
+        expect(hueFor(_hues, 'biological_age'), _hues.fitness);
+        expect(hueFor(_hues, 'cardio_load'), _hues.strain);
+        expect(toneForMetric('vo2max_estimate'), Tone.heart);
+        expect(toneForMetric('biological_age'), Tone.fitness);
+        expect(toneForMetric('cardio_load'), Tone.load);
+        expect(_hues.heart, isNot(_hues.fitness));
+        expect(_hues.strain, isNot(_hues.heart));
+      },
+    );
 
     testWidgets('NOTHING ON THE INTENSITY PANEL TURNS AT THE WHO FLOOR', (
       tester,

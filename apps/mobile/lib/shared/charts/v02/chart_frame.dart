@@ -246,6 +246,7 @@ void paintLastPointDot(
   required ChartInk ink,
   required double progress,
   double radius = 3.5,
+  Color? color,
 }) {
   final r = radius * progress.clamp(0.0, 1.0);
   if (r <= 0) {
@@ -253,7 +254,7 @@ void paintLastPointDot(
   }
   canvas
     ..drawCircle(point, r + 1.8, Paint()..color = ink.surface)
-    ..drawCircle(point, r, Paint()..color = ink.family);
+    ..drawCircle(point, r, Paint()..color = color ?? ink.family);
 }
 
 const double _dash = 3;
