@@ -16,7 +16,7 @@ from tests.challenges import _seed
 
 from healthee.challenges.record import build_ledger
 from healthee.challenges.record_window import review_key
-from healthee.core.db import tenant_transaction
+from healthee.core.db import admin_connection, tenant_transaction
 from healthee.core.tenancy import SENTINEL_TZ, user_today
 from healthee.db import migrate
 
@@ -25,12 +25,22 @@ pytestmark = pytest.mark.integration
 _TZ = ZoneInfo(SENTINEL_TZ)
 
 
+def _reset() -> None:
+    """``_seed.reset`` plus ``recommendation``, which the shared reset list does not clear.
+
+    Without this, ideas left by an earlier test (or suite) leak into the ledger's counts.
+    """
+    _seed.reset()
+    with admin_connection() as conn, conn.cursor() as cur:
+        cur.execute("TRUNCATE recommendation")
+
+
 @pytest.fixture
 def owner(db: None) -> Iterator[None]:  # noqa: ARG001 — gates on DB reachability
     migrate.apply_migrations()
-    _seed.reset()
+    _reset()
     yield
-    _seed.reset()
+    _reset()
 
 
 def _at(day: date) -> datetime:
