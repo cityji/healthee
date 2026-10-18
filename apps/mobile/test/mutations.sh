@@ -176,19 +176,19 @@ TOKEN_TEST=test/core/theme_test.dart
 
 # A hue transcribed one digit wrong. Renders perfectly; is not legacy's app.
 mutate 'a v02 family hue is transcribed wrong' "$HUES_TEST" "$PALETTE" \
-  '  static const Color movement = Color(0xFF774000);' \
-  '  static const Color movement = Color(0xFF774001);'
+  '  static const Color movement = Color(0xFFE58600);' \
+  '  static const Color movement = Color(0xFFE58601);'
 
 # The dark theme quietly wearing the light theme's value. Invisible by day.
 mutate 'the dark hue set copies the light one' "$HUES_TEST" "$PALETTE" \
-  '  static const Color sleep = Color(0xFFC5A8FF);' \
+  '  static const Color sleep = Color(0xFF7D7AFF);' \
   '  static const Color sleep = LightFamilies.sleep;'
 
 # The reverse of legacy's rule. Legacy FUSED identity and verdict (cHrv WAS the
 # green); v02 separates them, so the regression is someone re-merging the two
 # because "the fitness colour and the good colour should surely match".
 mutate 'the fitness family is re-merged with the favourable verdict' "$HUES_TEST" "$PALETTE" \
-  '  static const Color fav = Color(0xFF065F3D);' \
+  '  static const Color fav = Color(0xFF24A148);' \
   '  static const Color fav = LightFamilies.fitness;'
 
 # Two sleep stages collapsing onto one colour: a hypnogram that cannot be read.
@@ -223,26 +223,26 @@ mutate 'core and light stop being the same stage' "$STAGE_TEST" "$HUES" \
 # someone who reads the ramp's docstring and not the file header above it.
 mutate "legacy's four dark stage values replace the prototype's" \
   "$CONTRAST_TEST $TOKEN_TEST" "$STAGES" \
-  '  static const Color darkDeep = Color(0xFF7859E3);' \
+  '  static const Color darkDeep = Color(0xFF5E5CE6);' \
   '  static const Color darkDeep = Color(0xFFD9A84E);' \
-  '  static const Color darkLight = Color(0xFF9EBDFF);' \
+  '  static const Color darkLight = Color(0xFF0A84FF);' \
   '  static const Color darkLight = Color(0xFF7DA3C4);' \
-  '  static const Color darkRem = Color(0xFFDA7BDD);' \
+  '  static const Color darkRem = Color(0xFF64D2FF);' \
   '  static const Color darkRem = Color(0xFF968EC9);' \
-  '  static const Color darkAwake = Color(0xFFFFBD76);' \
+  '  static const Color darkAwake = Color(0xFFFF7A59);' \
   '  static const Color darkAwake = Color(0xFFE07A5F);'
 
 # ONE value moved. A wholesale-revert test would not catch a single-line edit,
 # and one wrong stage is a whole hypnogram lane painted in another stage's hue.
 mutate "the dark REM value alone drifts off richer.css" \
   "$CONTRAST_TEST $TOKEN_TEST" "$STAGES" \
-  '  static const Color darkRem = Color(0xFFDA7BDD);' \
+  '  static const Color darkRem = Color(0xFF64D2FF);' \
   '  static const Color darkRem = Color(0xFF968EC9);'
 
 # The same, in the theme the owner reads by day.
 mutate "the light AWAKE value alone drifts off richer.css" \
   "$CONTRAST_TEST $TOKEN_TEST" "$STAGES" \
-  '  static const Color lightAwake = Color(0xFFEDA253);' \
+  '  static const Color lightAwake = Color(0xFFE5603F);' \
   '  static const Color lightAwake = Color(0xFFBF472E);'
 
 # The superseded ramp put back where the prototype's set belongs — the exact
@@ -1062,11 +1062,10 @@ mutate 'a measured zero stops marking its baseline' "$V02_COLUMNS" "$V02_COLUMN_
 # Both panes forced onto one axis: heart rate flattens into the bottom third and
 # the crossing point of the two traces starts looking like it means something.
 mutate 'the linked panes share one scale' "$V02_COLUMNS" "$V02_LINKED" \
-  '          ticks: ChartTicks.nice(pane.values.whereType<double>(), target: 2),' \
   '          ticks: ChartTicks.nice(
-            panes.first.values.whereType<double>(),
-            target: 2,
-          ),'
+            pane.values.whereType<double>(),' \
+  '          ticks: ChartTicks.nice(
+            panes.first.values.whereType<double>(),'
 
 # The lanes abut, and the second pane title sits on the first pane fill.
 mutate 'the linked lanes stop leaving air between them' "$V02_COLUMNS" "$V02_LINKED_PAINTER" \
@@ -1390,6 +1389,8 @@ ACT_MOVE=lib/features/activity/v02/movement_panels.dart
 INS_TRENDS=lib/features/insights/widgets/trends_section.dart
 ACT_ORDER_TEST=test/features/activity_order_test.dart
 INS_ORDER_TEST=test/features/insights_order_test.dart
+INS_TRENDS_TEST=test/features/insights_trends_test.dart
+INS_PATTERN_TEST=test/features/insights_pattern_tiles_test.dart
 SURFACE_TEST=test/features/activity_insights_surface_test.dart
 EMPTY_TEST=test/features/today_empty_states_test.dart
 
@@ -1443,24 +1444,28 @@ mutate "Activity's sections leave the prototype's order" \
 mutate 'Insights keeps a trends heading with no trends under it' \
   "$INS_ORDER_TEST" lib/features/insights/insights_sections.dart \
   '  if (trends.isNotEmpty) {
-    sections.gap(PageSpacing.block);' \
+    sections
+      ..add(
+        InsightSectionTitle(' \
   '  if (true) {
-    sections.gap(PageSpacing.block);'
+    sections
+      ..add(
+        InsightSectionTitle('
 
 # THE load-bearing case, in its v02 carrier: a metric with no known polarity —
 # or a neutral one — acquires a verdict colour, after which every colour on the
 # screen is decoration and the two that are claims stop meaning anything.
 mutate 'a polarity-less trend panel acquires a verdict colour' \
-  test/features/insights_trends_test.dart "$INS_TRENDS" \
-  '      TrendVerdict.none => null,' \
-  '      TrendVerdict.none => colors.fav,'
+  "$INS_TRENDS_TEST $INS_PATTERN_TEST" lib/features/insights/widgets/pattern_tile.dart \
+  '  TrendVerdict.none => rs.ReadingState.usual,' \
+  '  TrendVerdict.none => rs.ReadingState.better,'
 
 # The sparkline collapses to nothing. Two charts have shipped at zero height in
 # this repo because a test only asked whether the widget existed.
 mutate 'a trend sparkline is laid out at zero height' \
-  "$SURFACE_TEST" "$INS_TRENDS" \
-  '  static const double sparklineHeight = 30;' \
-  '  static const double sparklineHeight = 0;'
+  "$INS_TRENDS_TEST $INS_PATTERN_TEST $SURFACE_TEST" lib/features/insights/widgets/pattern_tile.dart \
+  '  static const double sparkHeight = 32;' \
+  '  static const double sparkHeight = 0;'
 # ── Actions · Journal · Coach, rebuilt to v02 ───────────────────────────────
 # The honesty layer on these three screens is almost entirely a set of things
 # that must NOT be drawn — a bar with no observation behind it, an input with no
@@ -1651,7 +1656,7 @@ mutate 'an invalid amount reaches the wire' "$JOURNAL_TEST" "$LOG_SHEET" \
     }'
 
 # ── the v02 history surfaces ────────────────────────────────────────────────
-TILE=lib/features/history/v02/metric_tile.dart
+ROWS=lib/features/history/v02/signal_rows.dart
 PANEL=lib/features/history/v02/history_panel.dart
 WINDOW=lib/data/history/history_window.dart
 EXPLORER=lib/features/history/metric_explorer_screen.dart
@@ -1661,11 +1666,11 @@ WINDOW_TEST=test/history/history_window_test.dart
 
 # A refusal that is silently dropped leaves the tile reading as "no data", which
 # is a different and much softer claim than the server's own sentence.
-mutate 'a withheld reading loses its reason in the tile' "$EXPLORER_TEST" "$TILE" \
-  '    final refusal = withheld is Withheld<double>
-        ? withheld.disclosure.message
-        : null;' \
-  '    final refusal = withheld is Withheld<double> ? null : null;'
+mutate 'a withheld reading loses its reason in the tile' "$EXPLORER_TEST" "$ROWS" \
+  '    caption:
+        withheld?.disclosure.message ??
+        captionFor(metric, usual, goal, known: snapshot != null),' \
+  '    caption: captionFor(metric, usual, goal, known: snapshot != null),'
 
 # THE ONE THAT MATTERS MOST. Colour by the sign of the delta and every metric
 # gets a verdict — after which the colours that really ARE verdicts stop meaning
@@ -1684,16 +1689,16 @@ mutate 'a missing day is squeezed out instead of left as a hole' \
 
 # One metric quietly missing from the directory is a door nobody can find, and
 # the screen looks entirely correct without it.
-mutate 'the explorer drops a metric from the directory' "$EXPLORER_TEST" "$EXPLORER" \
-  '    for (final metric in HistoryMetric.values)
-      _entryFor(metric, cards[metric.id], snapshot),' \
-  '    for (final metric in HistoryMetric.values.skip(1))
-      _entryFor(metric, cards[metric.id], snapshot),'
+mutate 'the explorer drops a metric from the directory' "$EXPLORER_TEST" "$ROWS" \
+  '        rows: <SignalRow>[for (final id in ids) signalRow(id, tone, snapshot)],' \
+  '        rows: <SignalRow>[
+          for (final id in ids.skip(1)) signalRow(id, tone, snapshot),
+        ],'
 
 # An id on a tile is a log line where a name belongs.
-mutate 'a tile falls back to the raw metric id' "$EXPLORER_TEST" "$EXPLORER" \
-  '    title: card?.label ?? metricTitle(metric.id),' \
-  '    title: card?.label ?? metric.id,'
+mutate 'a tile falls back to the raw metric id' "$EXPLORER_TEST" "$ROWS" \
+  '  final title = card?.label ?? metricTitle(metric);' \
+  '  final title = card?.label ?? metric;'
 
 # The window must stop on the day the reader chose. Showing the newest reading
 # under an older date is stale-as-current at one metric's scale.
@@ -1723,12 +1728,12 @@ mutate 'a source chip returns to the findings card' \
 # exactly as the sweep intended and the grounding is gone from the device.
 mutate "the findings ⓘ is emptied of the card's citations" \
   "$SWEEP_TEST" "$FINDINGS" \
-  '              detail: MetricDetail(
-                title: headline,
-                notes: finding.researchNoteIds,' \
-  '              detail: MetricDetail(
-                title: headline,
-                notes: const <String>[],'
+  '      detail: MetricDetail(
+        title: headline,
+        notes: finding.researchNoteIds,' \
+  '      detail: MetricDetail(
+        title: headline,
+        notes: const <String>[],'
 
 # The same emptying on the profile field, where the note behind five verbatim
 # science labels is the only thing licensing them.
@@ -1922,15 +1927,17 @@ NAMES_TEST=test/shared/metric_names_coverage_test.dart
 # destination. This is exactly the state the owner reported.
 mutate 'the relationship card goes inert again' \
   "$ROUTE_TEST" "$PATTERNS" \
-  "      actionLabel: 'Explore'," \
-  '      actionLabel: null,'
+  "      onOpen: () => unawaited(
+        context.push('\${Routes.insight}/\${findingKey(pair)}', extra: pair),
+      )," \
+  '      onOpen: null,'
 
 # The finding stops travelling, so the screen must re-derive numbers it was
 # already handed — a second source of truth for one figure.
 mutate 'the finding no longer rides along with the tap' \
   "$ROUTE_TEST" "$PATTERNS" \
-  '          extra: finding,' \
-  '          extra: null,'
+  "        context.push('\${Routes.insight}/\${findingKey(pair)}', extra: pair)," \
+  "        context.push('\${Routes.insight}/\${findingKey(pair)}', extra: null),"
 
 # The route key drops its lag, so two findings on the same pair collide and the
 # wrong one opens.

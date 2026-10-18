@@ -22,6 +22,7 @@ import 'package:healthee/core/theme/tokens.dart';
 import 'package:healthee/data/models/trend_point.dart';
 import 'package:healthee/features/insights/widgets/pattern_tile.dart';
 import 'package:healthee/features/insights/widgets/trends_section.dart';
+import 'package:healthee/shared/charts/v02/signal_spark.dart';
 import 'package:healthee/shared/reveal_once.dart';
 import 'package:healthee/shared/v02/reading_chip.dart';
 import 'package:healthee/shared/v02/reading_state.dart' show ReadingState;
@@ -153,6 +154,23 @@ void main() {
 
       expect(find.text('No change over 14d'), findsOneWidget);
       expect(_chipState(tester), ReadingState.usual);
+    });
+  });
+
+  group('the tile\'s sparkline', () {
+    testWidgets('is laid out at PatternTile.sparkHeight, never collapsed', (
+      tester,
+    ) async {
+      // Two charts have shipped at zero height in this repo because a test only
+      // asked whether the widget existed.
+      await tester.pumpWidget(_tile(_trend('hrv_sleep_avg', 4)));
+      await tester.pumpAndSettle();
+
+      expect(PatternTile.sparkHeight, greaterThan(0));
+      expect(
+        tester.getSize(find.byType(SignalSpark)).height,
+        PatternTile.sparkHeight,
+      );
     });
   });
 
