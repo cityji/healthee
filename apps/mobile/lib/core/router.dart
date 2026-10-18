@@ -67,6 +67,7 @@ import 'package:healthee/features/actions/recommendation_history_screen.dart';
 import 'package:healthee/features/activity/fitness_screen.dart';
 import 'package:healthee/features/coach/coach_history_screen.dart';
 import 'package:healthee/features/coach/coach_screen.dart';
+import 'package:healthee/features/coach/every_yes_screen.dart';
 import 'package:healthee/features/gps/gps_screen.dart';
 import 'package:healthee/features/gps/route_detail_screen.dart';
 import 'package:healthee/features/gps/routes_screen.dart';
@@ -187,6 +188,10 @@ GoRouter buildRouter(WidgetRef ref) {
       GoRoute(
         path: Routes.outcomes,
         builder: (context, state) => const OutcomesScreen(),
+      ),
+      GoRoute(
+        path: Routes.coachLedger,
+        builder: (context, state) => const EveryYesScreen(),
       ),
       GoRoute(
         path: Routes.coach,

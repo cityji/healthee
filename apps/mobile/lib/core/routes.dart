@@ -25,6 +25,9 @@ abstract final class Routes {
   static const String challenge = '/challenge';
   static const String program = '/program';
   static const String outcomes = '/outcomes';
+
+  /// The coach ledger, "Every yes, checked". Not `/coach`: that is the chat.
+  static const String coachLedger = '/coach-ledger';
   static const String workouts = '/workouts';
   static const String workout = '/workout';
   static const String profile = '/profile';

@@ -7,6 +7,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:healthee/data/api/account_api.dart';
 import 'package:healthee/data/api/cache_session.dart';
+import 'package:healthee/data/coach/ledger_models.dart';
+import 'package:healthee/data/coach/ledger_repository.dart';
 import 'package:healthee/data/history/history_marker.dart';
 import 'package:healthee/data/history/history_metric.dart';
 import 'package:healthee/data/history/history_repository.dart';
@@ -19,6 +21,7 @@ import 'package:healthee/features/actions/challenge_detail_screen.dart';
 import 'package:healthee/features/actions/outcomes_screen.dart';
 import 'package:healthee/features/actions/program_detail_screen.dart';
 import 'package:healthee/features/actions/recommendation_history_screen.dart';
+import 'package:healthee/features/coach/every_yes_screen.dart';
 import 'package:healthee/features/history/history_screen.dart';
 import 'package:healthee/features/history/metric_explorer_screen.dart';
 import 'package:healthee/features/insights/insights_screen.dart';
@@ -149,6 +152,27 @@ List<GroupCase> recordCases(LocalStore Function() getStore) {
           today(t, home: commitments(const ProgramDetailScreen(id: 1304))),
     ),
     GroupCase(
+      name: 'program-large',
+      route: '/program/1304 at text scale 1.3',
+      data: 'programs.json active, large text',
+      build: (t) => today(
+        t,
+        home: _largeText(commitments(const ProgramDetailScreen(id: 1304))),
+      ),
+    ),
+    GroupCase(
+      name: 'coach-ledger',
+      route: '/coach-ledger',
+      data: 'coach_ledger.json',
+      build: (t) => today(t, home: _ledger(const EveryYesScreen())),
+    ),
+    GroupCase(
+      name: 'coach-ledger-large',
+      route: '/coach-ledger at text scale 1.3',
+      data: 'coach_ledger.json, large text',
+      build: (t) => today(t, home: _largeText(_ledger(const EveryYesScreen()))),
+    ),
+    GroupCase(
       name: 'outcomes',
       route: '/outcomes',
       data: 'challenge_outcomes.json',
@@ -156,3 +180,24 @@ List<GroupCase> recordCases(LocalStore Function() getStore) {
     ),
   ];
 }
+
+/// The ledger snapshot served for every window.
+Widget _ledger(Widget screen) => ProviderScope(
+  overrides: [
+    for (final w in LedgerWindow.values)
+      coachLedgerProvider(w).overrideWith(
+        (ref) async => CoachLedger.fromJson(snap('coach_ledger.json')),
+      ),
+  ],
+  child: pushed(screen),
+);
+
+/// [child] at the largest text size the design is checked at.
+Widget _largeText(Widget child) => Builder(
+  builder: (context) => MediaQuery(
+    data: MediaQuery.of(
+      context,
+    ).copyWith(textScaler: const TextScaler.linear(1.3)),
+    child: child,
+  ),
+);

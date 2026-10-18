@@ -21,6 +21,7 @@ class Challenge {
     this.progress,
     this.programId,
     this.outcome,
+    this.adoptedAt,
   });
 
   factory Challenge.fromJson(Map<String, Object?> json) => Challenge(
@@ -42,6 +43,9 @@ class Challenge {
     howTo: json['how_to'] as String?,
     expectedOutcome: json['expected_outcome'] as String?,
     programId: (json['program_id'] as num?)?.toInt(),
+    adoptedAt: DateTime.tryParse(
+      json['adopted_at'] as String? ?? '',
+    )?.toLocal(),
     outcome: json['outcome'] == null
         ? null
         : ChallengeOutcome.fromJson(json['outcome']! as Map<String, Object?>),
@@ -66,6 +70,9 @@ class Challenge {
   final ChallengeProgress? progress;
   final int? programId;
   final ChallengeOutcome? outcome;
+
+  /// When the owner started this rung, if they have.
+  final DateTime? adoptedAt;
 
   /// Everything backing this challenge's server-written prose: the inline
   /// `[note_id]` markers in **both** [title] and [why], merged with the
