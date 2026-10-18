@@ -106,6 +106,15 @@ class Challenge(_Wire):
     # this field is the only thing that can. NOT NULL with a default in the schema, so
     # it is required and non-optional here.
     kind: str
+    # `0023`. The weekly coach job's own words and bad-day floor. Required-and-nullable
+    # (rule 2): NULL is "not authored", and a challenge from the standalone generator
+    # has none of them.
+    action_text: str | None
+    slot_text: str | None
+    floor_value: float | None
+    floor_text: str | None
+    counts_when: str | None
+    days_required: int | None
 
 
 class Adaptation(_Wire):

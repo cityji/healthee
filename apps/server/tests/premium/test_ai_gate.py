@@ -110,6 +110,11 @@ FREE_PATHS: dict[str, str] = {
         "free tier — a proxied public map tile. It is context, never data or AI output, "
         "and paywalling it would leave a free owner's recorded track drawn on nothing"
     ),
+    "/api/coach/ledger": (
+        "free tier — nothing here is generated: every verdict is the owner's own strap "
+        "data checked by a deterministic rule (challenges.day_verdicts), and the stored "
+        "weekly-review `pattern` was written, and paid for, when that review was made"
+    ),
     "/api/me": "identity",
     "/api/device": "identity — device pairing, and the list of what is paired",
     "/api/device/{token_id}": (

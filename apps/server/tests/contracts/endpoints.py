@@ -43,6 +43,8 @@ STATIC_ENDPOINTS: list[tuple[str, str, str, dict | None, dict | None]] = [
     ("challenges", "GET", "/api/challenges", None, None),
     ("challenge_outcomes", "GET", "/api/challenges/outcomes", {"limit": 20}, None),
     ("programs", "GET", "/api/programs", None, None),
+    # "Every yes, checked" — the Coach screen and the ledger screen read this one payload.
+    ("coach_ledger", "GET", "/api/coach/ledger", {"window": "month"}, None),
     ("log_post", "POST", "/api/log", None, {"type": "caffeine", "amount": 50, "unit": "mg"}),
 ]
 

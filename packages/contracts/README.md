@@ -32,6 +32,7 @@ so their JSON response **shapes** (keys, nesting, value types) must stay stable.
 | `challenges.json` | `GET /api/challenges` |
 | `challenge_outcomes.json` | `GET /api/challenges/outcomes` |
 | `challenge_adopt.json` | `POST /api/challenges/{id}/adopt` |
+| `coach_ledger.json` | `GET /api/coach/ledger?window=week\|month\|all` |
 
 ### `coach_stream_events.json` — `POST /api/coach/stream`, a different shape of contract
 

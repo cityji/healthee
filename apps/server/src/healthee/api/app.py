@@ -22,6 +22,7 @@ from healthee.api.routers import (
     auth,
     challenges,
     coach,
+    coach_ledger,
     daily_action,
     entitlement,
     generation,
@@ -147,6 +148,7 @@ def create_app() -> FastAPI:
     # WP5 grounded insight surfaces (sleep/activity/metric/workout/notable) + coach.
     app.include_router(insights.router)
     app.include_router(coach.router)
+    app.include_router(coach_ledger.router)
     # WP-C2 challenges: the feed, the lifecycle writes, and the outcome ledger.
     # Deterministic only — generation (WP-C3) and the coach tools (WP-C5) are later.
     # Premium in full since 6.6a: every handler takes a gated identity (api.gate).
