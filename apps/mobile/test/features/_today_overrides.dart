@@ -51,6 +51,8 @@ import 'package:healthee/features/settings/app_version.dart';
 
 import '../_sleep_stubs.dart';
 import '../_today_stubs.dart';
+import 'coach/_breathing_fakes.dart' show defaultBreathingPlan;
+import 'coach/_coach_home_fakes.dart' show basicsOverrides;
 
 /// The overrides that keep a widget test off the network and off the keystore,
 /// wrapped around [child].
@@ -133,6 +135,9 @@ Widget todayScoped(
             weeks: <LedgerWeek>[],
           ),
         ),
+      // The Coach tab also draws Today's basics (breathing plan, water card off
+      // the journal feed); unstubbed they never settle.
+      ...basicsOverrides(defaultBreathingPlan()),
       notifyCompletionsProvider().overrideWith((ref) async {}),
       notableEventsProvider.overrideWith(
         (ref) => Stream.value(ServerSnapshot(<NotableEvent>[], fetchedAt: now)),
