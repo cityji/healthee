@@ -61,6 +61,7 @@ def call_all(client: Any, headers: dict) -> dict[str, Any]:
     # LAST, because it mutates: adopting turns the seeded suggestion into an active
     # challenge, which would change the `challenges` feed above if it ran first.
     out["challenge_adopt"] = _adopt(client, headers, out["challenges"])
+    out["challenge_slot"] = _slot(client, headers, out["challenge_adopt"])
     return out
 
 
@@ -87,6 +88,16 @@ def _adopt(client: Any, headers: dict, challenges: dict) -> Any:
         return None
     resp = client.post(f"/api/challenges/{suggested[0]['id']}/adopt", headers=headers)
     assert resp.status_code == 200, f"challenge_adopt: {resp.status_code} {resp.text[:200]}"
+    return resp.json()
+
+
+def _slot(client: Any, headers: dict, adopted: Any) -> Any:
+    """Reword the slot of the challenge `_adopt` just took on — the Coach screen's edit."""
+    if adopted is None:
+        return None
+    path = f"/api/challenges/{adopted['challenge']['id']}/slot"
+    resp = client.patch(path, json={"slot": "After lunch"}, headers=headers)
+    assert resp.status_code == 200, f"challenge_slot: {resp.status_code} {resp.text[:200]}"
     return resp.json()
 
 

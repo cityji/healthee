@@ -260,6 +260,19 @@ def set_target(cur: Cur, user_id: UUID, challenge_id: int, target_value: float) 
     return cur.rowcount == 1
 
 
+def set_slot_text(cur: Cur, user_id: UUID, challenge_id: int, slot_text: str) -> bool:
+    """Rewrite ONLY ``slot_text`` on a suggested or active challenge. False ⇒ neither.
+
+    A label for when the owner will do it; it feeds no rule, target or verdict.
+    """
+    cur.execute(
+        "UPDATE challenge SET slot_text = %s "
+        "WHERE user_id = %s AND id = %s AND status IN ('suggested', 'active')",
+        (slot_text, user_id, challenge_id),
+    )
+    return cur.rowcount == 1
+
+
 def mark_abandoned(cur: Cur, user_id: UUID, challenge_id: int, at: datetime) -> bool:
     """End an active challenge at the owner's request. False ⇒ it was not active."""
     cur.execute(

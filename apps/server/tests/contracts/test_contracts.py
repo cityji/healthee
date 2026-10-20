@@ -45,6 +45,7 @@ _ENDPOINTS = [
     "challenges",
     "challenge_outcomes",
     "challenge_adopt",
+    "challenge_slot",
     "coach_ledger",
 ]
 
