@@ -117,7 +117,8 @@ def _rec_series(
     for rec in recs:
         rule = rules[rec["id"]]
         if rule:
-            since[rule.metric] = min(rec["day"], since.get(rule.metric, rec["day"]))
+            held = since.get(rule.metric)
+            since[rule.metric] = rec["day"] if held is None else min(rec["day"], held)
     return {
         metric: series.metric_series(cur, user_id, tz, metric, day, today)
         for metric, day in since.items()

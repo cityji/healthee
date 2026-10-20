@@ -120,6 +120,7 @@ def test_the_second_call_in_a_week_is_the_stored_review_and_costs_no_model_call(
 
     assert (cached_first, cached_second) == (False, True)
     assert stub.calls == spent and spent >= 1
+    assert first is not None and second is not None
     assert second == first and first["week"] == coach_kv.week_label(owner)
     assert first["job"]["challenge_id"] > 0
 
@@ -127,6 +128,7 @@ def test_the_second_call_in_a_week_is_the_stored_review_and_costs_no_model_call(
 def test_the_job_is_a_suggested_challenge_with_the_coach_fields(owner: date) -> None:
     review, _ = coach_weekly.generate_week(_USER, SENTINEL_TZ, owner, client=_stub())
     (job,) = _jobs()
+    assert review is not None
     assert job["id"] == review["job"]["challenge_id"] and job["status"] == "suggested"
     assert (job["metric"], job["target"], job["cadence"], job["window"]) == (
         "mvpa_min", 20.0, "daily", 7,
@@ -147,6 +149,7 @@ def test_the_ledger_pattern_is_the_pattern_the_writer_stored(owner: date) -> Non
             "SELECT key FROM kv WHERE user_id = %s AND key LIKE 'coach_review:%%'", (_USER,)
         )
         keys = [r[0] for r in cur.fetchall()]
+    assert review is not None
     assert keys == [coach_kv.key_for_week(owner)] and ledger["pattern"] == review["pattern"]
 
 
@@ -185,6 +188,7 @@ def test_an_oversized_proposal_is_retried_once_then_the_previous_job_repeats(own
     review, _ = coach_weekly.generate_week(_USER, SENTINEL_TZ, owner, client=stub)
 
     assert stub.calls == 2  # one try plus ONE retry with the range stated
+    assert review is not None
     assert review["job"]["target"] == 20.0  # the previous rule, never the model's 200
     assert review["rationale"] is None and "repeats unchanged" in review["review"]
     assert any(j["status"] == "suggested" and j["target"] == 20.0 for j in _jobs())

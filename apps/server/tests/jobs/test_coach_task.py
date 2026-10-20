@@ -115,7 +115,9 @@ def test_week_keys_target_next_week_on_sunday() -> None:
 
 
 def _commitment(done: int, provable: int, required: int = 4, status: str = "expired") -> Commitment:
-    days = [(date(2026, 10, 1 + i), "done", 9.0) for i in range(done)]
+    days: list[tuple[date, str, float | None]] = [
+        (date(2026, 10, 1 + i), "done", 9.0) for i in range(done)
+    ]
     days += [(date(2026, 10, 1 + done + i), "missed", 1.0) for i in range(provable - done)]
     return Commitment(1, "Walk", "mvpa_min", 10.0, required, date(2026, 10, 1), date(2026, 10, 7),
                       status, True, days)  # fmt: skip

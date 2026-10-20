@@ -126,6 +126,7 @@ def test_a_loser_of_the_claim_waits_for_the_winners_review(
     monkeypatch.setattr(coach_weekly, "read_stored", lambda *_a: next(polls))
     monkeypatch.setattr(coach_weekly, "_POLL_SECONDS", 0)
     got, cached = coach_weekly.generate_week(SENTINEL_USER_ID, SENTINEL_TZ, date(2026, 10, 14))
+    assert got is not None
     assert cached is True and got["week"] == "w" and store.builds == 0
 
 

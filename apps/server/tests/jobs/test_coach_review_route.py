@@ -5,6 +5,7 @@ from __future__ import annotations
 import json
 from collections.abc import Iterator
 from pathlib import Path
+from typing import get_args
 from uuid import UUID
 
 import pytest
@@ -62,7 +63,7 @@ def http(monkeypatch: pytest.MonkeyPatch) -> Iterator[tuple[TestClient, dict]]:
     monkeypatch.setattr(coach_review.shape, "read_today_line", lambda *_a: "Today: 20 minutes.")
     app = FastAPI()
     app.include_router(coach_review.router)
-    guard = gate.CoachUser.__metadata__[0].dependency  # the route's own AIGate instance
+    guard = get_args(gate.CoachUser)[1].dependency  # the route's own AIGate instance
     app.dependency_overrides[guard] = lambda: _USER
     yield TestClient(app), state
 
@@ -117,4 +118,4 @@ def test_it_is_gated_like_the_coach() -> None:
     from healthee.api.app import create_app
 
     assert TestClient(create_app()).post("/api/coach/review").status_code == 401
-    assert gate.CoachUser.__metadata__[0].dependency.feature == gate.COACH
+    assert get_args(gate.CoachUser)[1].dependency.feature == gate.COACH
