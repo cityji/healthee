@@ -36,19 +36,26 @@ BreathingPlan buildBreathingPlan({
   UsualRange? hrvUsual,
 }) {
   final onDemand = _onDemand(now, history, settings);
-  return BreathingPlan([
-    _morning(history, settings, hrv, hrvUsual),
-    _midday(settings),
-    _night(history, settings),
-    ?onDemand,
-  ]);
+  return BreathingPlan(
+    [
+      _morning(history, settings, hrv, hrvUsual),
+      _midday(settings),
+      _night(history, settings),
+      ?onDemand?.item,
+    ],
+    nightsUsed: history.nights.take(kPlanNights).length,
+    stressDaysAgo: onDemand?.daysAgo,
+  );
 }
+
+/// Joins reason runs into the plain sentence.
+String _plain(List<ReasonSpan> spans) => spans.map((s) => s.text).join();
 
 BreathingItem _item(
   BreathingSettings settings,
   BreathingItemKind kind, {
   required int? minute,
-  required String reason,
+  required List<ReasonSpan> reason,
   bool timeIsDefault = false,
 }) => BreathingItem(
   kind: kind,
@@ -56,7 +63,8 @@ BreathingItem _item(
   minutes: kind.minutes,
   pattern: settings.patternFor(kind),
   enabled: settings.isEnabled(kind),
-  reason: reason,
+  reason: _plain(reason),
+  reasonSpans: reason,
   timeIsDefault: timeIsDefault,
 );
 
@@ -71,8 +79,12 @@ BreathingItem _morning(
       night.wake.hour * 60 + night.wake.minute,
   ]);
   final lead = median == null
-      ? 'Not enough nights yet to time this.'
-      : 'You wake around ${formatClock(median, meridiem: false)}.';
+      ? [const ReasonSpan('Not enough nights yet to time this.')]
+      : [
+          const ReasonSpan('You wake around '),
+          ReasonSpan(formatClock(median, meridiem: false), bold: true),
+          const ReasonSpan('.'),
+        ];
   final second = _hrvSentence(hrv, usual);
   return _item(
     settings,
@@ -81,11 +93,11 @@ BreathingItem _morning(
         ? settings.morningDefaultMinute
         : firstQuarterHourAfter(median),
     timeIsDefault: median == null,
-    reason: second == null ? lead : '$lead $second',
+    reason: second == null ? lead : [...lead, const ReasonSpan(' '), ...second],
   );
 }
 
-String? _hrvSentence(double? hrv, UsualRange? usual) {
+List<ReasonSpan>? _hrvSentence(double? hrv, UsualRange? usual) {
   if (hrv == null || usual == null || !hrv.isFinite) return null;
   final verdict = judge(
     value: hrv,
@@ -97,16 +109,22 @@ String? _hrvSentence(double? hrv, UsualRange? usual) {
   switch (verdict.state) {
     case ReadingState.better:
       final near = hrv - usual.high <= (usual.high - usual.low) * 0.1;
-      return 'This morning HRV was $value, ${near ? 'just ' : ''}over your usual $range.';
+      return _hrv(value, '${near ? 'just ' : ''}over your usual $range.');
     case ReadingState.worse:
       final near = usual.low - hrv <= (usual.high - usual.low) * 0.1;
-      return 'This morning HRV was $value, ${near ? 'just ' : ''}under your usual $range.';
+      return _hrv(value, '${near ? 'just ' : ''}under your usual $range.');
     case ReadingState.usual:
-      return 'This morning HRV was $value, within your usual $range.';
+      return _hrv(value, 'within your usual $range.');
     case ReadingState.watch || ReadingState.noData:
       return null;
   }
 }
+
+List<ReasonSpan> _hrv(String value, String tail) => [
+  const ReasonSpan('This morning HRV was '),
+  ReasonSpan(value, bold: true),
+  ReasonSpan(', $tail'),
+];
 
 BreathingItem _midday(BreathingSettings settings) {
   final pattern = settings.patternFor(BreathingItemKind.midday);
@@ -114,10 +132,14 @@ BreathingItem _midday(BreathingSettings settings) {
     settings,
     BreathingItemKind.midday,
     minute: 840,
-    reason: pattern.evidence.isCited
-        ? 'An afternoon reset.'
-        : 'An afternoon reset. Not in our evidence base, '
-              'so keep it only if it helps you.',
+    reason: [
+      ReasonSpan(
+        pattern.evidence.isCited
+            ? 'An afternoon reset.'
+            : 'An afternoon reset. Not in our evidence base, '
+                  'so keep it only if it helps you.',
+      ),
+    ],
   );
 }
 
@@ -127,11 +149,20 @@ BreathingItem _night(BreathingHistory history, BreathingSettings settings) {
       night.onset.hour * 60 + night.onset.minute,
   ]);
   final reason = range == null
-      ? 'Right after your free time.'
-      : 'Right after your free time. Lights-out swung from '
-            '${formatClock(range.earliest)} to ${formatClock(range.latest)} '
-            'over ${range.nights} nights. '
-            'This gives the night one fixed point.';
+      ? [const ReasonSpan('Right after your free time.')]
+      : [
+          const ReasonSpan(
+            'Right after your free time. Lights-out swung from ',
+          ),
+          ReasonSpan(
+            '${formatClock(range.earliest)} to ${formatClock(range.latest)}',
+            bold: true,
+          ),
+          ReasonSpan(
+            ' over ${range.nights} nights. '
+            'This gives the night one fixed point.',
+          ),
+        ];
   return _item(
     settings,
     BreathingItemKind.night,
@@ -140,7 +171,7 @@ BreathingItem _night(BreathingHistory history, BreathingSettings settings) {
   );
 }
 
-BreathingItem? _onDemand(
+({BreathingItem item, int daysAgo})? _onDemand(
   DateTime now,
   BreathingHistory history,
   BreathingSettings settings,
@@ -165,22 +196,33 @@ BreathingItem? _onDemand(
   final hour = peak.at.hour;
   final from = hour == 0 ? 12 : hour;
   final to = hour + 1;
-  final reason =
-      'Stress hit ${peak.value.round()} between $from and $to am '
+  final reason = [
+    const ReasonSpan('Stress hit '),
+    ReasonSpan('${peak.value.round()}', bold: true),
+    ReasonSpan(
+      ' between $from and $to am '
       '${_dayWord(now, peak.at)}${awake ? ' while you lay awake' : ''}. '
-      'No reminder, open it from the lock screen.';
-  return _item(
+      'No reminder, open it from the lock screen.',
+    ),
+  ];
+  final item = _item(
     settings,
     BreathingItemKind.onDemand,
     minute: null,
     reason: reason,
   );
+  return (item: item, daysAgo: _daysAgo(now, peak.at));
+}
+
+int _daysAgo(DateTime now, DateTime at) {
+  final today = DateTime(now.year, now.month, now.day);
+  final day = DateTime(at.year, at.month, at.day);
+  return today.difference(day).inHours ~/ 24;
 }
 
 String _dayWord(DateTime now, DateTime at) {
-  final today = DateTime(now.year, now.month, now.day);
   final day = DateTime(at.year, at.month, at.day);
-  final ago = today.difference(day).inHours ~/ 24;
+  final ago = _daysAgo(now, at);
   if (ago == 0) return 'this morning';
   if (ago == 1) return 'yesterday';
   return 'on ${_weekdays[day.weekday - 1]}';

@@ -41,6 +41,19 @@ enum BreathingItemKind {
   bool get isScheduled => reminderId != null;
 }
 
+/// A run of a reason sentence. [bold] marks a number from the owner's data.
+@immutable
+class ReasonSpan {
+  /// A run of [text].
+  const ReasonSpan(this.text, {this.bold = false});
+
+  /// The words.
+  final String text;
+
+  /// Whether the run is one of the owner's own numbers.
+  final bool bold;
+}
+
 /// One item of the plan.
 @immutable
 class BreathingItem {
@@ -53,6 +66,7 @@ class BreathingItem {
     required this.enabled,
     required this.reason,
     this.timeIsDefault = false,
+    this.reasonSpans,
   });
 
   /// Which slot.
@@ -75,13 +89,27 @@ class BreathingItem {
 
   /// True when the time is the owner's default because the data was too thin.
   final bool timeIsDefault;
+
+  /// [reason] cut into runs, with the owner's numbers marked. Null means the
+  /// sentence carries none.
+  final List<ReasonSpan>? reasonSpans;
+
+  /// The runs to draw: [reasonSpans], else the whole [reason] in one run.
+  List<ReasonSpan> get reasonParts => reasonSpans ?? [ReasonSpan(reason)];
 }
 
 /// The whole plan.
 @immutable
 class BreathingPlan {
-  /// A plan of [items] in display order.
-  const BreathingPlan(this.items);
+  /// A plan of [items] in display order, built from [nightsUsed] nights.
+  const BreathingPlan(this.items, {this.nightsUsed = 0, this.stressDaysAgo});
+
+  /// Nights with a staged sleep record the plan was built from.
+  final int nightsUsed;
+
+  /// How many days back the stress behind the on-demand item was, or null when
+  /// the plan has no on-demand item.
+  final int? stressDaysAgo;
 
   /// Morning, midday, night, then on demand when it applies.
   final List<BreathingItem> items;

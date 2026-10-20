@@ -23,10 +23,12 @@ library;
 import 'dart:async';
 import 'dart:math' as math;
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:healthee/core/theme/motion.dart';
 import 'package:healthee/core/theme/tokens.dart';
+import 'package:healthee/core/theme/tone_scope.dart';
 import 'package:healthee/shared/reveal_once.dart';
 import 'package:healthee/shared/v02/instruments/age_sphere_lattice.dart';
 import 'package:healthee/shared/v02/instruments/age_sphere_painter.dart';
@@ -54,6 +56,8 @@ class AgeSphere extends StatefulWidget {
     this.withheld = false,
     this.revealId,
     this.reveals,
+    this.breath,
+    this.useFamily = false,
     super.key,
   });
 
@@ -74,6 +78,15 @@ class AgeSphere extends StatefulWidget {
 
   /// The screen's registry of reveals already played.
   final RevealRegistry? reveals;
+
+  /// With a listenable, the dots are drawn at its value as a scale about the
+  /// centre, so the ball can breathe: 1 is the size it is drawn at. The
+  /// [centre] is not scaled. Null draws the dots as they always were.
+  final ValueListenable<double>? breath;
+
+  /// Draws the dots in the enclosing `ToneScope`'s family hue instead of the
+  /// app accent. No colour is passed in: the scope decides it.
+  final bool useFamily;
 
   @override
   State<AgeSphere> createState() => _AgeSphereState();
@@ -261,7 +274,7 @@ class _AgeSphereState extends State<AgeSphere>
             angle: _angle,
             lattice: SphereLattice.forCount(count),
             frame: _frameFor(count),
-            accent: context.colors.accent,
+            accent: widget.useFamily ? context.family : context.colors.accent,
             dark: dark,
             clearWidth: clear,
             withheld: widget.withheld,
@@ -269,6 +282,7 @@ class _AgeSphereState extends State<AgeSphere>
         ),
       ),
     );
+    final ValueListenable<double>? breath = widget.breath;
     return SizedBox.square(
       dimension: canvas,
       child: Stack(
@@ -281,7 +295,14 @@ class _AgeSphereState extends State<AgeSphere>
                 begin: kEntryScale,
                 end: 1,
               ).animate(_entryCurve),
-              child: dots,
+              child: breath == null
+                  ? dots
+                  : ValueListenableBuilder<double>(
+                      valueListenable: breath,
+                      builder: (_, double scale, Widget? child) =>
+                          Transform.scale(scale: scale, child: child),
+                      child: dots,
+                    ),
             ),
           ),
           widget.centre,

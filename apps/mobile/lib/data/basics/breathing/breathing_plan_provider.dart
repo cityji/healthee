@@ -47,7 +47,7 @@ Future<BreathingPlan> breathingPlan(Ref ref) async {
 }
 
 /// Changes that also move the reminders.
-@riverpod
+@Riverpod(keepAlive: true)
 class BreathingActions extends _$BreathingActions {
   @override
   void build() {}

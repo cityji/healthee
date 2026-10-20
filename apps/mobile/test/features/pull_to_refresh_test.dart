@@ -32,6 +32,7 @@ import 'package:healthee/features/sleep/sleep_screen.dart';
 import 'package:healthee/features/today/today_screen.dart';
 
 import '_today_host.dart';
+import 'coach/_coach_home_fakes.dart' show stubbedBasics;
 
 /// A controller that records which entry point was called and runs nothing.
 class _RecordingSync extends SyncController {
@@ -116,7 +117,13 @@ void main() {
   ]) {
     testWidgets('${screen.runtimeType} refreshes the same way', (tester) async {
       final recorder = _RecordingSync();
-      await tester.pumpWidget(_host(store, recorder, screen));
+      await tester.pumpWidget(
+        _host(
+          store,
+          recorder,
+          screen is CoachHomeScreen ? stubbedBasics(screen) : screen,
+        ),
+      );
       await tester.pumpAndSettle();
 
       await _pullDown(tester, find.byType(screen.runtimeType));

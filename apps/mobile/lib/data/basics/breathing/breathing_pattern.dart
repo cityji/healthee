@@ -248,15 +248,24 @@ class BreathPattern {
     return timeline.lastWhere((phase) => phase.startSeconds <= inCycle);
   }
 
+  /// The counts to show: in and out alone with no holds, in, hold and out when
+  /// only the second hold is zero (4-7-8), else all four.
+  List<int> get _shown {
+    if (hold1Seconds == 0 && hold2Seconds == 0) {
+      return [inSeconds, outSeconds];
+    }
+    return hold2Seconds == 0
+        ? [inSeconds, hold1Seconds, outSeconds]
+        : [inSeconds, hold1Seconds, outSeconds, hold2Seconds];
+  }
+
   /// "5 in, 5 out" or "4, 4, 4, 4" style counts for a subtitle.
   String get counts => hold1Seconds == 0 && hold2Seconds == 0
       ? '$inSeconds in, $outSeconds out'
-      : [inSeconds, hold1Seconds, outSeconds, hold2Seconds].join(', ');
+      : _shown.join(', ');
 
   /// The counts as shown on a pattern row, joined with a middle dot.
-  String get dotted => hold1Seconds == 0 && hold2Seconds == 0
-      ? '$inSeconds·$outSeconds'
-      : [inSeconds, hold1Seconds, outSeconds, hold2Seconds].join('·');
+  String get dotted => _shown.join('·');
 
   @override
   bool operator ==(Object other) =>

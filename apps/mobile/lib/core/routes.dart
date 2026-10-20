@@ -27,6 +27,14 @@ abstract final class Routes {
 
   /// The coach ledger, "Every yes, checked". Not `/coach`: that is the chat.
   static const String coachLedger = '/coach-ledger';
+
+  /// The breathing plan: four items, the patterns, and the owner's switches.
+  static const String breathingPlan = '/breathing';
+
+  /// One breathing session. Carries `item=<morning|midday|night|onDemand>` for
+  /// a plan item or `pattern=<id>` for an ad hoc one; see
+  /// [breathingPlayerLocation].
+  static const String breathingPlayer = '/breathing/play';
   static const String workouts = '/workouts';
   static const String workout = '/workout';
   static const String profile = '/profile';
@@ -203,6 +211,24 @@ String? coachTopicOf(Uri uri) {
   final String subject = uri.queryParameters['topic']?.trim() ?? '';
   return subject.isEmpty ? null : subject;
 }
+
+/// The breathing player's location for a plan [item] (a `BreathingItemKind`
+/// name) or an ad hoc [pattern] id. [item] wins when both are given.
+String breathingPlayerLocation({String? item, String? pattern}) {
+  final String key = item != null ? 'item' : 'pattern';
+  final String? value = item ?? pattern;
+  return value == null
+      ? Routes.breathingPlayer
+      : '${Routes.breathingPlayer}?$key=${Uri.encodeQueryComponent(value)}';
+}
+
+/// Where a tapped notification with [payload] leads. Anything this app did not
+/// schedule goes to the actions list, as it always did.
+String notificationRoute(String payload) => switch (payload) {
+  'sleep' => Routes.sleep,
+  'breathing' => Routes.breathingPlan,
+  _ => Routes.actions,
+};
 
 /// The query parameter the profile's focused field rides in.
 const String kFocusParameter = 'focus';

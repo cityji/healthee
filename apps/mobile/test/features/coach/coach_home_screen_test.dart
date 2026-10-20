@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:healthee/data/basics/breathing/breathing_plan.dart';
 import 'package:healthee/data/challenges/health_program.dart';
 import 'package:healthee/data/store/local_store.dart';
 import 'package:healthee/features/coach/coach_home_screen.dart';
@@ -77,6 +78,25 @@ void main() {
       ..program = _plan();
     await pump(tester, host);
     expect(find.text('Tue 4 Aug'), findsOneWidget);
+  });
+
+  testWidgets("Today's basics sits between the job and the record", (
+    tester,
+  ) async {
+    final host = await CoachHost.create()
+      ..today = '2026-08-04'
+      ..breathingDone = {BreathingItemKind.morning};
+    await pump(tester, host);
+    tester.view.physicalSize = const Size(390 * 3, 12000);
+    await tester.pumpAndSettle();
+    double top(Finder f) => tester.getTopLeft(f).dy;
+    final job = top(find.text("This week's job"));
+    final basics = top(find.text("Today's basics"));
+    final record = top(find.text('Your record'));
+    expect(job, lessThan(basics));
+    expect(basics, lessThan(record));
+    expect(find.text('Breathing'), findsOneWidget);
+    expect(find.text('1 of 3 today · edit plan'), findsOneWidget);
   });
 
   for (final width in <double>[320, 360, 390, 414]) {

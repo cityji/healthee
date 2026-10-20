@@ -78,4 +78,13 @@ void main() {
     expect(presetById('custom'), isNull);
     expect(kBreathPresets.length, 4);
   });
+
+  test('counts and dotted show only what is breathed', () {
+    expect(kSteady.counts, '5 in, 5 out');
+    expect(kSteady.dotted, '5·5');
+    expect(kBox.counts, '4, 4, 4, 4');
+    expect(kBox.dotted, '4·4·4·4');
+    expect(kFourSevenEight.counts, '4, 7, 8');
+    expect(kFourSevenEight.dotted, '4·7·8');
+  });
 }

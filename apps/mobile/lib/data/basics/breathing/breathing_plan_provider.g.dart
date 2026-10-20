@@ -70,7 +70,7 @@ final class BreathingActionsProvider
         argument: null,
         retry: null,
         name: r'breathingActionsProvider',
-        isAutoDispose: true,
+        isAutoDispose: false,
         dependencies: null,
         $allTransitiveDependencies: null,
       );
@@ -91,7 +91,7 @@ final class BreathingActionsProvider
   }
 }
 
-String _$breathingActionsHash() => r'44c6b8d9aab6303e1b1612e5651fb8294253f53c';
+String _$breathingActionsHash() => r'10646be9eea8a2fc9c1159703cb2d852eae0ea7d';
 
 /// Changes that also move the reminders.
 

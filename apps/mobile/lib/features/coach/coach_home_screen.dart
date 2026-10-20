@@ -18,6 +18,8 @@ import 'package:healthee/features/coach/v02/home_job_section.dart';
 import 'package:healthee/features/coach/v02/home_links_card.dart';
 import 'package:healthee/features/coach/v02/home_record_section.dart';
 import 'package:healthee/features/coach/v02/home_review_card.dart';
+import 'package:healthee/features/coach/v02/todays_basics_section.dart';
+import 'package:healthee/features/coach/v02/water_card.dart';
 import 'package:healthee/shared/format/date_labels.dart';
 import 'package:healthee/shared/instrument_screen.dart';
 import 'package:healthee/shared/page_section.dart';
@@ -68,8 +70,10 @@ List<PageSection> coachHomeSections(ScreenData data) {
     else ...<PageSection>[
       const PageSection(WeeklyReviewCard(), gap: PageSpacing.block),
       const PageSection(CoachJobSection(), gap: PageSpacing.block),
-      // Today's basics (water, breathing) goes here, between the job and the
-      // record.
+      const PageSection(
+        TodaysBasicsSection(water: WaterCard()),
+        gap: PageSpacing.block,
+      ),
       const PageSection(CoachRecordSection(), gap: PageSpacing.panel),
       const PageSection(CoachLinksCard(), gap: PageSpacing.block),
     ],

@@ -292,4 +292,38 @@ void main() {
     );
     expect(plan.item(BreathingItemKind.night)!.pattern, custom);
   });
+
+  group('structured reasons', () {
+    test('the owner numbers are bold and the spans join to the reason', () {
+      final plan = build(
+        sleep: nights(6, wake: (8, 14)),
+        hrv: 43.9,
+        usual: usual,
+        stress: [StressSample(DateTime(2026, 10, 17, 4, 30), 33)],
+      );
+      for (final item in plan.items) {
+        expect(item.reasonParts.map((s) => s.text).join(), item.reason);
+      }
+      List<String> bold(BreathingItemKind k) => [
+        for (final s in plan.item(k)!.reasonParts)
+          if (s.bold) s.text,
+      ];
+      expect(bold(BreathingItemKind.morning), ['8:14', '43.9']);
+      expect(bold(BreathingItemKind.night), ['11:00 pm to 11:00 pm']);
+      expect(bold(BreathingItemKind.onDemand), ['33']);
+      expect(bold(BreathingItemKind.midday), isEmpty);
+    });
+
+    test('nights used and the age of the stress come from the data', () {
+      final plan = build(
+        sleep: nights(9),
+        stress: [StressSample(DateTime(2026, 10, 15, 4, 30), 40)],
+      );
+      expect(plan.nightsUsed, 9);
+      expect(plan.stressDaysAgo, 3);
+      final bare = build();
+      expect(bare.nightsUsed, 0);
+      expect(bare.stressDaysAgo, isNull);
+    });
+  });
 }

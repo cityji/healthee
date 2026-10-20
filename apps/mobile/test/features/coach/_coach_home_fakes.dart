@@ -4,12 +4,17 @@ library;
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_riverpod/misc.dart' show Override;
 import 'package:go_router/go_router.dart';
 import 'package:healthee/core/routes.dart';
 import 'package:healthee/core/theme/app_theme.dart';
 import 'package:healthee/data/api/account_api.dart';
 import 'package:healthee/data/api/cache_session.dart';
 import 'package:healthee/data/api/server_snapshot.dart';
+import 'package:healthee/data/basics/breathing/breathing_done.dart';
+import 'package:healthee/data/basics/breathing/breathing_plan.dart';
+import 'package:healthee/data/basics/breathing/breathing_plan_provider.dart';
+import 'package:healthee/data/basics/water/water_controller.dart';
 import 'package:healthee/data/challenges/challenge.dart';
 import 'package:healthee/data/challenges/challenge_feed.dart';
 import 'package:healthee/data/challenges/commitment_repository.dart';
@@ -20,10 +25,42 @@ import 'package:healthee/data/coach/ledger_models.dart';
 import 'package:healthee/data/coach/ledger_repository.dart';
 import 'package:healthee/data/coach/review_models.dart';
 import 'package:healthee/data/coach/review_repository.dart';
+import 'package:healthee/data/journal/journal_entry.dart';
+import 'package:healthee/data/journal/journal_feed.dart';
+import 'package:healthee/data/journal/journal_repository.dart';
 import 'package:healthee/data/store/store_provider.dart';
+
+import '_breathing_fakes.dart';
 
 /// The owner's day in these tests: a Monday.
 const String kToday = '2026-10-19';
+
+/// Overrides that keep the two "Today's basics" cards off the store and the
+/// network: a fixed breathing plan, and an empty water feed.
+List<Override> basicsOverrides(
+  BreathingPlan plan, [
+  Set<BreathingItemKind> done = const <BreathingItemKind>{},
+]) => [
+  breathingPlanProvider.overrideWith((ref) async => plan),
+  breathingDoneProvider.overrideWith(() => FixedBreathingDone({...done})),
+  // The water card reads the journal feed; an empty one keeps the home
+  // tests off the network.
+  waterClockProvider.overrideWithValue(() => DateTime(2026, 10, 19, 15)),
+  journalFeedProvider.overrideWith(
+    (ref) => Stream.value(
+      ServerSnapshot(
+        const JournalFeed(entries: <JournalEntry>[], fastOpen: false),
+        fetchedAt: DateTime(2026),
+      ),
+    ),
+  ),
+];
+
+/// [child] with only the basics stubbed.
+Widget stubbedBasics(Widget child) => ProviderScope(
+  overrides: basicsOverrides(defaultBreathingPlan()),
+  child: child,
+);
 
 /// A review as the server would send it, with overrides.
 CoachReview review({
@@ -228,6 +265,12 @@ class CoachHost {
   /// The owner's day.
   String today = kToday;
 
+  /// The breathing plan the card shows.
+  BreathingPlan breathingPlan = defaultBreathingPlan();
+
+  /// The plan items done today.
+  Set<BreathingItemKind> breathingDone = <BreathingItemKind>{};
+
   /// Windows asked for.
   final List<LedgerWindow> asked = <LedgerWindow>[];
 
@@ -283,6 +326,7 @@ class CoachHost {
     return ProviderScope(
       overrides: [
         todayProvider.overrideWithValue(today),
+        ...basicsOverrides(breathingPlan, breathingDone),
         reviewRepositoryProvider.overrideWith((ref) async => reviews),
         // Overridden so it lives in THIS scope and reads the fake above.
         coachReviewProvider.overrideWith(CoachReviewNotifier.new),

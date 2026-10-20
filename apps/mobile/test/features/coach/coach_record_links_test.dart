@@ -198,6 +198,7 @@ void main() {
           '_CoachHead',
           'WeeklyReviewCard',
           'CoachJobSection',
+          'TodaysBasicsSection',
           'CoachRecordSection',
           'CoachLinksCard',
           'DataFooter',

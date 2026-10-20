@@ -64,6 +64,8 @@ import 'package:healthee/features/actions/challenge_detail_screen.dart';
 import 'package:healthee/features/actions/program_detail_screen.dart';
 import 'package:healthee/features/actions/recommendation_history_screen.dart';
 import 'package:healthee/features/activity/fitness_screen.dart';
+import 'package:healthee/features/coach/breathing_plan_screen.dart';
+import 'package:healthee/features/coach/breathing_player_screen.dart';
 import 'package:healthee/features/coach/coach_history_screen.dart';
 import 'package:healthee/features/coach/coach_screen.dart';
 import 'package:healthee/features/coach/every_yes_screen.dart';
@@ -198,6 +200,17 @@ GoRouter buildRouter(WidgetRef ref) {
       GoRoute(
         path: Routes.coachHistory,
         builder: (context, state) => const CoachHistoryScreen(),
+      ),
+      GoRoute(
+        path: Routes.breathingPlan,
+        builder: (context, state) => const BreathingPlanScreen(),
+      ),
+      GoRoute(
+        path: Routes.breathingPlayer,
+        builder: (context, state) => BreathingPlayerScreen(
+          item: state.uri.queryParameters['item'],
+          patternId: state.uri.queryParameters['pattern'],
+        ),
       ),
       GoRoute(
         path: Routes.body,
