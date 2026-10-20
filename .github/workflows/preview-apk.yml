@@ -31,8 +31,6 @@ on:
   push:
     branches:
       - main
-      - claude/confident-newton-fxbnhy
-      - design/**
     paths:
       - apps/mobile/**
       - .github/workflows/preview-apk.yml
