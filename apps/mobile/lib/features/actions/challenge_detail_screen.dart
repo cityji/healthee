@@ -166,8 +166,8 @@ class _Body extends StatelessWidget {
           Align(
             alignment: Alignment.centerLeft,
             child: TextLink(
-              label: 'See previous outcomes',
-              onPressed: () => unawaited(context.push(Routes.outcomes)),
+              label: 'Every yes, checked',
+              onPressed: () => unawaited(context.push(Routes.coachLedger)),
             ),
           ),
           const DataFooter(),

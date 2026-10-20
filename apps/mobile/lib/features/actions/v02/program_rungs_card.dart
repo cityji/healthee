@@ -66,11 +66,7 @@ String rungHeadline(Challenge rung) {
   final given = rung.progress?.unit;
   final unit =
       (given != null && given.isNotEmpty ? given : null) ??
-      switch (rung.metric) {
-        'mvpa_min' => 'min',
-        'steps_total' => 'steps',
-        final other => metricName(other),
-      };
+      metricUnitWord(rung.metric);
   return '$number $unit';
 }
 

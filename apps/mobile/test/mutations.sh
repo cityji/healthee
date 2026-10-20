@@ -1472,9 +1472,7 @@ mutate 'a trend sparkline is laid out at zero height' \
 # balance behind it, a prompt that spends a question the owner does not have.
 # Every one of those is invisible when it is right, so each is broken here.
 SUGGESTION=lib/features/actions/v02/suggestion_card.dart
-DECK_ITEM=lib/features/actions/v02/deck_item.dart
 CHALLENGE_CARD=lib/features/actions/v02/challenge_card.dart
-ACTIONS_SCREEN=lib/features/actions/actions_screen.dart
 OUTCOME_CARD=lib/shared/challenge_outcome_card.dart
 CHOICES=lib/shared/v02/choices.dart
 COACH_SCREEN=lib/features/coach/coach_screen.dart
@@ -1482,51 +1480,16 @@ COACH_CTRL=lib/features/coach/coach_controller.dart
 COMPOSER=lib/features/coach/v02/coach_composer.dart
 JOURNAL_GRID=lib/features/journal/v02/journal_grid.dart
 LOG_SHEET=lib/features/journal/v02/log_sheet.dart
-ACTIONS_TEST=test/features/actions_v02_test.dart
 CARDS_TEST=test/features/actions_cards_test.dart
 COACH_TEST=test/features/coach_screen_test.dart
 COMPOSER_TEST=test/features/coach_composer_test.dart
 JOURNAL_TEST=test/journal/journal_screen_test.dart
-
-# A snake_case token on a health screen is a log line where a source belongs.
-mutate 'a raw signal id reaches the suggestion card' "$ACTIONS_TEST" "$SUGGESTION" \
-  "  if (!hasMetricName(id)) {
-    return 'Raised by a reading with no name in this app';
-  }" \
-  "  if (false) {
-    return 'Raised by a reading with no name in this app';
-  }
-  return 'Raised by \$signal';"
 
 # Adoption records an INTENTION. Nothing in this app observes the doing.
 mutate 'the adopted line starts claiming the action was done' \
   "$CARDS_TEST" "$SUGGESTION" \
   "const String kAdoptedNote = 'An intention, not a completed action.';" \
   "const String kAdoptedNote = 'Done for today.';"
-
-# The family is the rec's own category. A card that picked one would be a hue
-# that can disagree with what the card is about — and the hue is the control's
-# ground now, which is where the owner asked the category to speak.
-mutate 'the suggestion row ignores its category' "$ACTIONS_TEST" "$DECK_ITEM" \
-  '    tone: toneForCategory(rec.category),' \
-  '    tone: Tone.fitness,'
-
-# The ranking is the server's claim about which suggestion matters most today.
-# A client that re-sorted it would be overruling that silently.
-mutate 'the client re-sorts the server’s ranking' "$ACTIONS_TEST" "$ACTIONS_SCREEN" \
-  '        SuggestionList(recommendations: recommendations),' \
-  '        SuggestionList(recommendations: recommendations.reversed.toList()),'
-
-# The prototype's order, moved by one: the owner's own record climbs above the
-# suggestions, which are the screen's subject and the whole of its top half.
-mutate 'the Actions sections come out of order' "$ACTIONS_TEST" "$ACTIONS_SCREEN" \
-  '    const PageSection(SectionHead(title: kRecordHeading), gap: 0),' \
-  '' \
-  '    if (snapshot != null)
-      PageSection(' \
-  '    const PageSection(SectionHead(title: kRecordHeading), gap: 0),
-    if (snapshot != null)
-      PageSection('
 
 # "Nothing observed yet" and "you are at zero" are different days.
 mutate 'a challenge with no progress draws a bar at zero' "$CARDS_TEST" "$CHALLENGE_CARD" \
@@ -2986,15 +2949,7 @@ mutate 'the baseline depths collapse into one number' \
 
 # ── C5 — one “from another day” decision, two surfaces ───────────────────────
 OTHER_DAY=lib/shared/format/other_day.dart
-ACTIONS_V02=test/features/actions_v02_test.dart
 SHARED_DAY_TEST=test/features/other_day_shared_test.dart
-
-# The v02 Actions screen goes back to relabelling a two-day-stale set as today'"'"'s.
-mutate 'the v02 actions set is relabelled as this day’s' "$ACTIONS_V02" \
-  lib/features/actions/actions_screen.dart \
-  '    if (recommendationsFromDay(recommendations, snapshot?.asOf?.day)
-        case final String day)' \
-  '    if (null case final String day)'
 
 # An undated block is filled in from the day on screen — "we do not know this
 # block'"'"'s day" quietly becomes "it is this day'"'"'s", which is the one claim
@@ -3391,29 +3346,6 @@ mutate 'the loopback fallback is prefilled as if it were an answer' \
   lib/features/signin/server_signin_screen.dart \
   "String get _suggestedAddress => Env.isUsingFallbackApi ? '' : Env.apiBaseUrl;" \
   'String get _suggestedAddress => Env.apiBaseUrl;'
-
-
-# ⛔ A program the coach designed reached NO screen. `create_program` wrote a
-# ladder in `suggested`, the feed served it with every field the client parses, and
-# the deck knew about two of the three feeds. Found on a real install: the owner
-# went looking for a six-week ladder and it was nowhere — which is also why it was
-# still `suggested` with no adopted_at. There was never a button.
-mutate 'suggested programs are dropped from the deck again' \
-  test/features/program_in_deck_test.dart \
-  lib/features/actions/v02/suggestion_list.dart \
-  '      if (repository != null)
-        for (final program in programs?.suggested ?? const <HealthProgram>[])
-          DeckItem.program(program, repository, ref),' \
-  ''
-
-# A ladder commits you to an ORDER, not a number. Quoting the first rung's target
-# reads as the whole commitment when it is only the first step, and the point of a
-# ladder is that the target moves.
-mutate 'a program quotes its first rung as the commitment' \
-  test/features/program_in_deck_test.dart \
-  lib/features/actions/v02/deck_item.dart \
-  "        '\${program.rungs.length} rungs, one at a time'" \
-  "        '\${program.rungs.first.target.round()} steps'"
 
 
 # ── the lever card and the "What moves it" dropdown ─────────────────────────

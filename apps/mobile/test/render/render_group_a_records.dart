@@ -5,8 +5,12 @@ library;
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_test/flutter_test.dart';
 import 'package:healthee/data/api/account_api.dart';
 import 'package:healthee/data/api/cache_session.dart';
+import 'package:healthee/data/challenges/challenge.dart';
+import 'package:healthee/data/challenges/challenge_feed.dart';
+import 'package:healthee/data/challenges/health_program.dart';
 import 'package:healthee/data/coach/ledger_models.dart';
 import 'package:healthee/data/coach/ledger_repository.dart';
 import 'package:healthee/data/history/history_marker.dart';
@@ -16,11 +20,10 @@ import 'package:healthee/data/journal/journal_repository.dart';
 import 'package:healthee/data/models/finding.dart';
 import 'package:healthee/data/recommendations/recommendation_history.dart';
 import 'package:healthee/data/store/local_store.dart';
-import 'package:healthee/features/actions/actions_screen.dart';
 import 'package:healthee/features/actions/challenge_detail_screen.dart';
-import 'package:healthee/features/actions/outcomes_screen.dart';
 import 'package:healthee/features/actions/program_detail_screen.dart';
 import 'package:healthee/features/actions/recommendation_history_screen.dart';
+import 'package:healthee/features/coach/coach_home_screen.dart';
 import 'package:healthee/features/coach/every_yes_screen.dart';
 import 'package:healthee/features/history/history_screen.dart';
 import 'package:healthee/features/history/metric_explorer_screen.dart';
@@ -30,6 +33,7 @@ import 'package:healthee/features/journal/journal_screen.dart';
 
 import '../_today_stubs.dart';
 import '../features/_today_host.dart';
+import '../features/coach/_coach_home_fakes.dart';
 import 'render_group_a_support.dart';
 import 'render_samples.dart';
 
@@ -113,10 +117,24 @@ List<GroupCase> recordCases(LocalStore Function() getStore) {
       ),
     ),
     GroupCase(
-      name: 'actions',
-      route: '/actions',
-      data: 'today.json recommendations; challenges.json, programs.json',
-      build: (t) => today(t, home: commitments(const ActionsScreen())),
+      name: 'coach',
+      route: '/actions (the Coach tab), review collapsed',
+      data: 'hand fixtures shaped like coach_review.json and coach_ledger.json',
+      build: (t) => today(t, home: _coachHome(shown: false)),
+    ),
+    GroupCase(
+      name: 'coach-review',
+      route: '/actions (the Coach tab), review open',
+      data: 'hand fixtures shaped like coach_review.json and coach_ledger.json',
+      build: (t) => today(t, home: _coachHome(shown: true)),
+      beforeShot: _openReview,
+    ),
+    GroupCase(
+      name: 'coach-large',
+      route: '/actions at text scale 1.3, review open',
+      data: 'as coach-review, large text',
+      build: (t) => today(t, home: _coachHome(shown: true, large: true)),
+      beforeShot: _openReview,
     ),
     GroupCase(
       name: 'recommendations',
@@ -172,12 +190,6 @@ List<GroupCase> recordCases(LocalStore Function() getStore) {
       data: 'coach_ledger.json, large text',
       build: (t) => today(t, home: _largeText(_ledger(const EveryYesScreen()))),
     ),
-    GroupCase(
-      name: 'outcomes',
-      route: '/outcomes',
-      data: 'challenge_outcomes.json',
-      build: (t) => today(t, home: commitments(const OutcomesScreen())),
-    ),
   ];
 }
 
@@ -201,3 +213,72 @@ Widget _largeText(Widget child) => Builder(
     child: child,
   ),
 );
+
+Future<void> _openReview(WidgetTester tester) async {
+  await tester.tap(find.text('Weekly review'));
+  for (var i = 0; i < 10; i++) {
+    await tester.pump(const Duration(milliseconds: 100));
+  }
+}
+
+/// The Coach tab over fixtures: a suggested job, a plan, a month of record.
+Widget _coachHome({required bool shown, bool large = false}) =>
+    FutureBuilder<CoachHost>(
+      future: CoachHost.create().then((h) => _fill(h)),
+      builder: (context, snap) {
+        final host = snap.data;
+        if (host == null) {
+          return const SizedBox.shrink();
+        }
+        return host.scope(
+          Builder(
+            builder: (context) => MediaQuery(
+              data: MediaQuery.of(
+                context,
+              ).copyWith(textScaler: TextScaler.linear(large ? 1.3 : 1)),
+              child: const CoachHomeScreen(),
+            ),
+          ),
+        );
+      },
+    );
+
+CoachHost _fill(CoachHost host) => host
+  ..today = todayDate
+  ..respond = ((_) async => review(
+    weekFrom: '2026-08-03',
+    weekTo: '2026-08-09',
+    text:
+        'Straight talk. Sleep is mostly fixed: 6h53 a night, up from 4h47 '
+        'two weeks before. Movement went the other way. Brisk minutes fell '
+        '66, 43, 11, 4.',
+    pattern:
+        'You said yes to 9 things this month and the strap shows 2 done. '
+        "So it's one job a week now, checked by the strap. Start tonight "
+        'after 10.',
+    todayLine: null,
+  ))
+  ..feed = ChallengeFeed(
+    active: const <Challenge>[],
+    suggested: <Challenge>[challenge(12, status: 'suggested', days: 4)],
+    recent: const <Challenge>[],
+    maxActive: 3,
+  )
+  ..program = HealthProgram(
+    id: 3,
+    title: 'The 4-week plan',
+    why: 'Build up.',
+    status: 'active',
+    rungs: <Challenge>[
+      challenge(1, status: 'locked'),
+      challenge(2, status: 'locked'),
+    ],
+    settledRungs: 0,
+    weeks: 4,
+  )
+  ..served = ((_) => ledger(
+    weeks: <LedgerWeek>[
+      week('2026-08-03', <int, String>{}),
+      week('2026-07-27', <int, String>{}),
+    ],
+  ));

@@ -123,10 +123,10 @@ class _HistoryState extends ConsumerState<RecommendationHistoryScreen> {
           ),
           ListRow(
             icon: SolarIconsOutline.chartSquare,
-            title: 'Completed outcomes',
-            subtitle: 'What happened during your changes',
+            title: 'Every yes, checked',
+            subtitle: 'What the strap saw for each one',
             tone: Tone.fitness,
-            onTap: () => unawaited(context.push(Routes.outcomes)),
+            onTap: () => unawaited(context.push(Routes.coachLedger)),
           ),
         ]),
         const DataFooter(),

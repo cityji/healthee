@@ -23,6 +23,8 @@ import 'package:healthee/data/challenges/challenge_feed.dart';
 import 'package:healthee/data/challenges/commitment_repository.dart';
 import 'package:healthee/data/challenges/health_program.dart';
 import 'package:healthee/data/challenges/program_feed.dart';
+import 'package:healthee/data/coach/ledger_models.dart';
+import 'package:healthee/data/coach/ledger_repository.dart';
 import 'package:healthee/data/gps/gps_recorder.dart';
 import 'package:healthee/data/gps/gps_recording_state.dart';
 import 'package:healthee/data/history/dated_history.dart';
@@ -116,6 +118,21 @@ Widget todayScoped(
           ),
         ),
       ),
+      // The Coach tab reads the ledger the moment it is on screen; without a
+      // stub the real client never answers and its loading state never settles.
+      for (final window in LedgerWindow.values)
+        coachLedgerProvider(window).overrideWith(
+          (ref) async => const CoachLedger(
+            window: 'month',
+            from: '',
+            to: '',
+            ideasGiven: 0,
+            yeses: 0,
+            totals: LedgerTotals(),
+            doneRate: DoneRate(done: 0, provable: 0),
+            weeks: <LedgerWeek>[],
+          ),
+        ),
       notifyCompletionsProvider().overrideWith((ref) async {}),
       notableEventsProvider.overrideWith(
         (ref) => Stream.value(ServerSnapshot(<NotableEvent>[], fetchedAt: now)),

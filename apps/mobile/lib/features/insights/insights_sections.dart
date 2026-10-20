@@ -72,7 +72,7 @@ class InsightsExtras {
     this.onOpenProfile,
     this.onOpenMetric,
     this.onOpenHistory,
-    this.onOpenOutcomes,
+    this.onOpenLedger,
     this.onOpenJournal,
     this.onOpenCoach,
     this.onOpenSleepHistory,
@@ -90,7 +90,7 @@ class InsightsExtras {
   final VoidCallback? onOpenHistory;
 
   /// Opens the challenge outcomes.
-  final VoidCallback? onOpenOutcomes;
+  final VoidCallback? onOpenLedger;
 
   /// Opens the journal.
   final VoidCallback? onOpenJournal;
@@ -254,7 +254,7 @@ List<PageSection> insightsSections(ScreenData data, InsightsExtras extras) {
     ..add(
       InsightLinks(
         onOpenTrends: extras.onOpenTrends,
-        onOpenOutcomes: extras.onOpenOutcomes,
+        onOpenLedger: extras.onOpenLedger,
         onOpenJournal: extras.onOpenJournal,
         onOpenSleepHistory: extras.onOpenSleepHistory,
         onOpenFitness: extras.onOpenFitness,

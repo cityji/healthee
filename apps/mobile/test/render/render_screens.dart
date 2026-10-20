@@ -45,8 +45,8 @@ import 'package:healthee/core/theme/appearance_variant.dart';
 import 'package:healthee/data/history/history_repository.dart';
 import 'package:healthee/data/store/local_store.dart';
 import 'package:healthee/data/store/store_provider.dart';
-import 'package:healthee/features/actions/actions_screen.dart';
 import 'package:healthee/features/activity/activity_screen.dart';
+import 'package:healthee/features/coach/coach_home_screen.dart';
 import 'package:healthee/features/diagnostics/diagnostics_screen.dart';
 import 'package:healthee/features/insights/insights_screen.dart';
 import 'package:healthee/features/sleep/sleep_screen.dart';
@@ -199,7 +199,7 @@ void main() {
         todayHost(
           store,
           themeOverride: theme.value,
-          home: const ActionsScreen(),
+          home: const CoachHomeScreen(),
         ),
       );
     });

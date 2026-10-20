@@ -61,7 +61,6 @@ import 'package:healthee/data/models/finding.dart';
 import 'package:healthee/data/pairing/pairing_repository.dart';
 import 'package:healthee/data/store/view_date.dart';
 import 'package:healthee/features/actions/challenge_detail_screen.dart';
-import 'package:healthee/features/actions/outcomes_screen.dart';
 import 'package:healthee/features/actions/program_detail_screen.dart';
 import 'package:healthee/features/actions/recommendation_history_screen.dart';
 import 'package:healthee/features/activity/fitness_screen.dart';
@@ -184,10 +183,6 @@ GoRouter buildRouter(WidgetRef ref) {
         builder: (context, state) => ProgramDetailScreen(
           id: int.tryParse(state.pathParameters['id'] ?? '') ?? -1,
         ),
-      ),
-      GoRoute(
-        path: Routes.outcomes,
-        builder: (context, state) => const OutcomesScreen(),
       ),
       GoRoute(
         path: Routes.coachLedger,

@@ -48,7 +48,7 @@ class InsightsScreen extends StatelessWidget {
           onOpenProfile: () => unawaited(context.push(Routes.settings)),
           onOpenMetric: (metric) => openMetricHistory(context, metric),
           onOpenHistory: () => unawaited(context.push(Routes.history)),
-          onOpenOutcomes: () => unawaited(context.push(Routes.outcomes)),
+          onOpenLedger: () => unawaited(context.push(Routes.coachLedger)),
           onOpenJournal: () => unawaited(context.push(Routes.journal)),
           // `H.panel('A useful question comes next', …, 'coach')` — the panel
           // whose Details link and whose button both open the coach. No topic:

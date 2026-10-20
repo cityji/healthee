@@ -14,7 +14,7 @@ class InsightLinks extends StatelessWidget {
   /// A row without its callback draws without a chevron.
   const InsightLinks({
     this.onOpenTrends,
-    this.onOpenOutcomes,
+    this.onOpenLedger,
     this.onOpenJournal,
     this.onOpenSleepHistory,
     this.onOpenFitness,
@@ -24,8 +24,8 @@ class InsightLinks extends StatelessWidget {
   /// Opens `Your trends`.
   final VoidCallback? onOpenTrends;
 
-  /// Opens the challenge outcomes.
-  final VoidCallback? onOpenOutcomes;
+  /// Opens `Every yes, checked`.
+  final VoidCallback? onOpenLedger;
 
   /// Opens the journal.
   final VoidCallback? onOpenJournal;
@@ -47,9 +47,9 @@ class InsightLinks extends StatelessWidget {
       ),
       LinkRow(
         icon: SolarIconsOutline.flag,
-        title: 'Challenge outcomes',
-        detail: 'Progress, data coverage and what changed together',
-        onOpen: onOpenOutcomes,
+        title: 'Every yes, checked',
+        detail: 'What the strap saw for each one',
+        onOpen: onOpenLedger,
       ),
       LinkRow(
         icon: SolarIconsOutline.book,
