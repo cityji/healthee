@@ -32,7 +32,7 @@ once and it was missed; he noticed.
 A standard-library Python tool (3.10 or newer, nothing to install) that copies workouts
 recorded in the Zepp app into Healthee: the workout itself and its GPS route. It writes
 through the two endpoints the phone app uses, `POST /ingest/helio` and
-`POST /api/workout/gps`. Version 0.2.0. 354 tests, run with:
+`POST /api/workout/gps`. Version 0.2.0. 369 tests, run with:
 
 ```sh
 python3 -m unittest discover -s scripts/zepp_import/tests -t scripts
@@ -58,41 +58,16 @@ API is unofficial, so the first real run may stop with "Zepp answered ... in a w
 tool does not understand". That message is by design; `--verbose` then prints the reply's
 field names and types (never values) so the parser can be fixed.
 
-Ask him whether he has done a first manual run and what it printed. Do not build the
-nightly job on top of an importer that has never worked once.
+Ask him whether he has done a first manual run and what it printed.
 
 ### What he asked for next
 
-1. **Run it every night by itself.** He does not want to ssh in and type two passwords
-   each time. He agreed to keep the logins in a `.env` file on the server.
-2. **Import other useful Zepp data that Healthee does not have.**
+1. **Import other useful Zepp data that Healthee does not have.**
+
+Running the importer every night by itself was planned and then dropped: it stays a
+manual command, or something he schedules himself with `--env-file`, `--yes` and `--days`.
 
 ### How to do 1
-
-You cannot reach his server from a cloud session. So the deliverable is something he
-installs with one command over ssh. Follow the pattern already in the repo:
-`infra/backup/healthee-backup.service` and `healthee-backup.timer`.
-
-- A systemd service and timer under `infra/`, plus one installer script. The installer
-  creates the env file with mode 600 if it is missing, asks for the four values once
-  (passwords hidden), installs the units and enables the timer.
-- The service runs the importer with `--env-file`, `--yes` and a short window such as
-  `--days 3`, so a missed night is caught up.
-- A lock so two runs cannot overlap.
-- Output goes to the journal. `journalctl -u <unit>` must show the plan and the result.
-- A failure must be visible. Decide how with him: the simplest honest option is a
-  one-line status command he can run. The server already sends Telegram alerts for other
-  things (`jobs/llm_watch.py`); look at how before inventing something.
-- Decide the routes question with him before enabling it. Every imported route is scored
-  and can replace his fitness estimate for 14 days, which moves biological age up or
-  down. `--yes` includes routes. `--no-routes` leaves them out. There is no delete
-  endpoint, so an import cannot be undone.
-- Zepp may refuse a cloud server's address (HTTP 403 or 429). If the first manual run on
-  the server shows that, the nightly job has to run from his phone instead (Termux has
-  `termux-job-scheduler` and cron). Find out before building.
-- Keep it standard library only. Tests in the same change.
-
-### How to do 2
 
 Do not start by writing code. First find out what is actually missing:
 
